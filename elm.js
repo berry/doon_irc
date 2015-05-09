@@ -3941,11 +3941,12 @@ Elm.InnoCheck.make = function (_elm) {
                switch (_v31.ctor)
                {case "_Tuple2":
                   return A2($Html.li,
+                    _L.fromArray([]),
+                    _L.fromArray([A2($Html.a,
                     _L.fromArray([A2($Html$Events.onClick,
-                    address,
-                    SelectAspectQuestions(_v31._0))]),
-                    _L.fromArray([A2($Html.span,
-                    _L.fromArray([$Html$Attributes.classList(_L.fromArray([{ctor: "_Tuple2"
+                                 address,
+                                 SelectAspectQuestions(_v31._0))
+                                 ,$Html$Attributes.classList(_L.fromArray([{ctor: "_Tuple2"
                                                                            ,_0: "selected_aspect"
                                                                            ,_1: _U.eq(_v31._0,
                                                                            model.selectedAspect)}]))]),
@@ -4264,6 +4265,8 @@ Elm.InnoCheck.make = function (_elm) {
                                    ,$Svg$Attributes.height("282")]),
                       _L.fromArray([]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(Leadership))]),
@@ -4273,8 +4276,10 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 10
                       ,_1: 10
                       ,_2: 90
-                      ,_3: 126}))
+                      ,_3: 126}))]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(Processes))]),
@@ -4284,8 +4289,10 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 110
                       ,_1: 10
                       ,_2: 180
-                      ,_3: 126}))
+                      ,_3: 126}))]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(MeasureAndMonitor))]),
@@ -4295,8 +4302,10 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 300
                       ,_1: 10
                       ,_2: 90
-                      ,_3: 126}))
+                      ,_3: 126}))]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(Culture))]),
@@ -4306,8 +4315,10 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 10
                       ,_1: 146
                       ,_2: 90
-                      ,_3: 126}))
+                      ,_3: 126}))]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(Resources))]),
@@ -4317,8 +4328,10 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 110
                       ,_1: 146
                       ,_2: 180
-                      ,_3: 126}))
+                      ,_3: 126}))]))
                       ,A2($Svg.svg,
+                      _L.fromArray([]),
+                      _L.fromArray([A2($Svg.a,
                       _L.fromArray([A2($Html$Events.onClick,
                       address,
                       SelectAspectQuestions(Improve))]),
@@ -4328,7 +4341,7 @@ Elm.InnoCheck.make = function (_elm) {
                       ,_0: 300
                       ,_1: 146
                       ,_2: 90
-                      ,_3: 126}))]));
+                      ,_3: 126}))]))]));
       }();
    });
    var view = F2(function (address,
