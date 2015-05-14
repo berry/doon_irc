@@ -3633,121 +3633,55 @@ Elm.InnoCheck.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "InnoCheck",
    $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Svg = Elm.Svg.make(_elm),
    $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
-   var showKeyScores = function (kscores) {
-      return function () {
-         var showKeyScore = function (_v0) {
-            return function () {
-               switch (_v0.ctor)
-               {case "_Tuple2":
-                  return A2($Html.p,
-                    _L.fromArray([]),
-                    _L.fromArray([$Html.text(A2($Basics._op["++"],
-                    "key: ",
-                    A2($Basics._op["++"],
-                    $Basics.toString(_v0._0),
-                    A2($Basics._op["++"],
-                    " - ",
-                    $Basics.toString(_v0._1)))))]));}
-               _U.badCase($moduleName,
-               "on line 545, column 13 to 73");
-            }();
-         };
-         return A2($List.map,
-         showKeyScore,
-         kscores);
-      }();
-   };
-   var showKeyColors = function (kcolors) {
-      return function () {
-         var showKeyColor = function (_v4) {
-            return function () {
-               switch (_v4.ctor)
-               {case "_Tuple2":
-                  return A2($Html.p,
-                    _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                       ,_0: "backgroundColor"
-                                                                       ,_1: _v4._1}]))]),
-                    _L.fromArray([$Html.text(A2($Basics._op["++"],
-                    "key: ",
-                    A2($Basics._op["++"],
-                    $Basics.toString(_v4._0),
-                    A2($Basics._op["++"],
-                    " - ",
-                    _v4._1))))]));}
-               _U.badCase($moduleName,
-               "on line 537, column 13 to 93");
-            }();
-         };
-         return A2($List.map,
-         showKeyColor,
-         kcolors);
-      }();
-   };
-   var showQuestionAnswers = function (qanswers) {
-      return function () {
-         var showQanswer = function (qa) {
-            return A2($Html.p,
-            _L.fromArray([]),
-            _L.fromArray([$Html.text(A2($Basics._op["++"],
-            "key: ",
-            A2($Basics._op["++"],
-            $Basics.toString(qa.questionKey),
-            A2($Basics._op["++"],
-            " - ",
-            $Basics.toString(qa.answer)))))]));
-         };
-         return A2($List.map,
-         showQanswer,
-         qanswers);
-      }();
-   };
    var showScore = F2(function (score,
-   _v8) {
+   _v0) {
       return function () {
-         switch (_v8.ctor)
+         switch (_v0.ctor)
          {case "_Tuple2":
             return _L.fromArray([A2($Svg.text,
-              _L.fromArray([$Svg$Attributes.x($Basics.toString(_v8._0))
-                           ,$Svg$Attributes.y($Basics.toString(_v8._1))
+              _L.fromArray([$Svg$Attributes.x($Basics.toString(_v0._0))
+                           ,$Svg$Attributes.y($Basics.toString(_v0._1))
                            ,$Svg$Attributes.style("text-anchor: middle; font-size: 24px; stroke: #ffffff; fill: #ffffff; font-family: Arial;")]),
               _L.fromArray([$Html.text(A2($Basics._op["++"],
               $Basics.toString(score),
               "%"))]))]);}
          _U.badCase($moduleName,
-         "between lines 512 and 517");
+         "between lines 503 and 508");
       }();
    });
    var showColorBlocks = F2(function (kcolors,
-   _v12) {
+   _v4) {
       return function () {
-         switch (_v12.ctor)
+         switch (_v4.ctor)
          {case "_Tuple4":
             return function () {
                  var numberOfBlocks = $List.length(kcolors);
-                 var blockHeight = $Basics.round($Basics.toFloat(_v12._3) / $Basics.toFloat(numberOfBlocks));
-                 var showRect = function (_v18) {
+                 var blockHeight = $Basics.round($Basics.toFloat(_v4._3) / $Basics.toFloat(numberOfBlocks));
+                 var showRect = function (_v10) {
                     return function () {
-                       switch (_v18.ctor)
+                       switch (_v10.ctor)
                        {case "_Tuple2":
-                          switch (_v18._1.ctor)
+                          switch (_v10._1.ctor)
                             {case "_Tuple2":
                                return A2($Svg.rect,
-                                 _L.fromArray([$Svg$Attributes.fill(_v18._1._1)
-                                              ,$Svg$Attributes.x($Basics.toString(_v12._0))
-                                              ,$Svg$Attributes.y($Basics.toString(_v12._1 + _v18._0 * blockHeight))
-                                              ,$Svg$Attributes.width($Basics.toString(_v12._2))
+                                 _L.fromArray([$Svg$Attributes.fill(_v10._1._1)
+                                              ,$Svg$Attributes.x($Basics.toString(_v4._0))
+                                              ,$Svg$Attributes.y($Basics.toString(_v4._1 + _v10._0 * blockHeight))
+                                              ,$Svg$Attributes.width($Basics.toString(_v4._2))
                                               ,$Svg$Attributes.height($Basics.toString(blockHeight))]),
                                  _L.fromArray([]));}
                             break;}
                        _U.badCase($moduleName,
-                       "on line 505, column 13 to 156");
+                       "on line 496, column 13 to 156");
                     }();
                  };
                  return A2($List.map,
@@ -3761,12 +3695,33 @@ Elm.InnoCheck.make = function (_elm) {
                  kcolors));
               }();}
          _U.badCase($moduleName,
-         "between lines 500 and 507");
+         "between lines 491 and 498");
       }();
    });
    var clickable = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
                                                         ,_0: "cursor"
                                                         ,_1: "pointer"}]));
+   var getValue = F2(function (dict,
+   key) {
+      return A2($Dict.get,
+      $Basics.toString(key),
+      dict);
+   });
+   var unionToDict = function (list) {
+      return $Dict.fromList(A2($List.map,
+      function (_v16) {
+         return function () {
+            switch (_v16.ctor)
+            {case "_Tuple2":
+               return {ctor: "_Tuple2"
+                      ,_0: $Basics.toString(_v16._0)
+                      ,_1: _v16._1};}
+            _U.badCase($moduleName,
+            "on line 314, column 41 to 56");
+         }();
+      },
+      list));
+   };
    var allQuestionsAnswered = F2(function (questions,
    qanswers) {
       return function () {
@@ -3776,49 +3731,34 @@ Elm.InnoCheck.make = function (_elm) {
                    ,_0: v0
                    ,_1: v1};
          }),
-         qanswers,
+         $Dict.toList(qanswers),
          questions));
          var numberOfAspectQuestions = $List.length(questions);
          return _U.eq(numberOfAspectQuestions,
          numberOfQAnswers);
       }();
    });
+   var showRecommendations = function (model) {
+      return A2(allQuestionsAnswered,
+      model.questions,
+      model.questionAnswers) ? _L.fromArray([A2($Html.p,
+                                            _L.fromArray([]),
+                                            _L.fromArray([$Html.text("Op basis van de gegeven antwoorden zijn de top 3 aanbevelingen:")]))
+                                            ,A2($Html.div,
+                                            _L.fromArray([$Html$Attributes.$class("well")]),
+                                            _L.fromArray([$Html.text("Maak tijd en ruimte vrij voor medewerkers om te innoveren.")]))]) : _L.fromArray([A2($Html.p,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text("Zodra alle vragen zijn beantwoord volgt een top 3 van adviezen waarmee je morgen aan de slag kom om je bedrijf meer innovatief te maken.")]))]);
+   };
    var listQuestionKeyAnswerScore = F2(function (questions,
    kscores) {
       return function () {
-         var selectAnswerScore = F2(function (key,
-         kscores) {
-            return function () {
-               var _v24 = A2($List.filter,
-               function (_v27) {
-                  return function () {
-                     switch (_v27.ctor)
-                     {case "_Tuple2":
-                        return _U.eq(_v27._0,key);}
-                     _U.badCase($moduleName,
-                     "on line 309, column 41 to 49");
-                  }();
-               },
-               kscores);
-               switch (_v24.ctor)
-               {case "::":
-                  return $Basics.snd(_v24._0);
-                  case "[]": return 0;}
-               _U.badCase($moduleName,
-               "between lines 309 and 313");
-            }();
-         });
-         var answerkeys = $Basics.fst($List.unzip(kscores));
          var getAnswerScore = function (q) {
-            return A2($List.member,
-            q.key,
-            answerkeys) ? {ctor: "_Tuple2"
-                          ,_0: q.key
-                          ,_1: A2(selectAnswerScore,
-                          q.key,
-                          kscores)} : {ctor: "_Tuple2"
-                                      ,_0: q.key
-                                      ,_1: 0};
+            return {ctor: "_Tuple2"
+                   ,_0: q.key
+                   ,_1: A2($Maybe.withDefault,
+                   0,
+                   A2($Dict.get,q.key,kscores))};
          };
          return A2($List.map,
          getAnswerScore,
@@ -3827,50 +3767,12 @@ Elm.InnoCheck.make = function (_elm) {
    });
    var aspectQuestions = F2(function (questions,
    aspect) {
-      return function () {
-         var isAspect = F2(function (aspect,
-         question) {
-            return _U.eq(aspect,
-            question.aspect);
-         });
-         return A2($List.filter,
-         isAspect(aspect),
-         questions);
-      }();
-   });
-   var addQuestionAnswer = F3(function (key,
-   answer,
-   model) {
-      return $Basics.not(A2($List.member,
-      key,
-      A2($List.map,
-      function (r) {
-         return r.questionKey;
+      return A2($List.filter,
+      function (q) {
+         return _U.eq(q.aspect,
+         aspect);
       },
-      model.questionAnswers))) ? _U.replace([["questionAnswers"
-                                             ,A2($List._op["::"],
-                                             {_: {}
-                                             ,answer: answer
-                                             ,questionKey: key},
-                                             model.questionAnswers)]],
-      model) : model;
-   });
-   var updateQuestionAnswers = F3(function (key,
-   answer,
-   model) {
-      return function () {
-         var updateQA = function (qa) {
-            return _U.eq(key,
-            qa.questionKey) ? {_: {}
-                              ,answer: answer
-                              ,questionKey: key} : qa;
-         };
-         return _U.replace([["questionAnswers"
-                            ,A2($List.map,
-                            updateQA,
-                            model.questionAnswers)]],
-         model);
-      }();
+      questions);
    });
    var update = F2(function (action,
    model) {
@@ -3878,23 +3780,18 @@ Elm.InnoCheck.make = function (_elm) {
          switch (action.ctor)
          {case "Noop": return model;
             case "SelectAnswer":
-            return A3(updateQuestionAnswers,
-              action._0,
-              action._1,
-              A3(addQuestionAnswer,
-              action._0,
-              action._1,
-              model));
+            return _U.replace([["questionAnswers"
+                               ,A3($Dict.insert,
+                               action._0,
+                               action._1,
+                               model.questionAnswers)]],
+              model);
             case "SelectAspectQuestions":
             return _U.replace([["selectedAspect"
-                               ,action._0]
-                              ,["currentApectQuestions"
-                               ,A2(aspectQuestions,
-                               model.questions,
-                               action._0)]],
+                               ,action._0]],
               model);}
          _U.badCase($moduleName,
-         "between lines 196 and 205");
+         "between lines 231 and 239");
       }();
    });
    var SelectAnswer = F2(function (a,
@@ -3904,66 +3801,55 @@ Elm.InnoCheck.make = function (_elm) {
              ,_1: b};
    });
    var showInputRadios = F4(function (address,
-   qas,
+   storedAnswer,
    key,
-   answerlist) {
+   answerTextlist) {
       return function () {
-         var radios = function (_v35) {
+         var checkAnswer = F2(function (answer,
+         storedAnswer) {
             return function () {
-               switch (_v35.ctor)
-               {case "_Tuple2":
-                  return function () {
-                       switch (qas.ctor)
-                       {case "::":
-                          return A2($Html.label,
-                            _L.fromArray([]),
-                            _L.fromArray([A2($Html.input,
-                                         _L.fromArray([$Html$Attributes.type$("checkbox")
-                                                      ,$Html$Attributes.name(A2($Basics._op["++"],
-                                                      "qa_",
-                                                      $Basics.toString(qas._0.questionKey)))
-                                                      ,$Html$Attributes.value(_v35._1)
-                                                      ,A2($Html$Events.onClick,
-                                                      address,
-                                                      A2(SelectAnswer,
-                                                      qas._0.questionKey,
-                                                      _v35._0))
-                                                      ,$Html$Attributes.checked(_U.eq(_v35._0,
-                                                      qas._0.answer))]),
-                                         _L.fromArray([]))
-                                         ,$Html.text(_v35._1)]));
-                          case "[]":
-                          return A2($Html.label,
-                            _L.fromArray([]),
-                            _L.fromArray([A2($Html.input,
-                                         _L.fromArray([$Html$Attributes.type$("checkbox")
-                                                      ,$Html$Attributes.name(A2($Basics._op["++"],
-                                                      "qa_",
-                                                      $Basics.toString(key)))
-                                                      ,$Html$Attributes.value(_v35._1)
-                                                      ,A2($Html$Events.onClick,
-                                                      address,
-                                                      A2(SelectAnswer,
-                                                      key,
-                                                      _v35._0))]),
-                                         _L.fromArray([]))
-                                         ,$Html.text(_v35._1)]));}
-                       _U.badCase($moduleName,
-                       "between lines 409 and 432");
-                    }();}
+               switch (storedAnswer.ctor)
+               {case "Just":
+                  return _U.eq(answer,
+                    storedAnswer._0);
+                  case "Nothing": return false;}
                _U.badCase($moduleName,
-               "between lines 409 and 432");
+               "between lines 392 and 396");
+            }();
+         });
+         var radios = function (_v26) {
+            return function () {
+               switch (_v26.ctor)
+               {case "_Tuple2":
+                  return A2($Html.label,
+                    _L.fromArray([]),
+                    _L.fromArray([A2($Html.input,
+                                 _L.fromArray([$Html$Attributes.type$("checkbox")
+                                              ,$Html$Attributes.name(A2($Basics._op["++"],
+                                              "qa_",
+                                              $Basics.toString(key)))
+                                              ,$Html$Attributes.value(_v26._1)
+                                              ,A2($Html$Events.onClick,
+                                              address,
+                                              A2(SelectAnswer,key,_v26._0))
+                                              ,$Html$Attributes.checked(A2(checkAnswer,
+                                              _v26._0,
+                                              storedAnswer))]),
+                                 _L.fromArray([]))
+                                 ,$Html.text(_v26._1)]));}
+               _U.badCase($moduleName,
+               "between lines 398 and 407");
             }();
          };
          return A2($List.map,
          radios,
-         answerlist);
+         answerTextlist);
       }();
    });
    var showQuestions = F4(function (address,
    model,
    questions,
-   answerlist) {
+   answerTextlist) {
       return function () {
          var liList = function (q) {
             return A2($Html.li,
@@ -3975,14 +3861,11 @@ Elm.InnoCheck.make = function (_elm) {
                          _L.fromArray([$Html$Attributes.$class("radio")]),
                          A4(showInputRadios,
                          address,
-                         A2($List.filter,
-                         function (k) {
-                            return _U.eq(k.questionKey,
-                            q.key);
-                         },
+                         A2($Dict.get,
+                         q.key,
                          model.questionAnswers),
                          q.key,
-                         answerlist))]));
+                         answerTextlist))]));
          };
          return A2($List.map,
          liList,
@@ -3997,23 +3880,23 @@ Elm.InnoCheck.make = function (_elm) {
    model,
    aspects) {
       return function () {
-         var liList = function (_v42) {
+         var liList = function (_v30) {
             return function () {
-               switch (_v42.ctor)
+               switch (_v30.ctor)
                {case "_Tuple2":
                   return A2($Html.li,
                     _L.fromArray([clickable]),
                     _L.fromArray([A2($Html.a,
                     _L.fromArray([A2($Html$Events.onClick,
                                  address,
-                                 SelectAspectQuestions(_v42._0))
+                                 SelectAspectQuestions(_v30._0))
                                  ,$Html$Attributes.classList(_L.fromArray([{ctor: "_Tuple2"
                                                                            ,_0: "selected_aspect"
-                                                                           ,_1: _U.eq(_v42._0,
+                                                                           ,_1: _U.eq(_v30._0,
                                                                            model.selectedAspect)}]))]),
-                    _L.fromArray([$Html.text(_v42._1)]))]));}
+                    _L.fromArray([$Html.text(_v30._1)]))]));}
                _U.badCase($moduleName,
-               "between lines 396 and 400");
+               "between lines 380 and 384");
             }();
          };
          return A2($List.map,
@@ -4027,46 +3910,42 @@ Elm.InnoCheck.make = function (_elm) {
    var listQuestionKeyAnswerColor = F2(function (questions,
    acolors) {
       return function () {
-         var selectAnswerColor = F2(function (key,
-         acolors) {
-            return function () {
-               var _v46 = A2($List.filter,
-               function (_v49) {
-                  return function () {
-                     switch (_v49.ctor)
-                     {case "_Tuple2":
-                        return _U.eq(_v49._0,key);}
-                     _U.badCase($moduleName,
-                     "on line 267, column 41 to 49");
-                  }();
-               },
-               acolors);
-               switch (_v46.ctor)
-               {case "::":
-                  return $Basics.snd(_v46._0);
-                  case "[]":
-                  return answerColorEmpty;}
-               _U.badCase($moduleName,
-               "between lines 267 and 271");
-            }();
-         });
-         var answerkeys = $Basics.fst($List.unzip(acolors));
          var getAnswerColor = function (q) {
-            return A2($List.member,
-            q.key,
-            answerkeys) ? {ctor: "_Tuple2"
-                          ,_0: q.key
-                          ,_1: A2(selectAnswerColor,
-                          q.key,
-                          acolors)} : {ctor: "_Tuple2"
-                                      ,_0: q.key
-                                      ,_1: answerColorEmpty};
+            return {ctor: "_Tuple2"
+                   ,_0: q.key
+                   ,_1: A2($Maybe.withDefault,
+                   answerColorEmpty,
+                   A2($Dict.get,q.key,acolors))};
          };
          return A2($List.map,
          getAnswerColor,
          questions);
       }();
    });
+   var answerColorList = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                      ,_0: "Yes"
+                                                      ,_1: "green"}
+                                                     ,{ctor: "_Tuple2"
+                                                      ,_0: "Partly"
+                                                      ,_1: "orange"}
+                                                     ,{ctor: "_Tuple2"
+                                                      ,_0: "No"
+                                                      ,_1: "red"}]));
+   var listAnswerColor = function (qas) {
+      return function () {
+         var getAnswerColor = F2(function (key,
+         answer) {
+            return A2($Maybe.withDefault,
+            answerColorEmpty,
+            A2($Dict.get,
+            $Basics.toString(answer),
+            answerColorList));
+         });
+         return A2($Dict.map,
+         getAnswerColor,
+         qas);
+      }();
+   };
    var Recommendation = F4(function (a,
    b,
    c,
@@ -4076,18 +3955,6 @@ Elm.InnoCheck.make = function (_elm) {
              ,scoreMax: c
              ,scoreMin: b
              ,text: d};
-   });
-   var AspectScore = F2(function (a,
-   b) {
-      return {_: {}
-             ,aspect: a
-             ,score: b};
-   });
-   var QuestionAnswer = F2(function (a,
-   b) {
-      return {_: {}
-             ,answer: b
-             ,questionKey: a};
    });
    var Question = F3(function (a,
    b,
@@ -4100,15 +3967,15 @@ Elm.InnoCheck.make = function (_elm) {
    var No = {ctor: "No"};
    var Partly = {ctor: "Partly"};
    var Yes = {ctor: "Yes"};
-   var answerList = _L.fromArray([{ctor: "_Tuple2"
-                                  ,_0: Yes
-                                  ,_1: "Ja"}
-                                 ,{ctor: "_Tuple2"
-                                  ,_0: Partly
-                                  ,_1: "Deels"}
-                                 ,{ctor: "_Tuple2"
-                                  ,_0: No
-                                  ,_1: "Nee"}]);
+   var answerTextList = _L.fromArray([{ctor: "_Tuple2"
+                                      ,_0: Yes
+                                      ,_1: "Ja"}
+                                     ,{ctor: "_Tuple2"
+                                      ,_0: Partly
+                                      ,_1: "Deels"}
+                                     ,{ctor: "_Tuple2"
+                                      ,_0: No
+                                      ,_1: "Nee"}]);
    var answerScoreList = _L.fromArray([{ctor: "_Tuple2"
                                        ,_0: Yes
                                        ,_1: 3}
@@ -4120,102 +3987,27 @@ Elm.InnoCheck.make = function (_elm) {
                                        ,_1: 0}]);
    var listAnswerScore = function (qas) {
       return function () {
-         var selectScore = function (answer) {
-            return function () {
-               var _v53 = A2($List.filter,
-               function (_v56) {
-                  return function () {
-                     switch (_v56.ctor)
-                     {case "_Tuple2":
-                        return _U.eq(_v56._0,answer);}
-                     _U.badCase($moduleName,
-                     "on line 288, column 41 to 52");
-                  }();
-               },
-               answerScoreList);
-               switch (_v53.ctor)
-               {case "::":
-                  return $Basics.snd(_v53._0);
-                  case "[]": return 0;}
-               _U.badCase($moduleName,
-               "between lines 288 and 292");
-            }();
-         };
-         var getAnswerScore = function (qa) {
-            return {ctor: "_Tuple2"
-                   ,_0: qa.questionKey
-                   ,_1: selectScore(qa.answer)};
-         };
-         return A2($List.map,
+         var getAnswerScore = F2(function (key,
+         answer) {
+            return A2($Maybe.withDefault,
+            0,
+            A2($Dict.get,
+            $Basics.toString(answer),
+            unionToDict(answerScoreList)));
+         });
+         return A2($Dict.map,
          getAnswerScore,
-         qas);
-      }();
-   };
-   var answerColorList = _L.fromArray([{ctor: "_Tuple2"
-                                       ,_0: Yes
-                                       ,_1: "green"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: Partly
-                                       ,_1: "orange"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: No
-                                       ,_1: "red"}]);
-   var listAnswerColor = function (qas) {
-      return function () {
-         var selectColor = function (answer) {
-            return function () {
-               var _v60 = A2($List.filter,
-               function (_v63) {
-                  return function () {
-                     switch (_v63.ctor)
-                     {case "_Tuple2":
-                        return _U.eq(_v63._0,answer);}
-                     _U.badCase($moduleName,
-                     "on line 245, column 41 to 52");
-                  }();
-               },
-               answerColorList);
-               switch (_v60.ctor)
-               {case "::":
-                  return $Basics.snd(_v60._0);
-                  case "[]":
-                  return answerColorEmpty;}
-               _U.badCase($moduleName,
-               "between lines 245 and 249");
-            }();
-         };
-         var getAnswerColor = function (qa) {
-            return {ctor: "_Tuple2"
-                   ,_0: qa.questionKey
-                   ,_1: selectColor(qa.answer)};
-         };
-         return A2($List.map,
-         getAnswerColor,
          qas);
       }();
    };
    var meanScore = function (kscores) {
       return function () {
-         var topScore = function () {
-            var _v67 = A2($List.filter,
-            function (_v70) {
-               return function () {
-                  switch (_v70.ctor)
-                  {case "_Tuple2":
-                     return _U.eq(_v70._0,Yes);}
-                  _U.badCase($moduleName,
-                  "on line 330, column 41 to 49");
-               }();
-            },
-            answerScoreList);
-            switch (_v67.ctor)
-            {case "::":
-               return $Basics.snd(_v67._0);
-               case "[]": return 0;}
-            _U.badCase($moduleName,
-            "between lines 330 and 333");
-         }();
-         var sumOfScores = $List.sum($Basics.snd($List.unzip(kscores)));
+         var topScore = A2($Maybe.withDefault,
+         0,
+         A2($Dict.get,
+         $Basics.toString(Yes),
+         unionToDict(answerScoreList)));
+         var sumOfScores = $List.sum($Dict.values(unionToDict(kscores)));
          var totalNumberOfScores = $List.length(kscores);
          return $Basics.round($Basics.toFloat(sumOfScores) / $Basics.toFloat(totalNumberOfScores * topScore) * 100);
       }();
@@ -4223,13 +4015,13 @@ Elm.InnoCheck.make = function (_elm) {
    var showBlock = F5(function (address,
    model,
    aspect,
-   _v74,
-   _v75) {
+   _v34,
+   _v35) {
       return function () {
-         switch (_v75.ctor)
+         switch (_v35.ctor)
          {case "_Tuple2":
             return function () {
-                 switch (_v74.ctor)
+                 switch (_v34.ctor)
                  {case "_Tuple4":
                     return function () {
                          var answerColors = A2(listQuestionKeyAnswerColor,
@@ -4245,10 +4037,10 @@ Elm.InnoCheck.make = function (_elm) {
                          $List.concat(_L.fromArray([A2(showColorBlocks,
                                                    answerColors,
                                                    {ctor: "_Tuple4"
-                                                   ,_0: _v74._0
-                                                   ,_1: _v74._1
-                                                   ,_2: _v74._2
-                                                   ,_3: _v74._3})
+                                                   ,_0: _v34._0
+                                                   ,_1: _v34._1
+                                                   ,_2: _v34._2
+                                                   ,_3: _v34._3})
                                                    ,A2(showScore,
                                                    meanScore(A2(listQuestionKeyAnswerScore,
                                                    A2(aspectQuestions,
@@ -4256,14 +4048,14 @@ Elm.InnoCheck.make = function (_elm) {
                                                    aspect),
                                                    listAnswerScore(model.questionAnswers))),
                                                    {ctor: "_Tuple2"
-                                                   ,_0: _v75._0
-                                                   ,_1: _v75._1})])));
+                                                   ,_0: _v35._0
+                                                   ,_1: _v35._1})])));
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 479 and 495");
+                 "between lines 470 and 486");
               }();}
          _U.badCase($moduleName,
-         "between lines 479 and 495");
+         "between lines 470 and 486");
       }();
    });
    var Improve = {ctor: "Improve"};
@@ -4275,39 +4067,75 @@ Elm.InnoCheck.make = function (_elm) {
    var questions = _L.fromArray([{_: {}
                                  ,aspect: Leadership
                                  ,key: 1
-                                 ,text: "Innovatiedoelstellingen zijn opgenomen in het beleid"}
+                                 ,text: "Er zijn innovatiedoelen"}
                                 ,{_: {}
                                  ,aspect: Leadership
                                  ,key: 2
-                                 ,text: "De wensen van stakeholders zijn in kaart gebracht"}
+                                 ,text: "Innovatiedoelen zijn SMART"}
                                 ,{_: {}
-                                 ,aspect: Culture
+                                 ,aspect: Leadership
                                  ,key: 3
-                                 ,text: "Is falen een optie in de cultuur van het bedrijf"}
+                                 ,text: "Innovatie wordt gecommuniceerd"}
                                 ,{_: {}
                                  ,aspect: Culture
                                  ,key: 4
-                                 ,text: "Mag je zeggen wat je wilt."}
+                                 ,text: "Er is een visie- en een missiestatement aanwezig"}
                                 ,{_: {}
-                                 ,aspect: Resources
+                                 ,aspect: Culture
                                  ,key: 5
-                                 ,text: "Wordt er geld vrijgemaakt"}
+                                 ,text: "Visie, missie en beleid is duidelijk uitgedragen"}
                                 ,{_: {}
                                  ,aspect: Culture
                                  ,key: 6
-                                 ,text: "Wordt er gelachen"}
+                                 ,text: "Wensen/eisen van stakeholders zijn in kaart gebracht"}
+                                ,{_: {}
+                                 ,aspect: Culture
+                                 ,key: 7
+                                 ,text: "Er is een cultuur waar innovatie in past"}
+                                ,{_: {}
+                                 ,aspect: Resources
+                                 ,key: 8
+                                 ,text: "Toewijzen middelen is ingericht"}
+                                ,{_: {}
+                                 ,aspect: Resources
+                                 ,key: 9
+                                 ,text: "Er is een hoofdverantwoordelijke"}
+                                ,{_: {}
+                                 ,aspect: Resources
+                                 ,key: 10
+                                 ,text: "Mensen kunnen participeren"}
+                                ,{_: {}
+                                 ,aspect: Resources
+                                 ,key: 11
+                                 ,text: "Er wordt continue analyse uitgevoerd"}
                                 ,{_: {}
                                  ,aspect: Processes
-                                 ,key: 7
-                                 ,text: "Wordt er een proces gebruikt"}
+                                 ,key: 12
+                                 ,text: "Ideeën worden continu gevangen"}
+                                ,{_: {}
+                                 ,aspect: Processes
+                                 ,key: 13
+                                 ,text: "Er is een innovatieproces"}
+                                ,{_: {}
+                                 ,aspect: Processes
+                                 ,key: 14
+                                 ,text: "Nieuwe producten kunnen landen in de organisatie"}
                                 ,{_: {}
                                  ,aspect: MeasureAndMonitor
-                                 ,key: 8
-                                 ,text: "Wordt er gemeten"}
+                                 ,key: 15
+                                 ,text: "Innovatieprocessen worden gemeten"}
+                                ,{_: {}
+                                 ,aspect: MeasureAndMonitor
+                                 ,key: 16
+                                 ,text: "Innovatieprojecten worden gemeten"}
                                 ,{_: {}
                                  ,aspect: Improve
-                                 ,key: 9
-                                 ,text: "Is er een proces om e.a. te verbeteren"}]);
+                                 ,key: 17
+                                 ,text: "Het innovatieproces wordt verbeterd"}
+                                ,{_: {}
+                                 ,aspect: Improve
+                                 ,key: 18
+                                 ,text: "Er is een proces als verbeteringen niet lukken"}]);
    var recommendations = _L.fromArray([{_: {}
                                        ,aspect: Leadership
                                        ,scoreMax: 0.3
@@ -4319,10 +4147,8 @@ Elm.InnoCheck.make = function (_elm) {
                                        ,scoreMin: 0.3
                                        ,text: "Goed bezig. Focus eerst op het verbeteren van de andere aspecten."}]);
    var initialModel = {_: {}
-                      ,aspectScores: _L.fromArray([])
-                      ,currentApectQuestions: _L.fromArray([])
                       ,email: ""
-                      ,questionAnswers: _L.fromArray([])
+                      ,questionAnswers: $Dict.empty
                       ,questions: questions
                       ,selectedAspect: Leadership};
    var model = A3($Signal.foldp,
@@ -4347,6 +4173,13 @@ Elm.InnoCheck.make = function (_elm) {
                                  ,{ctor: "_Tuple2"
                                   ,_0: Improve
                                   ,_1: "Verbeteren"}]);
+   var getAspectText = function (aspect) {
+      return A2($Maybe.withDefault,
+      "",
+      A2(getValue,
+      unionToDict(aspectList),
+      aspect));
+   };
    var showCanvas = F2(function (address,
    model) {
       return function () {
@@ -4447,33 +4280,43 @@ Elm.InnoCheck.make = function (_elm) {
                    _L.fromArray([]),
                    _L.fromArray([A2($Html.h1,
                                 _L.fromArray([]),
-                                _L.fromArray([$Html.text("Innovation Awareness")]))
+                                _L.fromArray([$Html.text("Is jouw organisatie klaar om te innoveren?")]))
                                 ,A2($Html.p,
                                 _L.fromArray([]),
-                                _L.fromArray([$Html.text("Aan de hand van een serie vragen verdeeld over 6 aspecten breng je in kaart hoe klaar jouw organisatie is om te innoveren.")]))
+                                _L.fromArray([$Html.text("Aan de hand van een serie vragen verdeeld over 6 aspecten breng je in kaart in welke mate jouw organisatie voorbereid is om te innoveren. Wij noemen dit \'Innovation Readiness\'.")]))
                                 ,A2($Html.div,
                                 _L.fromArray([$Html$Attributes.$class("row")]),
                                 _L.fromArray([A2($Html.div,
                                              _L.fromArray([$Html$Attributes.$class("aspect-list col-sm-3")]),
-                                             _L.fromArray([A2($Html.ul,
-                                             _L.fromArray([]),
-                                             A3(showAspects,
-                                             address,
-                                             model,
-                                             aspectList))]))
+                                             _L.fromArray([A2($Html.h4,
+                                                          _L.fromArray([]),
+                                                          _L.fromArray([$Html.text("Aspecten")]))
+                                                          ,A2($Html.ul,
+                                                          _L.fromArray([]),
+                                                          A3(showAspects,
+                                                          address,
+                                                          model,
+                                                          aspectList))]))
                                              ,A2($Html.div,
                                              _L.fromArray([$Html$Attributes.$class("questions col-sm-6")]),
-                                             _L.fromArray([A2($Html.ul,
-                                             _L.fromArray([]),
-                                             A4(showQuestions,
-                                             address,
-                                             model,
-                                             A2(aspectQuestions,
-                                             model.questions,
-                                             model.selectedAspect),
-                                             answerList))]))]))]))
+                                             _L.fromArray([A2($Html.h4,
+                                                          _L.fromArray([]),
+                                                          _L.fromArray([$Html.text(A2($Basics._op["++"],
+                                                          "Vragen voor het aspect \'",
+                                                          A2($Basics._op["++"],
+                                                          getAspectText(model.selectedAspect),
+                                                          "\'")))]))
+                                                          ,A2($Html.ul,
+                                                          _L.fromArray([]),
+                                                          A4(showQuestions,
+                                                          address,
+                                                          model,
+                                                          A2(aspectQuestions,
+                                                          model.questions,
+                                                          model.selectedAspect),
+                                                          answerTextList))]))]))]))
                    ,A2($Html.section,
-                   _L.fromArray([]),
+                   _L.fromArray([$Html$Attributes.$class("canvas")]),
                    _L.fromArray([A2($Html.h3,
                                 _L.fromArray([]),
                                 _L.fromArray([$Html.text("Innovation Readiness Canvas")]))
@@ -4481,35 +4324,53 @@ Elm.InnoCheck.make = function (_elm) {
                                 _L.fromArray([]),
                                 _L.fromArray([$Html.text("De scores op de vragen worden weergegeven op een canvas.")]))
                                 ,A2($Html.div,
-                                _L.fromArray([$Html$Attributes.$class("row")]),
+                                _L.fromArray([]),
                                 _L.fromArray([A2(showCanvas,
                                 address,
                                 model)]))]))
                    ,A2($Html.section,
-                   _L.fromArray([]),
+                   _L.fromArray([$Html$Attributes.$class("recommendations")]),
                    _L.fromArray([A2($Html.h3,
                                 _L.fromArray([]),
-                                _L.fromArray([$Html.text("Recommendations")]))
+                                _L.fromArray([$Html.text("Aanbevelingen")]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                showRecommendations(model))]))
+                   ,A2($Html.section,
+                   _L.fromArray([$Html$Attributes.$class("contact")]),
+                   _L.fromArray([A2($Html.h3,
+                                _L.fromArray([]),
+                                _L.fromArray([$Html.text("Meer informatie")]))
                                 ,A2($Html.p,
                                 _L.fromArray([]),
-                                _L.fromArray([$Html.text("Wanneer alle vragen zijn beantwoord volgt een top 3 van adviezen waarmee je morgen aan de slag kom om je bedrijf meer innovatief te maken.")]))]))]));
+                                _L.fromArray([$Html.text("Wilt u meer informatie? Laat hieronder uw e-mailadres achter.")]))
+                                ,A2($Html.form,
+                                _L.fromArray([$Html$Attributes.$class("form-inline")]),
+                                _L.fromArray([A2($Html.div,
+                                _L.fromArray([$Html$Attributes.$class("form-group")]),
+                                _L.fromArray([A2($Html.label,
+                                             _L.fromArray([]),
+                                             _L.fromArray([$Html.text("E-mailadres")]))
+                                             ,A2($Html.input,
+                                             _L.fromArray([]),
+                                             _L.fromArray([]))
+                                             ,A2($Html.button,
+                                             _L.fromArray([$Html$Attributes.type$("submit")
+                                                          ,$Html$Attributes.$class("btn btn-default")]),
+                                             _L.fromArray([$Html.text("Verstuur")]))]))]))]))]));
    });
    var main = A2($Signal.map,
    view(actions.address),
    model);
-   var Model = F6(function (a,
+   var Model = F4(function (a,
    b,
    c,
-   d,
-   e,
-   f) {
+   d) {
       return {_: {}
-             ,aspectScores: c
-             ,currentApectQuestions: e
-             ,email: f
+             ,email: d
              ,questionAnswers: b
              ,questions: a
-             ,selectedAspect: d};
+             ,selectedAspect: c};
    });
    _elm.InnoCheck.values = {_op: _op
                            ,Model: Model
@@ -4523,14 +4384,12 @@ Elm.InnoCheck.make = function (_elm) {
                            ,Partly: Partly
                            ,No: No
                            ,Question: Question
-                           ,QuestionAnswer: QuestionAnswer
-                           ,AspectScore: AspectScore
                            ,Recommendation: Recommendation
                            ,questions: questions
                            ,recommendations: recommendations
                            ,initialModel: initialModel
                            ,aspectList: aspectList
-                           ,answerList: answerList
+                           ,answerTextList: answerTextList
                            ,answerScoreList: answerScoreList
                            ,answerColorList: answerColorList
                            ,answerColorEmpty: answerColorEmpty
@@ -4538,8 +4397,6 @@ Elm.InnoCheck.make = function (_elm) {
                            ,SelectAspectQuestions: SelectAspectQuestions
                            ,SelectAnswer: SelectAnswer
                            ,update: update
-                           ,updateQuestionAnswers: updateQuestionAnswers
-                           ,addQuestionAnswer: addQuestionAnswer
                            ,aspectQuestions: aspectQuestions
                            ,listAnswerColor: listAnswerColor
                            ,listQuestionKeyAnswerColor: listQuestionKeyAnswerColor
@@ -4547,18 +4404,19 @@ Elm.InnoCheck.make = function (_elm) {
                            ,listQuestionKeyAnswerScore: listQuestionKeyAnswerScore
                            ,meanScore: meanScore
                            ,allQuestionsAnswered: allQuestionsAnswered
+                           ,unionToDict: unionToDict
+                           ,getValue: getValue
+                           ,getAspectText: getAspectText
                            ,clickable: clickable
                            ,view: view
                            ,showAspects: showAspects
                            ,showInputRadios: showInputRadios
                            ,showQuestions: showQuestions
+                           ,showRecommendations: showRecommendations
                            ,showCanvas: showCanvas
                            ,showBlock: showBlock
                            ,showColorBlocks: showColorBlocks
                            ,showScore: showScore
-                           ,showQuestionAnswers: showQuestionAnswers
-                           ,showKeyColors: showKeyColors
-                           ,showKeyScores: showKeyScores
                            ,main: main
                            ,model: model
                            ,actions: actions};
