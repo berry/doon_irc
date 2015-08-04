@@ -6552,6 +6552,9 @@ h3 {
   color: #009f6b;
   margin-bottom: 0.2em;
 }
+div.aspect-questions-block {
+  margin-top: 1.5em;
+}
 div.aspect-list ul {
   margin-bottom: 0;
   padding-left: 0;
