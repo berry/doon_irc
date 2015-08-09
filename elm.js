@@ -4051,8 +4051,8 @@ Elm.InnoCheck.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "InnoCheck",
    $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
    $ElmFire = Elm.ElmFire.make(_elm),
+   $Html = Elm.Html.make(_elm),
    $InnoCheckBackend = Elm.InnoCheckBackend.make(_elm),
    $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
    $InnoCheckUpdate = Elm.InnoCheckUpdate.make(_elm),
@@ -4065,22 +4065,12 @@ Elm.InnoCheck.make = function (_elm) {
    $Task = Elm.Task.make(_elm);
    var runStore = Elm.Native.Task.make(_elm).performSignal("runStore",
    $InnoCheckBackend.storeMailbox.signal);
-   var initialModel = {_: {}
-                      ,aspectSelectionList: $InnoCheckModel.aspectSelectionList0
-                      ,email: ""
-                      ,isDirty: true
-                      ,questionAnswers: $Dict.empty
-                      ,questions: $InnoCheckModel.questions
-                      ,sendAttempted: false
-                      ,sendErrorMessage: ""
-                      ,sendSuccess: false};
    var main = $StartApp.start({_: {}
-                              ,model: initialModel
+                              ,model: $InnoCheckModel.initialModel0
                               ,update: $InnoCheckUpdate.update
                               ,view: $InnoCheckView.view});
    _elm.InnoCheck.values = {_op: _op
-                           ,main: main
-                           ,initialModel: initialModel};
+                           ,main: main};
    return _elm.InnoCheck.values;
 };
 Elm.InnoCheckBackend = Elm.InnoCheckBackend || {};
@@ -4186,15 +4176,18 @@ Elm.InnoCheckModel.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm);
    var postUrl = "https://doon-irc.firebaseio.com/irc-quickscan/";
    var answerColorEmpty = "#CCCCCC";
+   var answerColorRed = "#C40233";
+   var answerColorOrange = "orange";
+   var answerColorGreen = "#009F6B";
    var answerColorList = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                       ,_0: "Yes"
-                                                      ,_1: "#009F6B"}
+                                                      ,_1: answerColorGreen}
                                                      ,{ctor: "_Tuple2"
                                                       ,_0: "Partly"
-                                                      ,_1: "orange"}
+                                                      ,_1: answerColorOrange}
                                                      ,{ctor: "_Tuple2"
                                                       ,_0: "No"
-                                                      ,_1: "#C40233"}]));
+                                                      ,_1: answerColorRed}]));
    var Recommendation = F4(function (a,
    b,
    c,
@@ -4243,75 +4236,51 @@ Elm.InnoCheckModel.make = function (_elm) {
    var questions = _L.fromArray([{_: {}
                                  ,aspect: Leadership
                                  ,key: 1
-                                 ,text: "Er zijn plannen om nieuwe producten of diensten te bedenken en te ontwikkelen"}
+                                 ,text: "Begrijpt en ondersteunt het management de activiteiten op het gebied van innovatie? En is het management ook actief betrokken in deze activiteiten?"}
                                 ,{_: {}
                                  ,aspect: Leadership
                                  ,key: 2
-                                 ,text: "De voornemens om nieuwe producten en diensten te ontwikkelen zijn opgenomen in de plannen van de organisatie en er is geld en tijd voor gereserveerd"}
+                                 ,text: "Heeft het management meetbare innovatiedoelen gesteld? En communiceert zij deze doelen ook?"}
                                 ,{_: {}
-                                 ,aspect: Leadership
+                                 ,aspect: Culture
                                  ,key: 3
-                                 ,text: "Er wordt binnen en buiten de organisatie (continue) gecommuniceerd over de nieuwe producten en diensten"}
+                                 ,text: "Wordt innovatie door de organisatie bewaakt en beoordeeld?"}
                                 ,{_: {}
                                  ,aspect: Culture
                                  ,key: 4
-                                 ,text: "Er is een visie- en een missiestatement aanwezig"}
+                                 ,text: "Worden inspanningen tot creativiteit en innovativiteit blijvend gestimuleerd?"}
                                 ,{_: {}
-                                 ,aspect: Culture
+                                 ,aspect: Processes
                                  ,key: 5
-                                 ,text: "Visie, missie en beleid is duidelijk uitgedragen"}
+                                 ,text: "Heeft de organisatie al haar processen zo beschreven, ontwikkeld en geïmplementeerd dat er innovatie kan plaats vinden?"}
                                 ,{_: {}
-                                 ,aspect: Culture
+                                 ,aspect: Processes
                                  ,key: 6
-                                 ,text: "Wensen/eisen van stakeholders zijn in kaart gebracht"}
+                                 ,text: "Omvatten de processen het begin, midden en einde van de innovatiecyclus en bevatten ze de zes aspecten van dit canvas?"}
                                 ,{_: {}
-                                 ,aspect: Culture
+                                 ,aspect: Resources
                                  ,key: 7
-                                 ,text: "Er is een cultuur waar innovatie in past"}
+                                 ,text: "Zijn er voldoende middelen (mensen, geld, infrastructuur, informatie) beschikbaar om innovatieve activiteiten uit te voeren?"}
                                 ,{_: {}
                                  ,aspect: Resources
                                  ,key: 8
-                                 ,text: "Toewijzen middelen is ingericht"}
+                                 ,text: "Worden individuen en teams erkend voor hun deelname in innovatieve activiteiten?"}
                                 ,{_: {}
-                                 ,aspect: Resources
+                                 ,aspect: MeasureAndMonitor
                                  ,key: 9
-                                 ,text: "Er is een hoofdverantwoordelijke"}
+                                 ,text: "Meet en bewaakt de organisatie systematisch de innovatiecapaciteit van de organisatie?"}
                                 ,{_: {}
-                                 ,aspect: Resources
+                                 ,aspect: MeasureAndMonitor
                                  ,key: 10
-                                 ,text: "Mensen kunnen participeren"}
+                                 ,text: "Worden er meetwaarden gebruikt om de innovatieve activiteiten te meten en bewaken?"}
                                 ,{_: {}
-                                 ,aspect: Resources
+                                 ,aspect: Improve
                                  ,key: 11
-                                 ,text: "Er wordt continue analyse uitgevoerd"}
+                                 ,text: "Analyseert de organisatie de resultaten van het innovatieproces en voert zij verbeteringen door op het innovatieproces?"}
                                 ,{_: {}
-                                 ,aspect: Processes
+                                 ,aspect: Improve
                                  ,key: 12
-                                 ,text: "Ideeën worden continu gevangen"}
-                                ,{_: {}
-                                 ,aspect: Processes
-                                 ,key: 13
-                                 ,text: "Er is een innovatieproces"}
-                                ,{_: {}
-                                 ,aspect: Processes
-                                 ,key: 14
-                                 ,text: "Nieuwe producten kunnen landen in de organisatie"}
-                                ,{_: {}
-                                 ,aspect: MeasureAndMonitor
-                                 ,key: 15
-                                 ,text: "Innovatieprocessen worden gemeten"}
-                                ,{_: {}
-                                 ,aspect: MeasureAndMonitor
-                                 ,key: 16
-                                 ,text: "Innovatieprojecten worden gemeten"}
-                                ,{_: {}
-                                 ,aspect: Improve
-                                 ,key: 17
-                                 ,text: "Het innovatieproces wordt verbeterd"}
-                                ,{_: {}
-                                 ,aspect: Improve
-                                 ,key: 18
-                                 ,text: "Er is een proces als verbeteringen niet lukken"}]);
+                                 ,text: "Is er een proces om maatregelen te nemen als verbeteringen van het innovatieproces niet succesvol zijn?"}]);
    var recommendations = _L.fromArray([{_: {}
                                        ,aspect: Leadership
                                        ,scoreMax: 0.3
@@ -4347,14 +4316,25 @@ Elm.InnoCheckModel.make = function (_elm) {
                 ,Resources
                 ,MeasureAndMonitor
                 ,Improve]));
-   var Model = F8(function (a,
+   var initialModel0 = {_: {}
+                       ,aspectSelectionList: aspectSelectionList0
+                       ,email: ""
+                       ,isDirty: true
+                       ,questionAnswers: $Dict.empty
+                       ,questions: questions
+                       ,sendAttempted: false
+                       ,sendErrorMessage: ""
+                       ,sendSuccess: false
+                       ,splashScreenRead: false};
+   var Model = F9(function (a,
    b,
    c,
    d,
    e,
    f,
    g,
-   h) {
+   h,
+   i) {
       return {_: {}
              ,aspectSelectionList: h
              ,email: c
@@ -4363,7 +4343,8 @@ Elm.InnoCheckModel.make = function (_elm) {
              ,questions: a
              ,sendAttempted: f
              ,sendErrorMessage: e
-             ,sendSuccess: d};
+             ,sendSuccess: d
+             ,splashScreenRead: i};
    });
    _elm.InnoCheckModel.values = {_op: _op
                                 ,Model: Model
@@ -4378,12 +4359,16 @@ Elm.InnoCheckModel.make = function (_elm) {
                                 ,No: No
                                 ,Question: Question
                                 ,Recommendation: Recommendation
+                                ,initialModel0: initialModel0
                                 ,questions: questions
                                 ,recommendations: recommendations
                                 ,aspectList: aspectList
                                 ,aspectSelectionList0: aspectSelectionList0
                                 ,answerTextList: answerTextList
                                 ,answerScoreList: answerScoreList
+                                ,answerColorGreen: answerColorGreen
+                                ,answerColorOrange: answerColorOrange
+                                ,answerColorRed: answerColorRed
                                 ,answerColorList: answerColorList
                                 ,answerColorEmpty: answerColorEmpty
                                 ,postUrl: postUrl};
@@ -4435,7 +4420,7 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                       ,["isDirty",false]],
                       model);}
                  _U.badCase($moduleName,
-                 "between lines 58 and 72");
+                 "between lines 64 and 78");
               }();
             case "NextAspect":
             return _U.replace([["aspectSelectionList"
@@ -4474,9 +4459,13 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                ,""]
                               ,["sendSuccess",false]
                               ,["sendAttempted",false]],
+              model);
+            case "SplashRead":
+            return _U.replace([["splashScreenRead"
+                               ,true]],
               model);}
          _U.badCase($moduleName,
-         "between lines 24 and 83");
+         "between lines 25 and 89");
       }();
    });
    var SendButtonClicked = {ctor: "SendButtonClicked"};
@@ -4500,10 +4489,12 @@ Elm.InnoCheckUpdate.make = function (_elm) {
       return {ctor: "SelectAspect"
              ,_0: a};
    };
+   var SplashRead = {ctor: "SplashRead"};
    var Noop = {ctor: "Noop"};
    var actionMailbox = $Signal.mailbox(Noop);
    _elm.InnoCheckUpdate.values = {_op: _op
                                  ,Noop: Noop
+                                 ,SplashRead: SplashRead
                                  ,SelectAspect: SelectAspect
                                  ,NextAspect: NextAspect
                                  ,PrevAspect: PrevAspect
@@ -4549,7 +4540,7 @@ Elm.InnoCheckUtil.make = function (_elm) {
                       ,_0: $Basics.toString(_v0._0)
                       ,_1: _v0._1};}
             _U.badCase($moduleName,
-            "on line 103, column 26 to 41");
+            "on line 127, column 26 to 41");
          }();
       },
       list));
@@ -4564,30 +4555,51 @@ Elm.InnoCheckUtil.make = function (_elm) {
       unionToDict($InnoCheckModel.answerTextList),
       answer));
    };
-   var allQuestionsAnswered = F2(function (questions,
+   var numberOfQuestionsAnswered = F2(function (questions,
    qanswers) {
       return function () {
-         var numberOfQAnswers = $List.length(A3($List.map2,
-         F2(function (v0,v1) {
-            return {ctor: "_Tuple2"
-                   ,_0: v0
-                   ,_1: v1};
-         }),
-         $Dict.toList(qanswers),
-         questions));
-         var numberOfAspectQuestions = $List.length(questions);
-         return _U.eq(numberOfAspectQuestions,
-         numberOfQAnswers);
+         var qkeys = A2($List.map,
+         function (q) {
+            return q.key;
+         },
+         questions);
+         var filter = function (key) {
+            return A2($Dict.member,
+            key,
+            qanswers) ? $Maybe.Just(key) : $Maybe.Nothing;
+         };
+         return $List.length(A2($List.filterMap,
+         filter,
+         qkeys));
       }();
    });
+   var allQuestionsAnswered = F2(function (questions,
+   qanswers) {
+      return _U.eq(A2(numberOfQuestionsAnswered,
+      questions,
+      qanswers),
+      $List.length(questions));
+   });
+   var meanScoreColor = F2(function (aqa,
+   score) {
+      return _U.cmp(score,
+      0) > -1 && _U.cmp(score,
+      30) < 1 && aqa ? $InnoCheckModel.answerColorRed : _U.cmp(score,
+      30) > 0 && _U.cmp(score,
+      60) < 0 && aqa ? $InnoCheckModel.answerColorOrange : _U.cmp(score,
+      60) > -1 && _U.cmp(score,
+      100) < 1 && aqa ? $InnoCheckModel.answerColorGreen : $InnoCheckModel.answerColorEmpty;
+   });
+   var sumOfScores = function (kscores) {
+      return $List.sum($Dict.values(unionToDict(kscores)));
+   };
    var meanScore = function (kscores) {
       return function () {
          var topScore = $Maybe.withDefault(0)(A2($Dict.get,
          $Basics.toString($InnoCheckModel.Yes),
          unionToDict($InnoCheckModel.answerScoreList)));
-         var sumOfScores = $List.sum($Dict.values(unionToDict(kscores)));
          var totalNumberOfScores = $List.length(kscores);
-         return $Basics.round($Basics.toFloat(sumOfScores) / $Basics.toFloat(totalNumberOfScores * topScore) * 100);
+         return $Basics.round($Basics.toFloat(sumOfScores(kscores)) / $Basics.toFloat(totalNumberOfScores * topScore) * 100);
       }();
    };
    var listQuestionKeyAnswerScore = F2(function (questions,
@@ -4661,7 +4673,10 @@ Elm.InnoCheckUtil.make = function (_elm) {
                                ,listQuestionKeyAnswerColor: listQuestionKeyAnswerColor
                                ,listAnswerScore: listAnswerScore
                                ,listQuestionKeyAnswerScore: listQuestionKeyAnswerScore
+                               ,sumOfScores: sumOfScores
                                ,meanScore: meanScore
+                               ,meanScoreColor: meanScoreColor
+                               ,numberOfQuestionsAnswered: numberOfQuestionsAnswered
                                ,allQuestionsAnswered: allQuestionsAnswered
                                ,unionToDict: unionToDict
                                ,getValue: getValue
@@ -4693,10 +4708,12 @@ Elm.InnoCheckView.make = function (_elm) {
    $InnoCheckViewSvg = Elm.InnoCheckViewSvg.make(_elm),
    $InnoCheckViewUtil = Elm.InnoCheckViewUtil.make(_elm),
    $List = Elm.List.make(_elm),
+   $Markdown = Elm.Markdown.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $SelectionList = Elm.SelectionList.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
    $Task = Elm.Task.make(_elm);
    var storeIrcData = F2(function (address,
    model) {
@@ -4727,46 +4744,30 @@ Elm.InnoCheckView.make = function (_elm) {
       "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. Dit is de technische foutmelding: ",
       model.sendErrorMessage))]))]))]) : _L.fromArray([]);
    };
+   var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag\n\nGeef je gegevens op en we sturen je een praktische template waarmee je \ndirect aan de slag kan in jouw organisatie. En natuurlijk gaan we netjes \nom met jouw gegevens.\n");
+   var recommendationsTopParagraph = $Markdown.toHtml("\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende \npunten te werken binnen je organisatie.\n");
    var showRecommendations = F2(function (address,
    model) {
       return A2($InnoCheckUtil.allQuestionsAnswered,
       model.questions,
-      model.questionAnswers) ? _L.fromArray([$Html.section(_L.fromArray([$Html$Attributes.$class("canvas")]))(A2($List._op["::"],
-                                            A2($Html.h3,
-                                            _L.fromArray([]),
-                                            _L.fromArray([$Html.text("Innovation Readiness Canvas")])),
-                                            A2($List._op["::"],
-                                            A2($Html.p,
-                                            _L.fromArray([]),
-                                            _L.fromArray([$Html.text("De scores op ieder organisatorisch aspect wordt weergegeven op een canvas. In het algemeen geldt dat de aspecten met de laagste score het eerst in aanmerking komen om verbeterd te worden.")])),
-                                            A2($List._op["::"],
-                                            A2($Html.div,
-                                            _L.fromArray([]),
-                                            _L.fromArray([A2($InnoCheckViewSvg.showCanvas,
-                                            address,
-                                            model)])),
-                                            _L.fromArray([])))))
-                                            ,$Html.section(_L.fromArray([$Html$Attributes.$class("recommendations")]))(A2($List._op["::"],
-                                            A2($Html.h3,
-                                            _L.fromArray([]),
-                                            _L.fromArray([$Html.text("Advies")])),
-                                            A2($List._op["::"],
-                                            A2($Html.p,
-                                            _L.fromArray([]),
-                                            _L.fromArray([$Html.text("Onze top 3 van aanbevelingen om innovatie (nog) beter te faciliteren in jouw organisatie:")])),
+      model.questionAnswers) ? _L.fromArray([$Html.section(_L.fromArray([$Html$Attributes.$class("recommendations")]))(A2($List._op["::"],
+                                            recommendationsTopParagraph,
                                             A2($List._op["::"],
                                             A2($Html.div,
                                             _L.fromArray([$Html$Attributes.$class("well")]),
-                                            _L.fromArray([$Html.text("Maak tijd en ruimte vrij voor medewerkers om te innoveren.")])),
-                                            _L.fromArray([])))))
+                                            _L.fromArray([$Html.text("Advies 1...")])),
+                                            A2($List._op["::"],
+                                            A2($Html.div,
+                                            _L.fromArray([$Html$Attributes.$class("well")]),
+                                            _L.fromArray([$Html.text("Advies 2...")])),
+                                            A2($List._op["::"],
+                                            A2($Html.div,
+                                            _L.fromArray([$Html$Attributes.$class("well")]),
+                                            _L.fromArray([$Html.text("Advies 3...")])),
+                                            _L.fromArray([]))))))
                                             ,A2($Html.section,
                                             _L.fromArray([$Html$Attributes.$class("contact")]),
-                                            _L.fromArray([A2($Html.h3,
-                                                         _L.fromArray([]),
-                                                         _L.fromArray([$Html.text("Ik wil meer weten")]))
-                                                         ,A2($Html.p,
-                                                         _L.fromArray([]),
-                                                         _L.fromArray([$Html.text("Wil je meer informatie? Wil je hulp bij het faciliteren van innovatie in jouw organisatie? Laat hieronder je e-mailadres achter en wij nemen contact met je op.")]))
+                                            _L.fromArray([moreInfoTopParagraph
                                                          ,A2($Html.form,
                                                          _L.fromArray([]),
                                                          _L.fromArray([A2($Html.div,
@@ -4819,7 +4820,7 @@ Elm.InnoCheckView.make = function (_elm) {
                     storedAnswer._0);
                   case "Nothing": return false;}
                _U.badCase($moduleName,
-               "between lines 107 and 111");
+               "between lines 192 and 196");
             }();
          });
          var radios = function (_v4) {
@@ -4852,7 +4853,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                  _L.fromArray([]))
                                  ,$Html.text(_v4._1)]));}
                _U.badCase($moduleName,
-               "between lines 113 and 122");
+               "between lines 198 and 207");
             }();
          };
          return A2($List.map,
@@ -4908,7 +4909,7 @@ Elm.InnoCheckView.make = function (_elm) {
                     _L.fromArray([$Html.text(_v10._1)])),
                     _L.fromArray([])));}
                _U.badCase($moduleName,
-               "between lines 93 and 99");
+               "between lines 178 and 184");
             }();
          };
          return A2($List.map,
@@ -4941,7 +4942,7 @@ Elm.InnoCheckView.make = function (_elm) {
                   {case "_Tuple2":
                      return _v14._0;}
                   _U.badCase($moduleName,
-                  "on line 64, column 42 to 48");
+                  "on line 149, column 42 to 48");
                }();
             },
             list);
@@ -4970,40 +4971,9 @@ Elm.InnoCheckView.make = function (_elm) {
          next));
       }();
    });
-   var view = F2(function (address,
+   var showAspectButtons = F2(function (address,
    model) {
       return A2($Html.div,
-      _L.fromArray([$Html$Attributes.$class("container")]),
-      _L.fromArray([$Html.section(_L.fromArray([]))(A2($List._op["::"],
-      A2($Html.h1,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text("Innovation Readiness Quickscan!")])),
-      A2($List._op["::"],
-      A2($Html.p,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text("Beantwoord voor elk van de zes organisatorische aspecten de vragen en je krijgt inzicht in hoe goed jouw organisatie voorbereid is om innovatie te faciliteren. Wij noemen dit de \'Innovation Readiness\' van een organisatie.")])),
-      A2($List._op["::"],
-      A2($Html.div,
-      _L.fromArray([$Html$Attributes.$class("aspect-questions-block")]),
-      _L.fromArray([A2($Html.h4,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text($InnoCheckUtil.getAspectText(model.aspectSelectionList.selected))]))])),
-      A2($List._op["::"],
-      A2($Html.div,
-      _L.fromArray([$Html$Attributes.$class("row aspect-questions-block")]),
-      _L.fromArray([A2($Html.div,
-      _L.fromArray([$Html$Attributes.$class("questions col-sm-6")]),
-      _L.fromArray([A2($Html.ul,
-      _L.fromArray([]),
-      A4(showQuestions,
-      address,
-      model,
-      A2($InnoCheckUtil.aspectQuestions,
-      model.questions,
-      model.aspectSelectionList.selected),
-      $InnoCheckModel.answerTextList))]))])),
-      A2($List._op["::"],
-      A2($Html.div,
       _L.fromArray([$Html$Attributes.$class("aspect-questions-buttons")]),
       _L.fromArray([A2($Html.button,
                    _L.fromArray([$Html$Attributes.type$("button")
@@ -5013,31 +4983,107 @@ Elm.InnoCheckView.make = function (_elm) {
                                 ,A2($Html$Events.onClick,
                                 address,
                                 $InnoCheckUpdate.PrevAspect)]),
-                   _L.fromArray([$Html.text("< Vorige aspect")]))
+                   _L.fromArray([$Html.text("« Vorige aspect")]))
                    ,$Html.text(" ")
                    ,A2($Html.button,
                    _L.fromArray([$Html$Attributes.type$("button")
                                 ,$Html$Attributes.$class("btn btn-primary")
                                 ,$Html$Attributes.disabled(_U.eq($List.length(model.aspectSelectionList.next),
-                                0))
+                                0) || $Basics.not(A2($InnoCheckUtil.allQuestionsAnswered,
+                                A2($InnoCheckUtil.aspectQuestions,
+                                model.questions,
+                                model.aspectSelectionList.selected),
+                                model.questionAnswers)))
                                 ,A2($Html$Events.onClick,
                                 address,
                                 $InnoCheckUpdate.NextAspect)]),
-                   _L.fromArray([$Html.text("Volgende aspect >")]))])),
-      A2($List._op["::"],
-      A2($Html.div,
+                   _L.fromArray([$Html.text("Volgende aspect »")]))]));
+   });
+   var questionBlockTopParagraph = $Markdown.toHtml("\n# Innovation Readiness Quick Scan\n\nBeantwoord voor elk van de zes aspecten de vragen.\n");
+   var showQuestionBlock = F2(function (address,
+   model) {
+      return A2($Html.section,
       _L.fromArray([]),
-      A2(showRecommendations,
+      _L.fromArray([questionBlockTopParagraph
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("aspect-questions-block")]),
+                   _L.fromArray([A2($Html.h3,
+                                _L.fromArray([]),
+                                _L.fromArray([$Html.text($InnoCheckUtil.getAspectText(model.aspectSelectionList.selected))]))
+                                ,A2($Html.img,
+                                _L.fromArray([$Html$Attributes.src(A2($Basics._op["++"],
+                                             "images/icon_",
+                                             A2($Basics._op["++"],
+                                             $String.toLower($Basics.toString(model.aspectSelectionList.selected)),
+                                             ".png")))
+                                             ,$Html$Attributes.width(40)
+                                             ,$Html$Attributes.height(40)]),
+                                _L.fromArray([]))]))
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("row aspect-questions-block")]),
+                   _L.fromArray([A2($Html.div,
+                                _L.fromArray([$Html$Attributes.$class("questions col-sm-6")]),
+                                _L.fromArray([A2($Html.ul,
+                                             _L.fromArray([]),
+                                             A4(showQuestions,
+                                             address,
+                                             model,
+                                             A2($InnoCheckUtil.aspectQuestions,
+                                             model.questions,
+                                             model.aspectSelectionList.selected),
+                                             $InnoCheckModel.answerTextList))
+                                             ,A2(showAspectButtons,
+                                             address,
+                                             model)]))
+                                ,A2($Html.div,
+                                _L.fromArray([$Html$Attributes.$class("canvas col-sm-6")]),
+                                _L.fromArray([A2($InnoCheckViewSvg.showCanvas,
+                                address,
+                                model)]))]))
+                   ,A2($Html.div,
+                   _L.fromArray([]),
+                   A2(showRecommendations,
+                   address,
+                   model))]));
+   });
+   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quick Scan\n\n### Inzicht in randvoorwaarden voor innovatie\n\nDe Innovation Readiness Quick Scan geeft inzicht in welke cruciale randvoorwaarden \ner ingevuld moeten worden om succesvol nieuwe producten en diensten te kunnen \nontwerpen en lanceren. De randvoorwaarden om te innoveren wordt gescoord op 6 \naspecten:\n\n1. leiderschap\n2. cultuur\n3. processen\n4. resources/middelen\n5. meten\n6. verbeteren\n\nAan de hand van het beantwoorden van vragen wordt de score van de organisatie op elk \nvan deze aspecten bepaald. Je krijgt inzicht op welke aspecten je als organisatie kan \nverbeteren. En na het invullen van de vragen geven we je praktische tips over hoe je als organisatie\nkan verbeteren. \n\n### Achtergrond\n\nDe Innovation Readiness Quick Scan is ontwikkeld door DOON in samenwerking met de PDMA/TIM Foundation \nen is gebaseerd op de Innovation Management Standard.\n\nDe Innovation Readiness Quick Scan is gebaseerd op het Innovation Readiness Canvas van DOON. In de Quick Scan \nis het aantal vragen sterk teruggebracht. De resultaten geven een eerste indruk van de \ninnovatiecapaciteit van de organisatie.\n");
+   var showSplashScreen = F2(function (address,
+   model) {
+      return _U.eq(model.splashScreenRead,
+      false) ? A2($Html.section,
+      _L.fromArray([]),
+      _L.fromArray([splashParagraph
+                   ,A2($Html.button,
+                   _L.fromArray([$Html$Attributes.type$("button")
+                                ,$Html$Attributes.$class("btn btn-primary")
+                                ,A2($Html$Events.onClick,
+                                address,
+                                $InnoCheckUpdate.SplashRead)]),
+                   _L.fromArray([$Html.text("Start de Quick Scan »")]))])) : A2(showQuestionBlock,
       address,
-      model)),
-      _L.fromArray([]))))))))]));
+      model);
+   });
+   var view = F2(function (address,
+   model) {
+      return A2($Html.div,
+      _L.fromArray([$Html$Attributes.$class("container")]),
+      _L.fromArray([A2(showSplashScreen,
+      address,
+      model)]));
    });
    _elm.InnoCheckView.values = {_op: _op
                                ,view: view
+                               ,showSplashScreen: showSplashScreen
+                               ,splashParagraph: splashParagraph
+                               ,questionBlockTopParagraph: questionBlockTopParagraph
+                               ,showQuestionBlock: showQuestionBlock
+                               ,showAspectButtons: showAspectButtons
                                ,showAspectSelectionList: showAspectSelectionList
                                ,showAspects: showAspects
                                ,showInputRadios: showInputRadios
                                ,showQuestions: showQuestions
+                               ,recommendationsTopParagraph: recommendationsTopParagraph
+                               ,moreInfoTopParagraph: moreInfoTopParagraph
                                ,showRecommendations: showRecommendations
                                ,showPortMessages: showPortMessages
                                ,storeIrcData: storeIrcData};
@@ -5065,108 +5111,78 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
    $Svg = Elm.Svg.make(_elm),
    $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
-   var showScore = F2(function (score,
+   var showIcon = F2(function (aspect,
    _v0) {
       return function () {
          switch (_v0.ctor)
          {case "_Tuple2":
-            return _L.fromArray([A2($Svg.text,
+            return A2($Svg.image,
               _L.fromArray([$Svg$Attributes.x($Basics.toString(_v0._0))
                            ,$Svg$Attributes.y($Basics.toString(_v0._1))
-                           ,$Svg$Attributes.style("text-anchor: middle; font-size: 24px; stroke: #ffffff; fill: #ffffff; font-family: Arial;")]),
-              _L.fromArray([$Html.text(A2($Basics._op["++"],
-              $Basics.toString(score),
-              "%"))]))]);}
+                           ,$Svg$Attributes.width("90px")
+                           ,$Svg$Attributes.height("90px")
+                           ,$Svg$Attributes.xlinkHref(A2($Basics._op["++"],
+                           "images/icon_",
+                           A2($Basics._op["++"],
+                           $String.toLower($Basics.toString(aspect)),
+                           ".png")))]),
+              _L.fromArray([]));}
          _U.badCase($moduleName,
-         "between lines 90 and 95");
+         "between lines 75 and 82");
       }();
    });
-   var showColorBlocks = F2(function (kcolors,
-   _v4) {
-      return function () {
-         switch (_v4.ctor)
-         {case "_Tuple4":
-            return function () {
-                 var numberOfBlocks = $List.length(kcolors);
-                 var blockHeight = $Basics.round($Basics.toFloat(_v4._3) / $Basics.toFloat(numberOfBlocks));
-                 var showRect = function (_v10) {
-                    return function () {
-                       switch (_v10.ctor)
-                       {case "_Tuple2":
-                          switch (_v10._1.ctor)
-                            {case "_Tuple2":
-                               return A2($Svg.rect,
-                                 _L.fromArray([$Svg$Attributes.fill(_v10._1._1)
-                                              ,$Svg$Attributes.x($Basics.toString(_v4._0))
-                                              ,$Svg$Attributes.y($Basics.toString(_v4._1 + _v10._0 * blockHeight))
-                                              ,$Svg$Attributes.width($Basics.toString(_v4._2))
-                                              ,$Svg$Attributes.height($Basics.toString(blockHeight))]),
-                                 _L.fromArray([]));}
-                            break;}
-                       _U.badCase($moduleName,
-                       "on line 82, column 13 to 156");
-                    }();
-                 };
-                 return $List.map(showRect)(A2($List.indexedMap,
-                 F2(function (v0,v1) {
-                    return {ctor: "_Tuple2"
-                           ,_0: v0
-                           ,_1: v1};
-                 }),
-                 kcolors));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 77 and 85");
-      }();
-   });
-   var showBlock = F5(function (address,
+   var showColorBlock = F5(function (address,
    model,
    aspect,
-   _v16,
-   _v17) {
+   _v4,
+   _v5) {
       return function () {
-         switch (_v17.ctor)
+         switch (_v5.ctor)
          {case "_Tuple2":
             return function () {
-                 switch (_v16.ctor)
+                 switch (_v4.ctor)
                  {case "_Tuple4":
                     return function () {
+                         var aqa = A2($InnoCheckUtil.allQuestionsAnswered,
+                         A2($InnoCheckUtil.aspectQuestions,
+                         model.questions,
+                         aspect),
+                         model.questionAnswers);
                          var answerScores = A2($InnoCheckUtil.listQuestionKeyAnswerScore,
                          A2($InnoCheckUtil.aspectQuestions,
                          model.questions,
                          aspect),
                          $InnoCheckUtil.listAnswerScore(model.questionAnswers));
                          var meanOfAnswers = $InnoCheckUtil.meanScore(answerScores);
-                         var answerColors = A2($InnoCheckUtil.listQuestionKeyAnswerColor,
-                         A2($InnoCheckUtil.aspectQuestions,
-                         model.questions,
-                         aspect),
-                         $InnoCheckUtil.listAnswerColor(model.questionAnswers));
+                         var aspectScoreColor = A2($InnoCheckUtil.meanScoreColor,
+                         aqa,
+                         meanOfAnswers);
                          return A2($Svg.svg,
                          _L.fromArray([$InnoCheckViewUtil.clickable
                                       ,A2($Html$Events.onClick,
                                       address,
                                       $InnoCheckUpdate.SelectAspect(aspect))]),
-                         $List.concat(_L.fromArray([A2(showColorBlocks,
-                                                   answerColors,
-                                                   {ctor: "_Tuple4"
-                                                   ,_0: _v16._0
-                                                   ,_1: _v16._1
-                                                   ,_2: _v16._2
-                                                   ,_3: _v16._3})
-                                                   ,A2(showScore,
-                                                   meanOfAnswers,
-                                                   {ctor: "_Tuple2"
-                                                   ,_0: _v17._0
-                                                   ,_1: _v17._1})])));
+                         _L.fromArray([A2($Svg.rect,
+                                      _L.fromArray([$Svg$Attributes.fill(aspectScoreColor)
+                                                   ,$Svg$Attributes.x($Basics.toString(_v4._0))
+                                                   ,$Svg$Attributes.y($Basics.toString(_v4._1))
+                                                   ,$Svg$Attributes.width($Basics.toString(_v4._2))
+                                                   ,$Svg$Attributes.height($Basics.toString(_v4._3))]),
+                                      _L.fromArray([]))
+                                      ,A2(showIcon,
+                                      aspect,
+                                      {ctor: "_Tuple2"
+                                      ,_0: _v5._0
+                                      ,_1: _v5._1})]));
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 50 and 72");
+                 "between lines 46 and 70");
               }();}
          _U.badCase($moduleName,
-         "between lines 50 and 72");
+         "between lines 46 and 70");
       }();
    });
    var showCanvas = F2(function (address,
@@ -5189,7 +5205,7 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                                    ,$Svg$Attributes.width("400")
                                    ,$Svg$Attributes.height("282")]),
                       _L.fromArray([]))
-                      ,A5(showBlock,
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.Leadership,
@@ -5198,8 +5214,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_1: 10
                       ,_2: 90
                       ,_3: 126},
-                      {ctor: "_Tuple2",_0: 55,_1: 80})
-                      ,A5(showBlock,
+                      {ctor: "_Tuple2",_0: 10,_1: 25})
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.Processes,
@@ -5209,9 +5225,9 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 180
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 200
-                      ,_1: 80})
-                      ,A5(showBlock,
+                      ,_0: 155
+                      ,_1: 25})
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.MeasureAndMonitor,
@@ -5221,9 +5237,9 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 345
-                      ,_1: 80})
-                      ,A5(showBlock,
+                      ,_0: 300
+                      ,_1: 25})
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.Culture,
@@ -5233,9 +5249,9 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 55
-                      ,_1: 221})
-                      ,A5(showBlock,
+                      ,_0: 10
+                      ,_1: 161})
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.Resources,
@@ -5245,9 +5261,9 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 180
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 200
-                      ,_1: 221})
-                      ,A5(showBlock,
+                      ,_0: 155
+                      ,_1: 161})
+                      ,A5(showColorBlock,
                       address,
                       model,
                       $InnoCheckModel.Improve,
@@ -5257,15 +5273,14 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 345
-                      ,_1: 221})]));
+                      ,_0: 300
+                      ,_1: 161})]));
       }();
    });
    _elm.InnoCheckViewSvg.values = {_op: _op
                                   ,showCanvas: showCanvas
-                                  ,showBlock: showBlock
-                                  ,showColorBlocks: showColorBlocks
-                                  ,showScore: showScore};
+                                  ,showColorBlock: showColorBlock
+                                  ,showIcon: showIcon};
    return _elm.InnoCheckViewSvg.values;
 };
 Elm.InnoCheckViewUtil = Elm.InnoCheckViewUtil || {};
@@ -5795,6 +5810,60 @@ Elm.List.make = function (_elm) {
                       ,sortBy: sortBy
                       ,sortWith: sortWith};
    return _elm.List.values;
+};
+Elm.Markdown = Elm.Markdown || {};
+Elm.Markdown.make = function (_elm) {
+   "use strict";
+   _elm.Markdown = _elm.Markdown || {};
+   if (_elm.Markdown.values)
+   return _elm.Markdown.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Markdown",
+   $Basics = Elm.Basics.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Markdown = Elm.Native.Markdown.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var toElementWith = $Native$Markdown.toElementWith;
+   var toHtmlWith = $Native$Markdown.toHtmlWith;
+   var defaultOptions = {_: {}
+                        ,githubFlavored: $Maybe.Just({_: {}
+                                                     ,breaks: false
+                                                     ,tables: false})
+                        ,sanitize: false
+                        ,smartypants: false};
+   var Options = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,githubFlavored: a
+             ,sanitize: b
+             ,smartypants: c};
+   });
+   var toElement = function (string) {
+      return A2($Native$Markdown.toElementWith,
+      defaultOptions,
+      string);
+   };
+   var toHtml = function (string) {
+      return A2($Native$Markdown.toHtmlWith,
+      defaultOptions,
+      string);
+   };
+   _elm.Markdown.values = {_op: _op
+                          ,toHtml: toHtml
+                          ,toElement: toElement
+                          ,Options: Options
+                          ,defaultOptions: defaultOptions
+                          ,toHtmlWith: toHtmlWith
+                          ,toElementWith: toElementWith};
+   return _elm.Markdown.values;
 };
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
@@ -10007,6 +10076,108 @@ Elm.Native.List.make = function(localRuntime) {
 
 };
 
+
+// setup
+Elm.Native = Elm.Native || {};
+Elm.Native.Markdown = Elm.Native.Markdown || {};
+
+// definition
+Elm.Native.Markdown.make = function(localRuntime) {
+	'use strict';
+
+	// attempt to short-circuit
+	if ('values' in Elm.Native.Markdown)
+	{
+		return Elm.Native.Markdown.values;
+	}
+
+	var Element = Elm.Native.Graphics.Element.make(localRuntime);
+
+	/**
+	 * marked - a markdown parser
+	 * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
+	 * https://github.com/chjj/marked
+	 */
+	(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment|closed|closing) *(?:\n{2,}|\s*$)/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,paragraph:/^/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:cap[1]==="pre"||cap[1]==="script"||cap[1]==="style",text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=escape(this.smartypants(cap[0]));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/--/g,"—").replace(/(^|[-\u2014/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&([#\w]+);/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
+
+	marked.setOptions({
+		highlight: function (code, lang) {
+			if (typeof hljs !== 'undefined'
+				&& lang
+				&& hljs.listLanguages().indexOf(lang) >= 0)
+			{
+				return hljs.highlight(lang, code, true).value;
+			}
+			return code;
+		}
+	});
+
+	function formatOptions(options) {
+		var gfm = options.githubFlavored;
+		if (gfm.ctor === 'Just')
+		{
+			return {
+				gfm: true,
+				tables: gfm.tables,
+				breaks: gfm.breaks,
+				sanitize: options.sanitize,
+				smartypants: options.smartypants
+			};
+		}
+		else
+		{
+			return {
+				gfm: false,
+				tables: false,
+				breaks: false,
+				sanitize: options.sanitize,
+				smartypants: options.smartypants
+			};
+		}
+	}
+
+	function toHtmlWith(options, rawMarkdown)
+	{
+		return new MarkdownWidget(options, rawMarkdown);
+	}
+
+	function MarkdownWidget(options, rawMarkdown)
+	{
+		this.options = options;
+		this.markdown = rawMarkdown;
+	}
+
+	MarkdownWidget.prototype.type = "Widget";
+
+	MarkdownWidget.prototype.init = function init()
+	{
+		var html = marked(this.markdown, formatOptions(this.options));
+		var div = document.createElement('div');
+		div.innerHTML = html;
+		return div;
+	};
+
+	MarkdownWidget.prototype.update = function update(previous, node)
+	{
+		if (this.markdown !== previous.markdown || this.options != previous.options)
+		{
+			var html = marked(this.markdown, formatOptions(this.options));
+			node.innerHTML = html;
+		}
+		return node;
+	};
+
+
+	function toElementWith(options, rawMarkdown)
+	{
+		return Element.markdown(marked(rawMarkdown, formatOptions(options)));
+	}
+
+	return Elm.Native.Markdown.values = {
+		toHtmlWith: F2(toHtmlWith),
+		toElementWith: F2(toElementWith)
+	};
+};
 Elm.Native.Port = {};
 Elm.Native.Port.make = function(localRuntime) {
 
@@ -13565,7 +13736,11 @@ function patchObject(node, props, previous, propName, propValue) {
             if (attrValue === undefined) {
                 node.removeAttribute(attrName)
             } else {
-                node.setAttribute(attrName, attrValue)
+                if (attrName.indexOf("xlink:") > -1) {
+                    node.setAttributeNS("http://www.w3.org/1999/xlink", attrName, attrValue)    
+                } else {
+                    node.setAttribute(attrName, attrValue)
+                }
             }
         }
 
