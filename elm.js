@@ -4236,11 +4236,11 @@ Elm.InnoCheckModel.make = function (_elm) {
    var questions = _L.fromArray([{_: {}
                                  ,aspect: Leadership
                                  ,key: 1
-                                 ,text: "Begrijpt en ondersteunt het management de activiteiten op het gebied van innovatie? En is het management ook actief betrokken in deze activiteiten?"}
+                                 ,text: "Begrijpt, ondersteunt en is het management actief betrokken bij de activiteiten op het gebied van innovatie?"}
                                 ,{_: {}
                                  ,aspect: Leadership
                                  ,key: 2
-                                 ,text: "Heeft het management meetbare innovatiedoelen gesteld? En communiceert zij deze doelen ook?"}
+                                 ,text: "Heeft het management meetbare innovatiedoelen gesteld en communiceert zij deze ook?"}
                                 ,{_: {}
                                  ,aspect: Culture
                                  ,key: 3
@@ -5122,8 +5122,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
             return A2($Svg.image,
               _L.fromArray([$Svg$Attributes.x($Basics.toString(_v0._0))
                            ,$Svg$Attributes.y($Basics.toString(_v0._1))
-                           ,$Svg$Attributes.width("90px")
-                           ,$Svg$Attributes.height("90px")
+                           ,$Svg$Attributes.width("80px")
+                           ,$Svg$Attributes.height("80px")
                            ,$Svg$Attributes.xlinkHref(A2($Basics._op["++"],
                            "images/icon_",
                            A2($Basics._op["++"],
@@ -5214,7 +5214,7 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_1: 10
                       ,_2: 90
                       ,_3: 126},
-                      {ctor: "_Tuple2",_0: 10,_1: 25})
+                      {ctor: "_Tuple2",_0: 15,_1: 30})
                       ,A5(showColorBlock,
                       address,
                       model,
@@ -5225,8 +5225,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 180
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 155
-                      ,_1: 25})
+                      ,_0: 160
+                      ,_1: 30})
                       ,A5(showColorBlock,
                       address,
                       model,
@@ -5237,8 +5237,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 300
-                      ,_1: 25})
+                      ,_0: 305
+                      ,_1: 30})
                       ,A5(showColorBlock,
                       address,
                       model,
@@ -5249,8 +5249,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 10
-                      ,_1: 161})
+                      ,_0: 15
+                      ,_1: 166})
                       ,A5(showColorBlock,
                       address,
                       model,
@@ -5261,8 +5261,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 180
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 155
-                      ,_1: 161})
+                      ,_0: 160
+                      ,_1: 166})
                       ,A5(showColorBlock,
                       address,
                       model,
@@ -5273,8 +5273,8 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
                       ,_2: 90
                       ,_3: 126},
                       {ctor: "_Tuple2"
-                      ,_0: 300
-                      ,_1: 161})]));
+                      ,_0: 305
+                      ,_1: 166})]));
       }();
    });
    _elm.InnoCheckViewSvg.values = {_op: _op
