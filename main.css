@@ -6874,7 +6874,7 @@ section.contact form div.group-button div button .badge {
   color: #337ab7;
   background-color: #ffffff;
 }
-section.contact form div.portmessage div {
+section.contact form div.portmessage {
   margin-top: 0.5em;
   position: relative;
   min-height: 1px;
@@ -6889,33 +6889,33 @@ section.contact form div.portmessage div {
   color: #31708f;
 }
 @media (min-width: 768px) {
-  section.contact form div.portmessage div {
+  section.contact form div.portmessage {
     margin-left: 16.66666667%;
   }
 }
 @media (min-width: 768px) {
-  section.contact form div.portmessage div {
+  section.contact form div.portmessage {
     float: left;
     width: 83.33333333%;
   }
 }
-section.contact form div.portmessage div h4 {
+section.contact form div.portmessage h4 {
   margin-top: 0;
   color: inherit;
 }
-section.contact form div.portmessage div .alert-link {
+section.contact form div.portmessage .alert-link {
   font-weight: bold;
 }
-section.contact form div.portmessage div > p,
-section.contact form div.portmessage div > ul {
+section.contact form div.portmessage > p,
+section.contact form div.portmessage > ul {
   margin-bottom: 0;
 }
-section.contact form div.portmessage div > p + p {
+section.contact form div.portmessage > p + p {
   margin-top: 5px;
 }
-section.contact form div.portmessage div hr {
+section.contact form div.portmessage hr {
   border-top-color: #a6e1ec;
 }
-section.contact form div.portmessage div .alert-link {
+section.contact form div.portmessage .alert-link {
   color: #245269;
 }

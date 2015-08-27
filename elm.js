@@ -4188,6 +4188,7 @@ Elm.InnoCheckModel.make = function (_elm) {
                                                      ,{ctor: "_Tuple2"
                                                       ,_0: "No"
                                                       ,_1: answerColorRed}]));
+   var questionAnswersEmpty = $Dict.empty;
    var Recommendation = F4(function (a,
    b,
    c,
@@ -4209,6 +4210,42 @@ Elm.InnoCheckModel.make = function (_elm) {
    var No = {ctor: "No"};
    var Partly = {ctor: "Partly"};
    var Yes = {ctor: "Yes"};
+   var questionAnswers0 = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                       ,_0: 1
+                                                       ,_1: Yes}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 2
+                                                       ,_1: Yes}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 3
+                                                       ,_1: No}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 4
+                                                       ,_1: Partly}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 5
+                                                       ,_1: No}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 6
+                                                       ,_1: Yes}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 7
+                                                       ,_1: Yes}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 8
+                                                       ,_1: No}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 9
+                                                       ,_1: Partly}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 10
+                                                       ,_1: Yes}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 11
+                                                       ,_1: Partly}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: 12
+                                                       ,_1: Yes}]));
    var answerTextList = _L.fromArray([{ctor: "_Tuple2"
                                       ,_0: Yes
                                       ,_1: "Ja"}
@@ -4309,6 +4346,24 @@ Elm.InnoCheckModel.make = function (_elm) {
                                  ,{ctor: "_Tuple2"
                                   ,_0: Improve
                                   ,_1: "Verbeteren"}]);
+   var aspectTips = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(Leadership)
+                                                 ,_1: "\n#### Tips op het aspect Leiderschap\n\nLeiderschap is een belangrijk aspect bij innovaties...\n\n* Ontdek innovaties en neem ze op in de business planning\n* Verzeker je ervan dat het management innovatie activiteiten erkent, ondersteunt en promoot\n* Stel organisatiedoelen op waar de innovatiedoelen in zijn opgenomen\n* Gebruik feedback gegevens van je ...\n       "}
+                                                ,{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(Culture)
+                                                 ,_1: "\n## Cultuur tip\n    "}
+                                                ,{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(Processes)
+                                                 ,_1: "\n## Processen tip\n    "}
+                                                ,{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(Resources)
+                                                 ,_1: "\n## Resources tip\n    "}
+                                                ,{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(MeasureAndMonitor)
+                                                 ,_1: "\n## Meten en weten tip\n    "}
+                                                ,{ctor: "_Tuple2"
+                                                 ,_0: $Basics.toString(Improve)
+                                                 ,_1: "\n## Verbeteren tip\n    "}]));
    var aspectSelectionList0 = A2($SelectionList.fromList,
    Leadership,
    _L.fromArray([Culture
@@ -4320,7 +4375,7 @@ Elm.InnoCheckModel.make = function (_elm) {
                        ,aspectSelectionList: aspectSelectionList0
                        ,email: ""
                        ,isDirty: true
-                       ,questionAnswers: $Dict.empty
+                       ,questionAnswers: questionAnswersEmpty
                        ,questions: questions
                        ,sendAttempted: false
                        ,sendErrorMessage: ""
@@ -4363,7 +4418,10 @@ Elm.InnoCheckModel.make = function (_elm) {
                                 ,questions: questions
                                 ,recommendations: recommendations
                                 ,aspectList: aspectList
+                                ,aspectTips: aspectTips
                                 ,aspectSelectionList0: aspectSelectionList0
+                                ,questionAnswersEmpty: questionAnswersEmpty
+                                ,questionAnswers0: questionAnswers0
                                 ,answerTextList: answerTextList
                                 ,answerScoreList: answerScoreList
                                 ,answerColorGreen: answerColorGreen
@@ -4540,7 +4598,7 @@ Elm.InnoCheckUtil.make = function (_elm) {
                       ,_0: $Basics.toString(_v0._0)
                       ,_1: _v0._1};}
             _U.badCase($moduleName,
-            "on line 127, column 26 to 41");
+            "on line 171, column 26 to 41");
          }();
       },
       list));
@@ -4602,6 +4660,21 @@ Elm.InnoCheckUtil.make = function (_elm) {
          return $Basics.round($Basics.toFloat(sumOfScores(kscores)) / $Basics.toFloat(totalNumberOfScores * topScore) * 100);
       }();
    };
+   var listQuestionAspectAnswerScore = F2(function (questions,
+   kscores) {
+      return function () {
+         var getAnswerScore = function (q) {
+            return {ctor: "_Tuple2"
+                   ,_0: q.aspect
+                   ,_1: $Maybe.withDefault(0)(A2($Dict.get,
+                   q.key,
+                   kscores))};
+         };
+         return A2($List.map,
+         getAnswerScore,
+         questions);
+      }();
+   });
    var listQuestionKeyAnswerScore = F2(function (questions,
    kscores) {
       return function () {
@@ -4628,6 +4701,42 @@ Elm.InnoCheckUtil.make = function (_elm) {
          return A2($Dict.map,
          getAnswerScore,
          qas);
+      }();
+   };
+   var aspectForTip = function (model) {
+      return function () {
+         var aspectScores = A2(listQuestionAspectAnswerScore,
+         model.questions,
+         listAnswerScore(model.questionAnswers));
+         var scoreOrange = A2($List.filter,
+         function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(_v4._1,
+                    30) > 0 && _U.cmp(_v4._1,
+                    60) < 0;}
+               _U.badCase($moduleName,
+               "on line 151, column 30 to 54");
+            }();
+         },
+         aspectScores);
+         var scoreRed = A2($List.filter,
+         function (_v8) {
+            return function () {
+               switch (_v8.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(_v8._1,
+                    0) > -1 && _U.cmp(_v8._1,
+                    30) < 1;}
+               _U.badCase($moduleName,
+               "on line 157, column 30 to 55");
+            }();
+         },
+         aspectScores);
+         return _U.cmp($List.length(scoreRed),
+         0) > 0 ? $List.head(scoreRed) : _U.cmp($List.length(scoreOrange),
+         0) > 0 ? $List.head(scoreOrange) : $Maybe.Nothing;
       }();
    };
    var listQuestionKeyAnswerColor = F2(function (questions,
@@ -4673,11 +4782,13 @@ Elm.InnoCheckUtil.make = function (_elm) {
                                ,listQuestionKeyAnswerColor: listQuestionKeyAnswerColor
                                ,listAnswerScore: listAnswerScore
                                ,listQuestionKeyAnswerScore: listQuestionKeyAnswerScore
+                               ,listQuestionAspectAnswerScore: listQuestionAspectAnswerScore
                                ,sumOfScores: sumOfScores
                                ,meanScore: meanScore
                                ,meanScoreColor: meanScoreColor
                                ,numberOfQuestionsAnswered: numberOfQuestionsAnswered
                                ,allQuestionsAnswered: allQuestionsAnswered
+                               ,aspectForTip: aspectForTip
                                ,unionToDict: unionToDict
                                ,getValue: getValue
                                ,getAspectText: getAspectText
@@ -4706,12 +4817,10 @@ Elm.InnoCheckView.make = function (_elm) {
    $InnoCheckUpdate = Elm.InnoCheckUpdate.make(_elm),
    $InnoCheckUtil = Elm.InnoCheckUtil.make(_elm),
    $InnoCheckViewSvg = Elm.InnoCheckViewSvg.make(_elm),
-   $InnoCheckViewUtil = Elm.InnoCheckViewUtil.make(_elm),
    $List = Elm.List.make(_elm),
    $Markdown = Elm.Markdown.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $SelectionList = Elm.SelectionList.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $String = Elm.String.make(_elm),
    $Task = Elm.Task.make(_elm);
@@ -4731,18 +4840,44 @@ Elm.InnoCheckView.make = function (_elm) {
          return $Signal.send(address)($InnoCheckUpdate.HandleBackendResponse($));
       });
    });
-   var showPortMessages = function (model) {
-      return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? _L.fromArray([A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([A2($Html.p,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text("Data succesvol verstuurd en opgeslagen. Dank je wel!")]))]))]) : model.sendAttempted && $Basics.not(model.sendSuccess) ? _L.fromArray([A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([A2($Html.p,
-      _L.fromArray([]),
-      _L.fromArray([$Html.text(A2($Basics._op["++"],
-      "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. Dit is de technische foutmelding: ",
-      model.sendErrorMessage))]))]))]) : _L.fromArray([]);
+   var buttonComp = F3(function (address,
+   action,
+   buttonText) {
+      return A2($Html.button,
+      _L.fromArray([$Html$Attributes.type$("button")
+                   ,$Html$Attributes.$class("btn btn-primary")
+                   ,A2($Html$Events.onClick,
+                   address,
+                   action)
+                   ,$Html$Attributes.disabled(false)]),
+      _L.fromArray([$Html.text(buttonText)]));
+   });
+   var portMessageComp = function (model) {
+      return function () {
+         var msgComp = function (msg) {
+            return A2($Html.div,
+            _L.fromArray([$Html$Attributes.$class("portmessage")]),
+            _L.fromArray([A2($Html.p,
+            _L.fromArray([]),
+            _L.fromArray([$Html.text(msg)]))]));
+         };
+         return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? msgComp("De gegevens van jouw quickscan zijn opgeslagen. Dank je wel!") : model.sendAttempted && $Basics.not(model.sendSuccess) ? msgComp(A2($Basics._op["++"],
+         "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. D is de technische foutmelding: ",
+         model.sendErrorMessage)) : $Html.text("");
+      }();
+   };
+   var aspectTipComp = function (model) {
+      return function () {
+         var aspect = $Basics.fst($Maybe.withDefault({ctor: "_Tuple2"
+                                                     ,_0: $InnoCheckModel.Culture
+                                                     ,_1: 0})($InnoCheckUtil.aspectForTip(model)));
+         var msg = $Maybe.withDefault("")(A2($Dict.get,
+         $Basics.toString(aspect),
+         $InnoCheckModel.aspectTips));
+         return A2($Html.div,
+         _L.fromArray([$Html$Attributes.$class("well")]),
+         _L.fromArray([$Markdown.toHtml(msg)]));
+      }();
    };
    var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag\n\nGeef je gegevens op en we sturen je een praktische template waarmee je \ndirect aan de slag kan in jouw organisatie. En natuurlijk gaan we netjes \nom met jouw gegevens.\n");
    var recommendationsTopParagraph = $Markdown.toHtml("\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende \npunten te werken binnen je organisatie.\n");
@@ -4750,21 +4885,10 @@ Elm.InnoCheckView.make = function (_elm) {
    model) {
       return A2($InnoCheckUtil.allQuestionsAnswered,
       model.questions,
-      model.questionAnswers) ? _L.fromArray([$Html.section(_L.fromArray([$Html$Attributes.$class("recommendations")]))(A2($List._op["::"],
-                                            recommendationsTopParagraph,
-                                            A2($List._op["::"],
-                                            A2($Html.div,
-                                            _L.fromArray([$Html$Attributes.$class("well")]),
-                                            _L.fromArray([$Html.text("Advies 1...")])),
-                                            A2($List._op["::"],
-                                            A2($Html.div,
-                                            _L.fromArray([$Html$Attributes.$class("well")]),
-                                            _L.fromArray([$Html.text("Advies 2...")])),
-                                            A2($List._op["::"],
-                                            A2($Html.div,
-                                            _L.fromArray([$Html$Attributes.$class("well")]),
-                                            _L.fromArray([$Html.text("Advies 3...")])),
-                                            _L.fromArray([]))))))
+      model.questionAnswers) ? _L.fromArray([A2($Html.section,
+                                            _L.fromArray([$Html$Attributes.$class("recommendations")]),
+                                            _L.fromArray([recommendationsTopParagraph
+                                                         ,aspectTipComp(model)]))
                                             ,A2($Html.section,
                                             _L.fromArray([$Html$Attributes.$class("contact")]),
                                             _L.fromArray([moreInfoTopParagraph
@@ -4802,9 +4926,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                                                                    address,
                                                                                    model))]),
                                                                       _L.fromArray([$Html.text("Verstuur")]))]))]))
-                                                                      ,A2($Html.div,
-                                                                      _L.fromArray([$Html$Attributes.$class("portmessage")]),
-                                                                      showPortMessages(model))]))]))]) : _L.fromArray([]);
+                                                                      ,portMessageComp(model)]))]))]) : _L.fromArray([]);
    });
    var showInputRadios = F4(function (address,
    storedAnswer,
@@ -4820,7 +4942,7 @@ Elm.InnoCheckView.make = function (_elm) {
                     storedAnswer._0);
                   case "Nothing": return false;}
                _U.badCase($moduleName,
-               "between lines 192 and 196");
+               "between lines 144 and 148");
             }();
          });
          var radios = function (_v4) {
@@ -4853,7 +4975,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                  _L.fromArray([]))
                                  ,$Html.text(_v4._1)]));}
                _U.badCase($moduleName,
-               "between lines 198 and 207");
+               "between lines 150 and 159");
             }();
          };
          return A2($List.map,
@@ -4889,88 +5011,6 @@ Elm.InnoCheckView.make = function (_elm) {
          questions);
       }();
    });
-   var showAspects = F3(function (address,
-   model,
-   aspects) {
-      return function () {
-         var liList = function (_v10) {
-            return function () {
-               switch (_v10.ctor)
-               {case "_Tuple2":
-                  return $Html.li(_L.fromArray([$InnoCheckViewUtil.clickable]))(A2($List._op["::"],
-                    A2($Html.a,
-                    _L.fromArray([A2($Html$Events.onClick,
-                                 address,
-                                 $InnoCheckUpdate.SelectAspect(_v10._0))
-                                 ,$Html$Attributes.classList(_L.fromArray([{ctor: "_Tuple2"
-                                                                           ,_0: "selected_aspect"
-                                                                           ,_1: _U.eq(_v10._0,
-                                                                           model.aspectSelectionList.selected)}]))]),
-                    _L.fromArray([$Html.text(_v10._1)])),
-                    _L.fromArray([])));}
-               _U.badCase($moduleName,
-               "between lines 178 and 184");
-            }();
-         };
-         return A2($List.map,
-         liList,
-         aspects);
-      }();
-   });
-   var showAspectSelectionList = F3(function (address,
-   model,
-   aspectStrings) {
-      return function () {
-         var link = function (aspect) {
-            return A2($Html.li,
-            _L.fromArray([$InnoCheckViewUtil.clickable]),
-            _L.fromArray([A2($Html.a,
-            _L.fromArray([A2($Html$Events.onClick,
-                         address,
-                         $InnoCheckUpdate.SelectAspect(aspect))
-                         ,$Html$Attributes.classList(_L.fromArray([{ctor: "_Tuple2"
-                                                                   ,_0: "selected_aspect"
-                                                                   ,_1: _U.eq(aspect,
-                                                                   model.aspectSelectionList.selected)}]))]),
-            _L.fromArray([$Html.text($InnoCheckUtil.getAspectText(aspect))]))]));
-         };
-         var aspects = function (list) {
-            return A2($List.map,
-            function (_v14) {
-               return function () {
-                  switch (_v14.ctor)
-                  {case "_Tuple2":
-                     return _v14._0;}
-                  _U.badCase($moduleName,
-                  "on line 149, column 42 to 48");
-               }();
-            },
-            list);
-         };
-         var aspectList = aspects(aspectStrings);
-         var firstAspect = A2($Maybe.withDefault,
-         $InnoCheckModel.Leadership,
-         $List.head(aspectList));
-         var tailAspects = A2($Maybe.withDefault,
-         _L.fromArray([$InnoCheckModel.Leadership]),
-         $List.tail(aspectList));
-         var selList = A2($SelectionList.fromList,
-         firstAspect,
-         tailAspects);
-         var prev = A2($List.map,
-         link,
-         selList.previous);
-         var selected = _L.fromArray([link(selList.selected)]);
-         var next = A2($List.map,
-         link,
-         selList.next);
-         return A2($Basics._op["++"],
-         prev,
-         A2($Basics._op["++"],
-         selected,
-         next));
-      }();
-   });
    var showAspectButtons = F2(function (address,
    model) {
       return A2($Html.div,
@@ -4999,7 +5039,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                 $InnoCheckUpdate.NextAspect)]),
                    _L.fromArray([$Html.text("Volgende aspect »")]))]));
    });
-   var questionBlockTopParagraph = $Markdown.toHtml("\n# Innovation Readiness Quick Scan\n\nBeantwoord voor elk van de zes aspecten de vragen.\n");
+   var questionBlockTopParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\nBeantwoord voor elk van de zes aspecten de vragen.\n");
    var showQuestionBlock = F2(function (address,
    model) {
       return A2($Html.section,
@@ -5046,20 +5086,17 @@ Elm.InnoCheckView.make = function (_elm) {
                    address,
                    model))]));
    });
-   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quick Scan\n\n### Inzicht in randvoorwaarden voor innovatie\n\nDe Innovation Readiness Quick Scan geeft inzicht in welke cruciale randvoorwaarden \ner ingevuld moeten worden om succesvol nieuwe producten en diensten te kunnen \nontwerpen en lanceren. De randvoorwaarden om te innoveren wordt gescoord op 6 \naspecten:\n\n1. leiderschap\n2. cultuur\n3. processen\n4. resources/middelen\n5. meten\n6. verbeteren\n\nAan de hand van het beantwoorden van vragen wordt de score van de organisatie op elk \nvan deze aspecten bepaald. Je krijgt inzicht op welke aspecten je als organisatie kan \nverbeteren. En na het invullen van de vragen geven we je praktische tips over hoe je als organisatie\nkan verbeteren. \n\n### Achtergrond\n\nDe Innovation Readiness Quick Scan is ontwikkeld door DOON in samenwerking met de PDMA/TIM Foundation \nen is gebaseerd op de Innovation Management Standard.\n\nDe Innovation Readiness Quick Scan is gebaseerd op het Innovation Readiness Canvas van DOON. In de Quick Scan \nis het aantal vragen sterk teruggebracht. De resultaten geven een eerste indruk van de \ninnovatiecapaciteit van de organisatie.\n");
+   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\n### Inzicht in randvoorwaarden voor innovatie\n\nDe Innovation Readiness Quickscan geeft inzicht in welke cruciale randvoorwaarden \ner ingevuld moeten worden om succesvol nieuwe producten en diensten te kunnen \nontwerpen en lanceren. De randvoorwaarden om te innoveren wordt gescoord op 6 \naspecten:\n\n1. leiderschap\n2. cultuur\n3. processen\n4. resources/middelen\n5. meten\n6. verbeteren\n\nAan de hand van het beantwoorden van vragen wordt de score van de organisatie op elk \nvan deze aspecten bepaald. Je krijgt inzicht op welke aspecten je als organisatie kan \nverbeteren. En na het invullen van de vragen geven we je praktische tips over hoe je \nals organisatie kan verbeteren. \n\n### Achtergrond\n\nDe Innovation Readiness Quickscan is ontwikkeld door DOON in samenwerking met de PDMA/TIM Foundation \nen is gebaseerd op de Innovation Management Standard.\n\nDe Innovation Readiness Quickscan is gebaseerd op het Innovation Readiness Canvas van DOON. \nIn de Quickscan is het aantal vragen sterk teruggebracht. De resultaten geven een \neerste indruk van de innovatiecapaciteit van de organisatie.\n");
    var showSplashScreen = F2(function (address,
    model) {
       return _U.eq(model.splashScreenRead,
       false) ? A2($Html.section,
       _L.fromArray([]),
       _L.fromArray([splashParagraph
-                   ,A2($Html.button,
-                   _L.fromArray([$Html$Attributes.type$("button")
-                                ,$Html$Attributes.$class("btn btn-primary")
-                                ,A2($Html$Events.onClick,
-                                address,
-                                $InnoCheckUpdate.SplashRead)]),
-                   _L.fromArray([$Html.text("Start de Quick Scan »")]))])) : A2(showQuestionBlock,
+                   ,A3(buttonComp,
+                   address,
+                   $InnoCheckUpdate.SplashRead,
+                   "Start de Quickscan »")])) : A2(showQuestionBlock,
       address,
       model);
    });
@@ -5078,14 +5115,14 @@ Elm.InnoCheckView.make = function (_elm) {
                                ,questionBlockTopParagraph: questionBlockTopParagraph
                                ,showQuestionBlock: showQuestionBlock
                                ,showAspectButtons: showAspectButtons
-                               ,showAspectSelectionList: showAspectSelectionList
-                               ,showAspects: showAspects
                                ,showInputRadios: showInputRadios
                                ,showQuestions: showQuestions
                                ,recommendationsTopParagraph: recommendationsTopParagraph
                                ,moreInfoTopParagraph: moreInfoTopParagraph
                                ,showRecommendations: showRecommendations
-                               ,showPortMessages: showPortMessages
+                               ,aspectTipComp: aspectTipComp
+                               ,portMessageComp: portMessageComp
+                               ,buttonComp: buttonComp
                                ,storeIrcData: storeIrcData};
    return _elm.InnoCheckView.values;
 };
