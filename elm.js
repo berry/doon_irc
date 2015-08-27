@@ -4348,22 +4348,22 @@ Elm.InnoCheckModel.make = function (_elm) {
                                   ,_1: "Verbeteren"}]);
    var aspectTips = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(Leadership)
-                                                 ,_1: "\n#### Tips op het aspect Leiderschap\n\nLeiderschap is een belangrijk aspect bij innovaties...\n\n* Ontdek innovaties en neem ze op in de business planning\n* Verzeker je ervan dat het management innovatie activiteiten erkent, ondersteunt en promoot\n* Stel organisatiedoelen op waar de innovatiedoelen in zijn opgenomen\n* Gebruik feedback gegevens van je ...\n       "}
+                                                 ,_1: "\n#### Tips voor het aspect leiderschap\n\nLeiderschap is een belangrijk aspect bij innovaties. Om ondernemend gedrag \nin je organisatie aan te wakkeren, dient het management ondernemende \nmedewerkers te faciliteren in hun ambitie om oplossingen \nte zoeken voor problemen en uitdagingen.\n\n**Onze tips**\n\n* Ontdek innovaties in jouw organisatie en neem ze op in de business planning\n* Verzeker je ervan dat het management innovatie activiteiten erkent, ondersteunt en promoot\n* Stel organisatiedoelen op waar de innovatiedoelen in zijn opgenomen\n* Gebruik de feedback van jouw stakeholders bij het vaststellen van jouw innovatiedoelen\n* Maak jouw innovatiedoelen meetbaar met doelen, mijlpijlen, tijdlijnen en een strategie om de doelen te halen\n* Communiceer de innovatiedoelen binnen alle lagen van jouw organisatie\n* Hou jouw stakeholders op de hoogte van de voortgang van jouw innovatieactiviteiten\n* Maak managers persoonlijk verantwoordelijk en toerekenbaar, niet alleen voor het \nbehalen van de innovatiedoelen, maar specifiek voor het eigenaarschap en de voortgang van het \ninnovatieproces, de -tools en -methoden, gezamenlijk het innovatiemanagementsysteem genoemd.\n       "}
                                                 ,{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(Culture)
-                                                 ,_1: "\n## Cultuur tip\n    "}
+                                                 ,_1: "\n#### Tips voor het aspect cultuur\n\nOndernemend gedrag heeft een goede voedingsbodem nodig. Een cultuur waarin ondernemen \nkan en mag.\n\n**Onze tips**\n\n* Stel een innovatiemanager aan, iemand die verantwoordelijk is voor de innovatieactiveiten in de organisatie\n* Stel een innovatieteam samen om de innovatieactiviteiten te organiseren\n* Weet wie je stakeholders zijn en leer hun (veranderende) behoefte en verwachtingen kennen\n* Stel een visie- en een missiestatement op\n    "}
                                                 ,{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(Processes)
-                                                 ,_1: "\n## Processen tip\n    "}
+                                                 ,_1: "\n#### Tips voor het aspect processen\n\nEen innovatieproces is tevens een creatief proces. En een creatief proces kent geen vaste \nstappen die met zekerheid leiden naar succes. Een creatief proces is een ontdekkingstocht. \nMaar, de ontwikkeling van een product of dienst, het innovatieproces, kent wel degelijk \nterugkerende ingrediënten en een fasering. Het innovatieproces heeft een aanpak nodig. \nEen innovatiemanagementsysteem.\n\n**Onze tips**\n\n* Documenteer het innovatieproces voldoende en voor zover nodig en zorg voor een *audit trail* om de effectiviteit van het innovatieproces te kunnen meten\n* Organiseer een proces om innovatieprojecten te initiëren, te plannen, te selecteren en te beheersen terwijl deze door de ontdekkings-, ontwikkelings- en uitrolfase heen gaan\n* Verzorg de planning van ieder innovatieproject en biedt een innovatiemethode aan\n* Onderken risico\'s en ga consequent met risico\'s om\n    "}
                                                 ,{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(Resources)
-                                                 ,_1: "\n## Resources tip\n    "}
+                                                 ,_1: "\n#### Tips voor het aspect middelen\n\nEen innovatieproces heeft voeding nodig in de vorm van mensen en middelen. Je wilt op \neen gecontroleerde wijze het proces op het juiste moment de juiste voeding geven.\n\n**Onze tips**\n\n* Als je het nog niet hebt, zet een budgetteringsproces op waarin je regelmatig bepaald \nwat de benodigde financiële resources zijn om de innovatieprocessen te ondersteunen.\n* Bewaak het innovatieproces en de projectuitgaven regelmatig\n* Stel een innovatiemanager aan die het centrum is van alle innovatieactiviteiten en die \nhet mandaat heeft om een innovatiemanagemensysteem te implementeren.\n* Organiseer een proces waarin medewerkers participeren in de innovatieactiviteiten. Het \nmedewerkerparticipatieprogramma groeit later uit tot een continue leerproces voor medewerkers.\n* Zorg voor een goede informatieverzameling ten behoeve van de ondersteuning van de innovatieactiviteiten \n\n    "}
                                                 ,{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(MeasureAndMonitor)
-                                                 ,_1: "\n## Meten en weten tip\n    "}
+                                                 ,_1: "\n#### Tips voor het aspect meten en monitoren\n\nMeten is weten. Dat geldt ook voor innovatieprocessen. Meten hoe je innovatieprojecten er \nvoor staan, stelt je in staat om op het juiste moment de juiste ondersteuning te bieden.\n\n**Onze tips**\n\n* Zet een proces in werking om regelmatig de innovatieactiviteiten in je organisatie \nte monitoren en meten gedurende de gehele levenscyclus van het innovatieproces.\n* Meet en bewaak individuele projecten én het gehele innovatie systeem\n* Meet zoveel als nodig is om in de gaten te houden of de innovatieactiviteiten de innovatiedoelstellingen halen\n* Communiceer en review de informatie die je meet\n* Review regelmatig de innovatieactiviteiten\n    "}
                                                 ,{ctor: "_Tuple2"
                                                  ,_0: $Basics.toString(Improve)
-                                                 ,_1: "\n## Verbeteren tip\n    "}]));
+                                                 ,_1: "\n#### Tips voor het aspect verbeteren\n\nLeren en verbeteren is een belangrijk kenmerk van innoveren en dat geldt ook voor het \ninnovatieproces zelf. Sta ervoor open dat je bezig ben met iets nieuws en dat er nog \nveel te leren valt.\n\n**Onze tips**\n\n* Zorg voor verbeteracties na een managementreview en implementeer, indien nodig, preventieve acties \n* Zorg dat verbeteringen bijdragen aan de organisatiecultuur, de innovatieactiviteiten en processen\n* Analyseer en gebruik de informatieverzameling om continue verbeteringen door te voeren\n* Documenteer en maak inzichtelijk waarom een innovatiemanagementsysteem, -tools en -methoden nodig zijn \nop alle niveau\'s in de organisatie.\n    "}]));
    var aspectSelectionList0 = A2($SelectionList.fromList,
    Leadership,
    _L.fromArray([Culture
@@ -4581,6 +4581,7 @@ Elm.InnoCheckUtil.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
+   $SelectionList = Elm.SelectionList.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var getValue = F2(function (dict,
    key) {
@@ -4598,7 +4599,7 @@ Elm.InnoCheckUtil.make = function (_elm) {
                       ,_0: $Basics.toString(_v0._0)
                       ,_1: _v0._1};}
             _U.badCase($moduleName,
-            "on line 171, column 26 to 41");
+            "on line 187, column 26 to 41");
          }();
       },
       list));
@@ -4703,42 +4704,6 @@ Elm.InnoCheckUtil.make = function (_elm) {
          qas);
       }();
    };
-   var aspectForTip = function (model) {
-      return function () {
-         var aspectScores = A2(listQuestionAspectAnswerScore,
-         model.questions,
-         listAnswerScore(model.questionAnswers));
-         var scoreOrange = A2($List.filter,
-         function (_v4) {
-            return function () {
-               switch (_v4.ctor)
-               {case "_Tuple2":
-                  return _U.cmp(_v4._1,
-                    30) > 0 && _U.cmp(_v4._1,
-                    60) < 0;}
-               _U.badCase($moduleName,
-               "on line 151, column 30 to 54");
-            }();
-         },
-         aspectScores);
-         var scoreRed = A2($List.filter,
-         function (_v8) {
-            return function () {
-               switch (_v8.ctor)
-               {case "_Tuple2":
-                  return _U.cmp(_v8._1,
-                    0) > -1 && _U.cmp(_v8._1,
-                    30) < 1;}
-               _U.badCase($moduleName,
-               "on line 157, column 30 to 55");
-            }();
-         },
-         aspectScores);
-         return _U.cmp($List.length(scoreRed),
-         0) > 0 ? $List.head(scoreRed) : _U.cmp($List.length(scoreOrange),
-         0) > 0 ? $List.head(scoreOrange) : $Maybe.Nothing;
-      }();
-   };
    var listQuestionKeyAnswerColor = F2(function (questions,
    acolors) {
       return function () {
@@ -4776,6 +4741,62 @@ Elm.InnoCheckUtil.make = function (_elm) {
       },
       questions);
    });
+   var meanScorePerAspect = function (model) {
+      return function () {
+         var aspectList = $SelectionList.toList($InnoCheckModel.aspectSelectionList0);
+         var answerScores = function (aspect) {
+            return A2(listQuestionKeyAnswerScore,
+            A2(aspectQuestions,
+            model.questions,
+            aspect),
+            listAnswerScore(model.questionAnswers));
+         };
+         var meanOfAnswers = function (aspect) {
+            return meanScore(answerScores(aspect));
+         };
+         return A2($List.map,
+         function (aspect) {
+            return {ctor: "_Tuple2"
+                   ,_0: aspect
+                   ,_1: meanOfAnswers(aspect)};
+         },
+         aspectList);
+      }();
+   };
+   var aspectForTip = function (model) {
+      return function () {
+         var aspectScores = meanScorePerAspect(model);
+         var scoreOrange = A2($List.filter,
+         function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(_v4._1,
+                    30) > 0 && _U.cmp(_v4._1,
+                    60) < 0;}
+               _U.badCase($moduleName,
+               "on line 167, column 30 to 54");
+            }();
+         },
+         aspectScores);
+         var scoreRed = A2($List.filter,
+         function (_v8) {
+            return function () {
+               switch (_v8.ctor)
+               {case "_Tuple2":
+                  return _U.cmp(_v8._1,
+                    0) > -1 && _U.cmp(_v8._1,
+                    30) < 1;}
+               _U.badCase($moduleName,
+               "on line 173, column 30 to 55");
+            }();
+         },
+         aspectScores);
+         return _U.cmp($List.length(scoreRed),
+         0) > 0 ? $List.head(scoreRed) : _U.cmp($List.length(scoreOrange),
+         0) > 0 ? $List.head(scoreOrange) : $Maybe.Nothing;
+      }();
+   };
    _elm.InnoCheckUtil.values = {_op: _op
                                ,aspectQuestions: aspectQuestions
                                ,listAnswerColor: listAnswerColor
@@ -4788,6 +4809,7 @@ Elm.InnoCheckUtil.make = function (_elm) {
                                ,meanScoreColor: meanScoreColor
                                ,numberOfQuestionsAnswered: numberOfQuestionsAnswered
                                ,allQuestionsAnswered: allQuestionsAnswered
+                               ,meanScorePerAspect: meanScorePerAspect
                                ,aspectForTip: aspectForTip
                                ,unionToDict: unionToDict
                                ,getValue: getValue
@@ -4869,7 +4891,7 @@ Elm.InnoCheckView.make = function (_elm) {
    var aspectTipComp = function (model) {
       return function () {
          var aspect = $Basics.fst($Maybe.withDefault({ctor: "_Tuple2"
-                                                     ,_0: $InnoCheckModel.Culture
+                                                     ,_0: $InnoCheckModel.Leadership
                                                      ,_1: 0})($InnoCheckUtil.aspectForTip(model)));
          var msg = $Maybe.withDefault("")(A2($Dict.get,
          $Basics.toString(aspect),
