@@ -4095,6 +4095,20 @@ Elm.InnoCheckBackend.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
+   var encodePerson = function (person) {
+      return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                               ,_0: "email"
+                                               ,_1: $Json$Encode.string(person.email)}
+                                              ,{ctor: "_Tuple2"
+                                               ,_0: "firstname"
+                                               ,_1: $Json$Encode.string(person.firstname)}
+                                              ,{ctor: "_Tuple2"
+                                               ,_0: "lastname"
+                                               ,_1: $Json$Encode.string(person.lastname)}
+                                              ,{ctor: "_Tuple2"
+                                               ,_0: "companyname"
+                                               ,_1: $Json$Encode.string(person.companyname)}]));
+   };
    var encodeQuestionAnwsers = function (questionAnswers) {
       return function () {
          var encodeQuestionAnswer = function (_v0) {
@@ -4133,8 +4147,8 @@ Elm.InnoCheckBackend.make = function (_elm) {
    };
    var ircObject = function (model) {
       return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                               ,_0: "email"
-                                               ,_1: $Json$Encode.string(model.email)}
+                                               ,_0: "person"
+                                               ,_1: encodePerson(model.person)}
                                               ,{ctor: "_Tuple2"
                                                ,_0: "questions"
                                                ,_1: encodeQuestions(model.questions)}
@@ -4152,6 +4166,7 @@ Elm.InnoCheckBackend.make = function (_elm) {
                                   ,storeMailbox: storeMailbox
                                   ,encodeQuestions: encodeQuestions
                                   ,encodeQuestionAnwsers: encodeQuestionAnwsers
+                                  ,encodePerson: encodePerson
                                   ,ircObject: ircObject
                                   ,storeIrcObject: storeIrcObject};
    return _elm.InnoCheckBackend.values;
@@ -4189,6 +4204,21 @@ Elm.InnoCheckModel.make = function (_elm) {
                                                       ,_0: "No"
                                                       ,_1: answerColorRed}]));
    var questionAnswersEmpty = $Dict.empty;
+   var person0 = {_: {}
+                 ,companyname: ""
+                 ,email: ""
+                 ,firstname: ""
+                 ,lastname: ""};
+   var Person = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,companyname: d
+             ,email: a
+             ,firstname: b
+             ,lastname: c};
+   });
    var Recommendation = F4(function (a,
    b,
    c,
@@ -4373,8 +4403,8 @@ Elm.InnoCheckModel.make = function (_elm) {
                 ,Improve]));
    var initialModel0 = {_: {}
                        ,aspectSelectionList: aspectSelectionList0
-                       ,email: ""
                        ,isDirty: true
+                       ,person: person0
                        ,questionAnswers: questionAnswersEmpty
                        ,questions: questions
                        ,sendAttempted: false
@@ -4392,8 +4422,8 @@ Elm.InnoCheckModel.make = function (_elm) {
    i) {
       return {_: {}
              ,aspectSelectionList: h
-             ,email: c
              ,isDirty: g
+             ,person: c
              ,questionAnswers: b
              ,questions: a
              ,sendAttempted: f
@@ -4414,7 +4444,9 @@ Elm.InnoCheckModel.make = function (_elm) {
                                 ,No: No
                                 ,Question: Question
                                 ,Recommendation: Recommendation
+                                ,Person: Person
                                 ,initialModel0: initialModel0
+                                ,person0: person0
                                 ,questions: questions
                                 ,recommendations: recommendations
                                 ,aspectList: aspectList
@@ -4456,11 +4488,46 @@ Elm.InnoCheckUpdate.make = function (_elm) {
    model) {
       return function () {
          switch (action.ctor)
-         {case "EditEmailAddress":
-            return _U.replace([["email"
-                               ,action._0]
-                              ,["isDirty",true]],
-              model);
+         {case "EditCompanyName":
+            return function () {
+                 var prs = model.person;
+                 return _U.replace([["person"
+                                    ,_U.replace([["companyname"
+                                                 ,action._0]],
+                                    prs)]
+                                   ,["isDirty",true]],
+                 model);
+              }();
+            case "EditEmailAddress":
+            return function () {
+                 var prs = model.person;
+                 return _U.replace([["person"
+                                    ,_U.replace([["email"
+                                                 ,action._0]],
+                                    prs)]
+                                   ,["isDirty",true]],
+                 model);
+              }();
+            case "EditFirstName":
+            return function () {
+                 var prs = model.person;
+                 return _U.replace([["person"
+                                    ,_U.replace([["firstname"
+                                                 ,action._0]],
+                                    prs)]
+                                   ,["isDirty",true]],
+                 model);
+              }();
+            case "EditLastName":
+            return function () {
+                 var prs = model.person;
+                 return _U.replace([["person"
+                                    ,_U.replace([["lastname"
+                                                 ,action._0]],
+                                    prs)]
+                                   ,["isDirty",true]],
+                 model);
+              }();
             case "HandleBackendResponse":
             return function () {
                  switch (action._0.ctor)
@@ -4478,7 +4545,7 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                       ,["isDirty",false]],
                       model);}
                  _U.badCase($moduleName,
-                 "between lines 64 and 78");
+                 "between lines 67 and 81");
               }();
             case "NextAspect":
             return _U.replace([["aspectSelectionList"
@@ -4523,10 +4590,22 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                ,true]],
               model);}
          _U.badCase($moduleName,
-         "between lines 25 and 89");
+         "between lines 28 and 119");
       }();
    });
    var SendButtonClicked = {ctor: "SendButtonClicked"};
+   var EditCompanyName = function (a) {
+      return {ctor: "EditCompanyName"
+             ,_0: a};
+   };
+   var EditLastName = function (a) {
+      return {ctor: "EditLastName"
+             ,_0: a};
+   };
+   var EditFirstName = function (a) {
+      return {ctor: "EditFirstName"
+             ,_0: a};
+   };
    var EditEmailAddress = function (a) {
       return {ctor: "EditEmailAddress"
              ,_0: a};
@@ -4559,6 +4638,9 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                  ,SelectAnswer: SelectAnswer
                                  ,HandleBackendResponse: HandleBackendResponse
                                  ,EditEmailAddress: EditEmailAddress
+                                 ,EditFirstName: EditFirstName
+                                 ,EditLastName: EditLastName
+                                 ,EditCompanyName: EditCompanyName
                                  ,SendButtonClicked: SendButtonClicked
                                  ,update: update
                                  ,actionMailbox: actionMailbox};
@@ -4883,8 +4965,8 @@ Elm.InnoCheckView.make = function (_elm) {
             _L.fromArray([]),
             _L.fromArray([$Html.text(msg)]))]));
          };
-         return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? msgComp("De gegevens van jouw quickscan zijn opgeslagen. Dank je wel!") : model.sendAttempted && $Basics.not(model.sendSuccess) ? msgComp(A2($Basics._op["++"],
-         "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. D is de technische foutmelding: ",
+         return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? msgComp("De gegevens van jouw quickscan zijn opgeslagen. We sturen de praktische template zo snel mogelijk naar je toe. Dank je wel!") : model.sendAttempted && $Basics.not(model.sendSuccess) ? msgComp(A2($Basics._op["++"],
+         "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. Dit is de technische foutmelding: ",
          model.sendErrorMessage)) : $Html.text("");
       }();
    };
@@ -4901,6 +4983,105 @@ Elm.InnoCheckView.make = function (_elm) {
          _L.fromArray([$Markdown.toHtml(msg)]));
       }();
    };
+   var showContactForm = F2(function (address,
+   model) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([A2($Html.form,
+      _L.fromArray([]),
+      _L.fromArray([A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("group-input")]),
+                   _L.fromArray([A2($Html.label,
+                                _L.fromArray([$Html$Attributes.$for("companyname")]),
+                                _L.fromArray([$Html.text("Naam bedrijf")]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                _L.fromArray([A2($Html.input,
+                                _L.fromArray([$Html$Attributes.value(model.person.companyname)
+                                             ,$Html$Attributes.type$("text")
+                                             ,A3($Html$Events.on,
+                                             "input",
+                                             $Html$Events.targetValue,
+                                             function ($) {
+                                                return $Signal.message(address)($InnoCheckUpdate.EditCompanyName($));
+                                             })
+                                             ,$Html$Attributes.placeholder("Naam bedrijf")
+                                             ,$Html$Attributes.id("companyname")]),
+                                _L.fromArray([]))]))]))
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("name-input")]),
+                   _L.fromArray([A2($Html.label,
+                                _L.fromArray([$Html$Attributes.$for("firstname")]),
+                                _L.fromArray([$Html.text("Jouw naam")]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                _L.fromArray([A2($Html.input,
+                                _L.fromArray([$Html$Attributes.value(model.person.firstname)
+                                             ,$Html$Attributes.type$("text")
+                                             ,A3($Html$Events.on,
+                                             "input",
+                                             $Html$Events.targetValue,
+                                             function ($) {
+                                                return $Signal.message(address)($InnoCheckUpdate.EditFirstName($));
+                                             })
+                                             ,$Html$Attributes.placeholder("Voornaam")
+                                             ,$Html$Attributes.id("firstname")]),
+                                _L.fromArray([]))]))
+                                ,A2($Html.label,
+                                _L.fromArray([$Html$Attributes.$for("lastname")
+                                             ,$Html$Attributes.$class("sr-only")]),
+                                _L.fromArray([$Html.text("Achternaam")]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                _L.fromArray([A2($Html.input,
+                                _L.fromArray([$Html$Attributes.value(model.person.lastname)
+                                             ,$Html$Attributes.type$("text")
+                                             ,A3($Html$Events.on,
+                                             "input",
+                                             $Html$Events.targetValue,
+                                             function ($) {
+                                                return $Signal.message(address)($InnoCheckUpdate.EditLastName($));
+                                             })
+                                             ,$Html$Attributes.placeholder("Achternaam")
+                                             ,$Html$Attributes.id("lastname")]),
+                                _L.fromArray([]))]))]))
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("group-input")]),
+                   _L.fromArray([A2($Html.label,
+                                _L.fromArray([$Html$Attributes.$for("emailaddress")]),
+                                _L.fromArray([$Html.text("E-mailadres")]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                _L.fromArray([A2($Html.input,
+                                _L.fromArray([$Html$Attributes.value(model.person.email)
+                                             ,$Html$Attributes.type$("email")
+                                             ,A3($Html$Events.on,
+                                             "input",
+                                             $Html$Events.targetValue,
+                                             function ($) {
+                                                return $Signal.message(address)($InnoCheckUpdate.EditEmailAddress($));
+                                             })
+                                             ,$Html$Attributes.placeholder("E-mailadres")
+                                             ,$Html$Attributes.id("emailaddress")]),
+                                _L.fromArray([]))]))]))
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("group-button")]),
+                   _L.fromArray([A2($Html.label,
+                                _L.fromArray([]),
+                                _L.fromArray([]))
+                                ,A2($Html.div,
+                                _L.fromArray([]),
+                                _L.fromArray([A2($Html.button,
+                                _L.fromArray([$Html$Attributes.type$("button")
+                                             ,$Html$Attributes.disabled($Basics.not(model.isDirty))
+                                             ,A2($Html$Events.onClick,
+                                             $InnoCheckBackend.storeMailbox.address,
+                                             A2(storeIrcData,
+                                             address,
+                                             model))]),
+                                _L.fromArray([$Html.text("Stuur template toe")]))]))]))
+                   ,portMessageComp(model)]))]));
+   });
    var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag\n\nGeef je gegevens op en we sturen je een praktische template waarmee je \ndirect aan de slag kan in jouw organisatie. En natuurlijk gaan we netjes \nom met jouw gegevens.\n");
    var recommendationsTopParagraph = $Markdown.toHtml("\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende \npunten te werken binnen je organisatie.\n");
    var showRecommendations = F2(function (address,
@@ -4913,42 +5094,20 @@ Elm.InnoCheckView.make = function (_elm) {
                                                          ,aspectTipComp(model)]))
                                             ,A2($Html.section,
                                             _L.fromArray([$Html$Attributes.$class("contact")]),
-                                            _L.fromArray([moreInfoTopParagraph
-                                                         ,A2($Html.form,
-                                                         _L.fromArray([]),
-                                                         _L.fromArray([A2($Html.div,
-                                                                      _L.fromArray([$Html$Attributes.$class("group-email")]),
-                                                                      _L.fromArray([A2($Html.label,
-                                                                                   _L.fromArray([$Html$Attributes.$for("emailaddress")]),
-                                                                                   _L.fromArray([$Html.text("E-mailadres")]))
-                                                                                   ,A2($Html.div,
-                                                                                   _L.fromArray([]),
-                                                                                   _L.fromArray([A2($Html.input,
-                                                                                   _L.fromArray([$Html$Attributes.value(model.email)
-                                                                                                ,$Html$Attributes.type$("email")
-                                                                                                ,A3($Html$Events.on,
-                                                                                                "input",
-                                                                                                $Html$Events.targetValue,
-                                                                                                function ($) {
-                                                                                                   return $Signal.message(address)($InnoCheckUpdate.EditEmailAddress($));
-                                                                                                })
-                                                                                                ,$Html$Attributes.placeholder("E-mailadres")
-                                                                                                ,$Html$Attributes.id("emailaddress")]),
-                                                                                   _L.fromArray([]))]))]))
-                                                                      ,A2($Html.div,
-                                                                      _L.fromArray([$Html$Attributes.$class("group-button")]),
-                                                                      _L.fromArray([A2($Html.div,
-                                                                      _L.fromArray([]),
-                                                                      _L.fromArray([A2($Html.button,
-                                                                      _L.fromArray([$Html$Attributes.type$("button")
-                                                                                   ,$Html$Attributes.disabled($Basics.not(model.isDirty))
-                                                                                   ,A2($Html$Events.onClick,
-                                                                                   $InnoCheckBackend.storeMailbox.address,
-                                                                                   A2(storeIrcData,
-                                                                                   address,
-                                                                                   model))]),
-                                                                      _L.fromArray([$Html.text("Verstuur")]))]))]))
-                                                                      ,portMessageComp(model)]))]))]) : _L.fromArray([]);
+                                            _L.fromArray([A2($Html.div,
+                                            _L.fromArray([$Html$Attributes.$class("row")]),
+                                            _L.fromArray([A2($Html.div,
+                                                         _L.fromArray([$Html$Attributes.$class("col-sm-8")]),
+                                                         _L.fromArray([moreInfoTopParagraph
+                                                                      ,A2(showContactForm,
+                                                                      address,
+                                                                      model)]))
+                                                         ,A2($Html.div,
+                                                         _L.fromArray([$Html$Attributes.$class("col-sm-4")]),
+                                                         _L.fromArray([A2($Html.img,
+                                                         _L.fromArray([$Html$Attributes.src("images/template.png")
+                                                                      ,$Html$Attributes.width(300)]),
+                                                         _L.fromArray([]))]))]))]))]) : _L.fromArray([]);
    });
    var showInputRadios = F4(function (address,
    storedAnswer,
@@ -4964,7 +5123,7 @@ Elm.InnoCheckView.make = function (_elm) {
                     storedAnswer._0);
                   case "Nothing": return false;}
                _U.badCase($moduleName,
-               "between lines 144 and 148");
+               "between lines 156 and 160");
             }();
          });
          var radios = function (_v4) {
@@ -4997,7 +5156,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                  _L.fromArray([]))
                                  ,$Html.text(_v4._1)]));}
                _U.badCase($moduleName,
-               "between lines 150 and 159");
+               "between lines 162 and 171");
             }();
          };
          return A2($List.map,
@@ -5108,17 +5267,25 @@ Elm.InnoCheckView.make = function (_elm) {
                    address,
                    model))]));
    });
-   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\n### Inzicht in randvoorwaarden voor innovatie\n\nDe Innovation Readiness Quickscan geeft inzicht in welke cruciale randvoorwaarden \ner ingevuld moeten worden om succesvol nieuwe producten en diensten te kunnen \nontwerpen en lanceren. De randvoorwaarden om te innoveren wordt gescoord op 6 \naspecten:\n\n1. leiderschap\n2. cultuur\n3. processen\n4. resources/middelen\n5. meten\n6. verbeteren\n\nAan de hand van het beantwoorden van vragen wordt de score van de organisatie op elk \nvan deze aspecten bepaald. Je krijgt inzicht op welke aspecten je als organisatie kan \nverbeteren. En na het invullen van de vragen geven we je praktische tips over hoe je \nals organisatie kan verbeteren. \n\n### Achtergrond\n\nDe Innovation Readiness Quickscan is ontwikkeld door DOON in samenwerking met de PDMA/TIM Foundation \nen is gebaseerd op de Innovation Management Standard.\n\nDe Innovation Readiness Quickscan is gebaseerd op het Innovation Readiness Canvas van DOON. \nIn de Quickscan is het aantal vragen sterk teruggebracht. De resultaten geven een \neerste indruk van de innovatiecapaciteit van de organisatie.\n");
+   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\n### Inzicht in randvoorwaarden voor innovatie\n\nDe Innovation Readiness Quickscan geeft inzicht in welke cruciale randvoorwaarden \ner ingevuld moeten worden om succesvol nieuwe producten en diensten te kunnen \nontwerpen en lanceren. De randvoorwaarden om te innoveren wordt gescoord op 6 \naspecten:\n\n1. leiderschap\n2. cultuur\n3. processen\n4. resources/middelen\n5. meten\n6. verbeteren\n\nAan de hand van het beantwoorden van vragen wordt de score van de organisatie op elk \nvan deze aspecten bepaald. Je krijgt inzicht op welke aspecten je als organisatie kan \nverbeteren. En na het invullen van de vragen geven we je praktische tips over hoe je \nals organisatie kan verbeteren. \n\n### Achtergrond\n\nDe Innovation Readiness Quickscan is ontwikkeld door [DOON](http://www.doon.nu/home/) in samenwerking met de PDMA/TIM Foundation \nen is gebaseerd op de Innovation Management Standard.\n\nDe Innovation Readiness Quickscan is gebaseerd op het Innovation Readiness Canvas van DOON. \nIn de Quickscan is het aantal vragen sterk teruggebracht. De resultaten geven een \neerste indruk van de innovatiecapaciteit van de organisatie.\n");
    var showSplashScreen = F2(function (address,
    model) {
       return _U.eq(model.splashScreenRead,
-      false) ? A2($Html.section,
-      _L.fromArray([]),
-      _L.fromArray([splashParagraph
-                   ,A3(buttonComp,
-                   address,
-                   $InnoCheckUpdate.SplashRead,
-                   "Start de Quickscan »")])) : A2(showQuestionBlock,
+      false) ? A2($Html.div,
+      _L.fromArray([$Html$Attributes.$class("row splash")]),
+      _L.fromArray([A2($Html.section,
+                   _L.fromArray([$Html$Attributes.$class("col-sm-6 splashtext")]),
+                   _L.fromArray([splashParagraph
+                                ,A3(buttonComp,
+                                address,
+                                $InnoCheckUpdate.SplashRead,
+                                "Start de Quickscan »")]))
+                   ,A2($Html.div,
+                   _L.fromArray([$Html$Attributes.$class("col-sm-6 splashimage")]),
+                   _L.fromArray([A2($Html.img,
+                   _L.fromArray([$Html$Attributes.src("images/card_irc.png")
+                                ,$Html$Attributes.width(400)]),
+                   _L.fromArray([]))]))])) : A2(showQuestionBlock,
       address,
       model);
    });
@@ -5141,6 +5308,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                ,showQuestions: showQuestions
                                ,recommendationsTopParagraph: recommendationsTopParagraph
                                ,moreInfoTopParagraph: moreInfoTopParagraph
+                               ,showContactForm: showContactForm
                                ,showRecommendations: showRecommendations
                                ,aspectTipComp: aspectTipComp
                                ,portMessageComp: portMessageComp
