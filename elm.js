@@ -13795,40 +13795,40 @@ Elm.InnoCheckModel.make = function (_elm) {
    var Leadership = {ctor: "Leadership"};
    var questions = _U.list([{key: 1
                             ,aspect: Leadership
-                            ,text: "Begrijpt, ondersteunt en is het management actief betrokken bij de activiteiten op het gebied van innovatie?"}
+                            ,text: "Ondersteunt en is het management actief betrokken bij de activiteiten op het gebied van het organiseren en ontwikkelen van nieuwe producten en diensten (oftewel innovatie)?"}
                            ,{key: 2
                             ,aspect: Leadership
-                            ,text: "Heeft het management meetbare innovatiedoelen gesteld en communiceert zij deze ook?"}
+                            ,text: "Heeft het management meetbare (innovatie)doelen voor het ontwikkelen van nieuwe producten of diensten en communiceert zij deze ook?"}
                            ,{key: 3
                             ,aspect: Culture
-                            ,text: "Wordt innovatie door de organisatie bewaakt en beoordeeld?"}
+                            ,text: "Heeft de organisatie een visie geformuleerd en gecommuniceerd? Handelen medewerkers volgens deze visie?"}
                            ,{key: 4
                             ,aspect: Culture
-                            ,text: "Worden inspanningen tot creativiteit en innovativiteit blijvend gestimuleerd?"}
+                            ,text: "Moedigt de organisatie medewerkers aan tot het behalen van resultaten m.b.t. het bedenken, ontwikkelen en invoeren van nieuwe producten en diensten?"}
                            ,{key: 5
                             ,aspect: Processes
-                            ,text: "Heeft de organisatie al haar processen zo beschreven, ontwikkeld en geïmplementeerd dat er innovatie kan plaats vinden?"}
+                            ,text: "Zijn de activiteiten, instructies en procedures beschreven m.b.t. hoe ideeën uit te werken tot nieuwe producten en diensten? M.a.w. is er een werkend innovatieproces ingevoerd?"}
                            ,{key: 6
                             ,aspect: Processes
-                            ,text: "Omvatten de processen het begin, midden en einde van de innovatiecyclus en bevatten ze de zes aspecten van dit canvas?"}
+                            ,text: "Zijn er processen aanwezig om nieuwe producten en diensten op te nemen in de bestaande organisatie?"}
                            ,{key: 7
                             ,aspect: Resources
-                            ,text: "Zijn er voldoende middelen (mensen, geld, infrastructuur, informatie) beschikbaar om innovatieve activiteiten uit te voeren?"}
+                            ,text: "Zijn er voldoende middelen (mensen, geld, infrastructuur, informatie) gereserveerd en gemakkelijk beschikbaar om innovatieve activiteiten uit te voeren?"}
                            ,{key: 8
                             ,aspect: Resources
-                            ,text: "Worden individuen en teams erkend voor hun deelname in innovatieve activiteiten?"}
+                            ,text: "Kunnen medewerkers deelnemen in het bedenken en uitvoeren van nieuwe innovatieve activiteiten? Is innovatie opgenomen in hun persoonlijke doestellingen? Kunnen medewerkers een opleiding volgen?"}
                            ,{key: 9
                             ,aspect: MeasureAndMonitor
-                            ,text: "Meet en bewaakt de organisatie systematisch de innovatiecapaciteit van de organisatie?"}
+                            ,text: "Worden er specifieke cijfers en data verzameld en gebruikt om de innovatie-activiteiten te meten en bewaken?"}
                            ,{key: 10
                             ,aspect: MeasureAndMonitor
-                            ,text: "Worden er meetwaarden gebruikt om de innovatieve activiteiten te meten en bewaken?"}
+                            ,text: "Vindt er daadwerkelijk sturing plaats op basis van deze monitoring? Of is deze data transparant beschikbaar als basis voor zelfsturing?"}
                            ,{key: 11
                             ,aspect: Improve
-                            ,text: "Analyseert de organisatie de resultaten van het innovatieproces en voert zij verbeteringen door op het innovatieproces?"}
+                            ,text: "Wordt het innovatieproces zelf stelselmatig geanalyseerd en beoordeeld op de goede werking?"}
                            ,{key: 12
                             ,aspect: Improve
-                            ,text: "Is er een proces om maatregelen te nemen als verbeteringen van het innovatieproces niet succesvol zijn?"}]);
+                            ,text: "Is er een proces/procedure ingericht om het innovatieproces te verbeteren op basis van deze bevindingen?"}]);
    var recommendations = _U.list([{aspect: Leadership
                                   ,scoreMin: 0.0
                                   ,scoreMax: 0.3
