@@ -9174,7 +9174,7 @@ Elm.Dict.make = function (_elm) {
                                                         ,lgot
                                                         ,"/"
                                                         ,rgot
-                                                        ,"\nPlease report this bug to <https://github.com/elm-lang/Elm/issues>"])));
+                                                        ,"\nPlease report this bug to <https://github.com/elm-lang/core/issues>"])));
    });
    var isBBlack = function (dict) {
       var _p2 = dict;
@@ -10270,6 +10270,506 @@ Elm.ElmFire.make = function (_elm) {
                                 ,UserCancelled: UserCancelled
                                 ,UserDenied: UserDenied
                                 ,OtherAuthenticationError: OtherAuthenticationError};
+};
+Elm.Native.Date = {};
+Elm.Native.Date.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Date = localRuntime.Native.Date || {};
+	if (localRuntime.Native.Date.values)
+	{
+		return localRuntime.Native.Date.values;
+	}
+
+	var Result = Elm.Result.make(localRuntime);
+
+	function readDate(str)
+	{
+		var date = new Date(str);
+		return isNaN(date.getTime())
+			? Result.Err('unable to parse \'' + str + '\' as a date')
+			: Result.Ok(date);
+	}
+
+	var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	var monthTable =
+		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+	return localRuntime.Native.Date.values = {
+		read: readDate,
+		year: function(d) { return d.getFullYear(); },
+		month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+		day: function(d) { return d.getDate(); },
+		hour: function(d) { return d.getHours(); },
+		minute: function(d) { return d.getMinutes(); },
+		second: function(d) { return d.getSeconds(); },
+		millisecond: function(d) { return d.getMilliseconds(); },
+		toTime: function(d) { return d.getTime(); },
+		fromTime: function(t) { return new Date(t); },
+		dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+	};
+};
+
+Elm.Date = Elm.Date || {};
+Elm.Date.make = function (_elm) {
+   "use strict";
+   _elm.Date = _elm.Date || {};
+   if (_elm.Date.values) return _elm.Date.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Native$Date = Elm.Native.Date.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var millisecond = $Native$Date.millisecond;
+   var second = $Native$Date.second;
+   var minute = $Native$Date.minute;
+   var hour = $Native$Date.hour;
+   var dayOfWeek = $Native$Date.dayOfWeek;
+   var day = $Native$Date.day;
+   var month = $Native$Date.month;
+   var year = $Native$Date.year;
+   var fromTime = $Native$Date.fromTime;
+   var toTime = $Native$Date.toTime;
+   var fromString = $Native$Date.read;
+   var Dec = {ctor: "Dec"};
+   var Nov = {ctor: "Nov"};
+   var Oct = {ctor: "Oct"};
+   var Sep = {ctor: "Sep"};
+   var Aug = {ctor: "Aug"};
+   var Jul = {ctor: "Jul"};
+   var Jun = {ctor: "Jun"};
+   var May = {ctor: "May"};
+   var Apr = {ctor: "Apr"};
+   var Mar = {ctor: "Mar"};
+   var Feb = {ctor: "Feb"};
+   var Jan = {ctor: "Jan"};
+   var Sun = {ctor: "Sun"};
+   var Sat = {ctor: "Sat"};
+   var Fri = {ctor: "Fri"};
+   var Thu = {ctor: "Thu"};
+   var Wed = {ctor: "Wed"};
+   var Tue = {ctor: "Tue"};
+   var Mon = {ctor: "Mon"};
+   var Date = {ctor: "Date"};
+   return _elm.Date.values = {_op: _op
+                             ,fromString: fromString
+                             ,toTime: toTime
+                             ,fromTime: fromTime
+                             ,year: year
+                             ,month: month
+                             ,day: day
+                             ,dayOfWeek: dayOfWeek
+                             ,hour: hour
+                             ,minute: minute
+                             ,second: second
+                             ,millisecond: millisecond
+                             ,Jan: Jan
+                             ,Feb: Feb
+                             ,Mar: Mar
+                             ,Apr: Apr
+                             ,May: May
+                             ,Jun: Jun
+                             ,Jul: Jul
+                             ,Aug: Aug
+                             ,Sep: Sep
+                             ,Oct: Oct
+                             ,Nov: Nov
+                             ,Dec: Dec
+                             ,Mon: Mon
+                             ,Tue: Tue
+                             ,Wed: Wed
+                             ,Thu: Thu
+                             ,Fri: Fri
+                             ,Sat: Sat
+                             ,Sun: Sun};
+};
+Elm.Native.Regex = {};
+Elm.Native.Regex.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Regex = localRuntime.Native.Regex || {};
+	if (localRuntime.Native.Regex.values)
+	{
+		return localRuntime.Native.Regex.values;
+	}
+	if ('values' in Elm.Native.Regex)
+	{
+		return localRuntime.Native.Regex.values = Elm.Native.Regex.values;
+	}
+
+	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+	function escape(str)
+	{
+		return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	}
+	function caseInsensitive(re)
+	{
+		return new RegExp(re.source, 'gi');
+	}
+	function regex(raw)
+	{
+		return new RegExp(raw, 'g');
+	}
+
+	function contains(re, string)
+	{
+		return string.match(re) !== null;
+	}
+
+	function find(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var out = [];
+		var number = 0;
+		var string = str;
+		var lastIndex = re.lastIndex;
+		var prevLastIndex = -1;
+		var result;
+		while (number++ < n && (result = re.exec(string)))
+		{
+			if (prevLastIndex === re.lastIndex) break;
+			var i = result.length - 1;
+			var subs = new Array(i);
+			while (i > 0)
+			{
+				var submatch = result[i];
+				subs[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			out.push({
+				match: result[0],
+				submatches: List.fromArray(subs),
+				index: result.index,
+				number: number
+			});
+			prevLastIndex = re.lastIndex;
+		}
+		re.lastIndex = lastIndex;
+		return List.fromArray(out);
+	}
+
+	function replace(n, re, replacer, string)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var count = 0;
+		function jsReplacer(match)
+		{
+			if (count++ >= n)
+			{
+				return match;
+			}
+			var i = arguments.length - 3;
+			var submatches = new Array(i);
+			while (i > 0)
+			{
+				var submatch = arguments[i];
+				submatches[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			return replacer({
+				match: match,
+				submatches: List.fromArray(submatches),
+				index: arguments[i - 1],
+				number: count
+			});
+		}
+		return string.replace(re, jsReplacer);
+	}
+
+	function split(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		if (n === Infinity)
+		{
+			return List.fromArray(str.split(re));
+		}
+		var string = str;
+		var result;
+		var out = [];
+		var start = re.lastIndex;
+		while (n--)
+		{
+			if (!(result = re.exec(string))) break;
+			out.push(string.slice(start, result.index));
+			start = re.lastIndex;
+		}
+		out.push(string.slice(start));
+		return List.fromArray(out);
+	}
+
+	return Elm.Native.Regex.values = {
+		regex: regex,
+		caseInsensitive: caseInsensitive,
+		escape: escape,
+
+		contains: F2(contains),
+		find: F3(find),
+		replace: F4(replace),
+		split: F3(split)
+	};
+};
+
+Elm.Regex = Elm.Regex || {};
+Elm.Regex.make = function (_elm) {
+   "use strict";
+   _elm.Regex = _elm.Regex || {};
+   if (_elm.Regex.values) return _elm.Regex.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Regex = Elm.Native.Regex.make(_elm);
+   var _op = {};
+   var split = $Native$Regex.split;
+   var replace = $Native$Regex.replace;
+   var find = $Native$Regex.find;
+   var AtMost = function (a) {    return {ctor: "AtMost",_0: a};};
+   var All = {ctor: "All"};
+   var Match = F4(function (a,b,c,d) {
+      return {match: a,submatches: b,index: c,number: d};
+   });
+   var contains = $Native$Regex.contains;
+   var caseInsensitive = $Native$Regex.caseInsensitive;
+   var regex = $Native$Regex.regex;
+   var escape = $Native$Regex.escape;
+   var Regex = {ctor: "Regex"};
+   return _elm.Regex.values = {_op: _op
+                              ,regex: regex
+                              ,escape: escape
+                              ,caseInsensitive: caseInsensitive
+                              ,contains: contains
+                              ,find: find
+                              ,replace: replace
+                              ,split: split
+                              ,Match: Match
+                              ,All: All
+                              ,AtMost: AtMost};
+};
+Elm.Native.Effects = {};
+Elm.Native.Effects.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Effects = localRuntime.Native.Effects || {};
+	if (localRuntime.Native.Effects.values)
+	{
+		return localRuntime.Native.Effects.values;
+	}
+
+	var Task = Elm.Native.Task.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+	var Signal = Elm.Signal.make(localRuntime);
+	var List = Elm.Native.List.make(localRuntime);
+
+
+	// polyfill so things will work even if rAF is not available for some reason
+	var _requestAnimationFrame =
+		typeof requestAnimationFrame !== 'undefined'
+			? requestAnimationFrame
+			: function(cb) { setTimeout(cb, 1000 / 60); }
+			;
+
+
+	// batchedSending and sendCallback implement a small state machine in order
+	// to schedule only one send(time) call per animation frame.
+	//
+	// Invariants:
+	// 1. In the NO_REQUEST state, there is never a scheduled sendCallback.
+	// 2. In the PENDING_REQUEST and EXTRA_REQUEST states, there is always exactly
+	//    one scheduled sendCallback.
+	var NO_REQUEST = 0;
+	var PENDING_REQUEST = 1;
+	var EXTRA_REQUEST = 2;
+	var state = NO_REQUEST;
+	var messageArray = [];
+
+
+	function batchedSending(address, tickMessages)
+	{
+		// insert ticks into the messageArray
+		var foundAddress = false;
+
+		for (var i = messageArray.length; i--; )
+		{
+			if (messageArray[i].address === address)
+			{
+				foundAddress = true;
+				messageArray[i].tickMessages = A3(List.foldl, List.cons, messageArray[i].tickMessages, tickMessages);
+				break;
+			}
+		}
+
+		if (!foundAddress)
+		{
+			messageArray.push({ address: address, tickMessages: tickMessages });
+		}
+
+		// do the appropriate state transition
+		switch (state)
+		{
+			case NO_REQUEST:
+				_requestAnimationFrame(sendCallback);
+				state = PENDING_REQUEST;
+				break;
+			case PENDING_REQUEST:
+				state = PENDING_REQUEST;
+				break;
+			case EXTRA_REQUEST:
+				state = PENDING_REQUEST;
+				break;
+		}
+	}
+
+
+	function sendCallback(time)
+	{
+		switch (state)
+		{
+			case NO_REQUEST:
+				// This state should not be possible. How can there be no
+				// request, yet somehow we are actively fulfilling a
+				// request?
+				throw new Error(
+					'Unexpected send callback.\n' +
+					'Please report this to <https://github.com/evancz/elm-effects/issues>.'
+				);
+
+			case PENDING_REQUEST:
+				// At this point, we do not *know* that another frame is
+				// needed, but we make an extra request to rAF just in
+				// case. It's possible to drop a frame if rAF is called
+				// too late, so we just do it preemptively.
+				_requestAnimationFrame(sendCallback);
+				state = EXTRA_REQUEST;
+
+				// There's also stuff we definitely need to send.
+				send(time);
+				return;
+
+			case EXTRA_REQUEST:
+				// Turns out the extra request was not needed, so we will
+				// stop calling rAF. No reason to call it all the time if
+				// no one needs it.
+				state = NO_REQUEST;
+				return;
+		}
+	}
+
+
+	function send(time)
+	{
+		for (var i = messageArray.length; i--; )
+		{
+			var messages = A3(
+				List.foldl,
+				F2( function(toAction, list) { return List.Cons(toAction(time), list); } ),
+				List.Nil,
+				messageArray[i].tickMessages
+			);
+			Task.perform( A2(Signal.send, messageArray[i].address, messages) );
+		}
+		messageArray = [];
+	}
+
+
+	function requestTickSending(address, tickMessages)
+	{
+		return Task.asyncFunction(function(callback) {
+			batchedSending(address, tickMessages);
+			callback(Task.succeed(Utils.Tuple0));
+		});
+	}
+
+
+	return localRuntime.Native.Effects.values = {
+		requestTickSending: F2(requestTickSending)
+	};
+
+};
+
+Elm.Effects = Elm.Effects || {};
+Elm.Effects.make = function (_elm) {
+   "use strict";
+   _elm.Effects = _elm.Effects || {};
+   if (_elm.Effects.values) return _elm.Effects.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Effects = Elm.Native.Effects.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var ignore = function (task) {
+      return A2($Task.map,$Basics.always({ctor: "_Tuple0"}),task);
+   };
+   var requestTickSending = $Native$Effects.requestTickSending;
+   var toTaskHelp = F3(function (address,effect,_p0) {
+      var _p1 = _p0;
+      var _p5 = _p1._1;
+      var _p4 = _p1;
+      var _p3 = _p1._0;
+      var _p2 = effect;
+      switch (_p2.ctor)
+      {case "Task": var reporter = A2($Task.andThen,
+           _p2._0,
+           function (answer) {
+              return A2($Signal.send,address,_U.list([answer]));
+           });
+           return {ctor: "_Tuple2"
+                  ,_0: A2($Task.andThen,
+                  _p3,
+                  $Basics.always(ignore($Task.spawn(reporter))))
+                  ,_1: _p5};
+         case "Tick": return {ctor: "_Tuple2"
+                             ,_0: _p3
+                             ,_1: A2($List._op["::"],_p2._0,_p5)};
+         case "None": return _p4;
+         default: return A3($List.foldl,toTaskHelp(address),_p4,_p2._0);}
+   });
+   var toTask = F2(function (address,effect) {
+      var _p6 = A3(toTaskHelp,
+      address,
+      effect,
+      {ctor: "_Tuple2"
+      ,_0: $Task.succeed({ctor: "_Tuple0"})
+      ,_1: _U.list([])});
+      var combinedTask = _p6._0;
+      var tickMessages = _p6._1;
+      return $List.isEmpty(tickMessages) ? combinedTask : A2($Task.andThen,
+      combinedTask,
+      $Basics.always(A2(requestTickSending,address,tickMessages)));
+   });
+   var Never = function (a) {    return {ctor: "Never",_0: a};};
+   var Batch = function (a) {    return {ctor: "Batch",_0: a};};
+   var batch = Batch;
+   var None = {ctor: "None"};
+   var none = None;
+   var Tick = function (a) {    return {ctor: "Tick",_0: a};};
+   var tick = Tick;
+   var Task = function (a) {    return {ctor: "Task",_0: a};};
+   var task = Task;
+   var map = F2(function (func,effect) {
+      var _p7 = effect;
+      switch (_p7.ctor)
+      {case "Task": return Task(A2($Task.map,func,_p7._0));
+         case "Tick": return Tick(function (_p8) {
+              return func(_p7._0(_p8));
+           });
+         case "None": return None;
+         default: return Batch(A2($List.map,map(func),_p7._0));}
+   });
+   return _elm.Effects.values = {_op: _op
+                                ,none: none
+                                ,task: task
+                                ,tick: tick
+                                ,map: map
+                                ,batch: batch
+                                ,toTask: toTask};
 };
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
@@ -13553,47 +14053,241 @@ Elm.Svg.Attributes.make = function (_elm) {
                                        ,writingMode: writingMode};
 };
 Elm.StartApp = Elm.StartApp || {};
-Elm.StartApp.Simple = Elm.StartApp.Simple || {};
-Elm.StartApp.Simple.make = function (_elm) {
+Elm.StartApp.make = function (_elm) {
    "use strict";
    _elm.StartApp = _elm.StartApp || {};
-   _elm.StartApp.Simple = _elm.StartApp.Simple || {};
-   if (_elm.StartApp.Simple.values)
-   return _elm.StartApp.Simple.values;
+   if (_elm.StartApp.values) return _elm.StartApp.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
    var _op = {};
    var start = function (config) {
-      var update = F2(function (maybeAction,model) {
-         var _p0 = maybeAction;
-         if (_p0.ctor === "Just") {
-               return A2(config.update,_p0._0,model);
-            } else {
-               return _U.crashCase("StartApp.Simple",
-               {start: {line: 91,column: 7},end: {line: 96,column: 52}},
-               _p0)("This should never happen.");
-            }
+      var updateStep = F2(function (action,_p0) {
+         var _p1 = _p0;
+         var _p2 = A2(config.update,action,_p1._0);
+         var newModel = _p2._0;
+         var additionalEffects = _p2._1;
+         return {ctor: "_Tuple2"
+                ,_0: newModel
+                ,_1: $Effects.batch(_U.list([_p1._1,additionalEffects]))};
       });
-      var actions = $Signal.mailbox($Maybe.Nothing);
-      var address = A2($Signal.forwardTo,actions.address,$Maybe.Just);
-      var model = A3($Signal.foldp,
+      var update = F2(function (actions,_p3) {
+         var _p4 = _p3;
+         return A3($List.foldl,
+         updateStep,
+         {ctor: "_Tuple2",_0: _p4._0,_1: $Effects.none},
+         actions);
+      });
+      var messages = $Signal.mailbox(_U.list([]));
+      var singleton = function (action) {
+         return _U.list([action]);
+      };
+      var address = A2($Signal.forwardTo,messages.address,singleton);
+      var inputs = $Signal.mergeMany(A2($List._op["::"],
+      messages.signal,
+      A2($List.map,$Signal.map(singleton),config.inputs)));
+      var effectsAndModel = A3($Signal.foldp,
       update,
-      config.model,
-      actions.signal);
-      return A2($Signal.map,config.view(address),model);
+      config.init,
+      inputs);
+      var model = A2($Signal.map,$Basics.fst,effectsAndModel);
+      return {html: A2($Signal.map,config.view(address),model)
+             ,model: model
+             ,tasks: A2($Signal.map,
+             function (_p5) {
+                return A2($Effects.toTask,messages.address,$Basics.snd(_p5));
+             },
+             effectsAndModel)};
    };
-   var Config = F3(function (a,b,c) {
-      return {model: a,view: b,update: c};
+   var App = F3(function (a,b,c) {
+      return {html: a,model: b,tasks: c};
    });
-   return _elm.StartApp.Simple.values = {_op: _op
-                                        ,Config: Config
-                                        ,start: start};
+   var Config = F4(function (a,b,c,d) {
+      return {init: a,update: b,view: c,inputs: d};
+   });
+   return _elm.StartApp.values = {_op: _op
+                                 ,start: start
+                                 ,Config: Config
+                                 ,App: App};
+};
+Elm.Native.TaskTutorial = {};
+Elm.Native.TaskTutorial.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.TaskTutorial = localRuntime.Native.TaskTutorial || {};
+	if (localRuntime.Native.TaskTutorial.values)
+	{
+		return localRuntime.Native.TaskTutorial.values;
+	}
+
+	var Task = Elm.Native.Task.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+
+	function log(string)
+	{
+		return Task.asyncFunction(function(callback) {
+			console.log(string);
+			return callback(Task.succeed(Utils.Tuple0));
+		});
+	}
+
+
+	var getCurrentTime = Task.asyncFunction(function(callback) {
+		return callback(Task.succeed(Date.now()));
+	});
+
+
+	return localRuntime.Native.TaskTutorial.values = {
+		log: log,
+		getCurrentTime: getCurrentTime
+	};
+};
+
+Elm.TaskTutorial = Elm.TaskTutorial || {};
+Elm.TaskTutorial.make = function (_elm) {
+   "use strict";
+   _elm.TaskTutorial = _elm.TaskTutorial || {};
+   if (_elm.TaskTutorial.values) return _elm.TaskTutorial.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$TaskTutorial = Elm.Native.TaskTutorial.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var getCurrentTime = $Native$TaskTutorial.getCurrentTime;
+   var print = function (value) {
+      return $Native$TaskTutorial.log($Basics.toString(value));
+   };
+   return _elm.TaskTutorial.values = {_op: _op
+                                     ,print: print
+                                     ,getCurrentTime: getCurrentTime};
+};
+Elm.Date = Elm.Date || {};
+Elm.Date.Format = Elm.Date.Format || {};
+Elm.Date.Format.make = function (_elm) {
+   "use strict";
+   _elm.Date = _elm.Date || {};
+   _elm.Date.Format = _elm.Date.Format || {};
+   if (_elm.Date.Format.values) return _elm.Date.Format.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Regex = Elm.Regex.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var padWith = function (c) {
+      return function (_p0) {
+         return A3($String.padLeft,2,c,$Basics.toString(_p0));
+      };
+   };
+   var mod12 = function (h) {
+      return A2($Basics._op["%"],h,12);
+   };
+   var fullDayOfWeek = function (dow) {
+      var _p1 = dow;
+      switch (_p1.ctor)
+      {case "Mon": return "Monday";
+         case "Tue": return "Tuesday";
+         case "Wed": return "Wednesday";
+         case "Thu": return "Thursday";
+         case "Fri": return "Friday";
+         case "Sat": return "Saturday";
+         default: return "Sunday";}
+   };
+   var monthToFullName = function (m) {
+      var _p2 = m;
+      switch (_p2.ctor)
+      {case "Jan": return "January";
+         case "Feb": return "February";
+         case "Mar": return "March";
+         case "Apr": return "April";
+         case "May": return "May";
+         case "Jun": return "June";
+         case "Jul": return "July";
+         case "Aug": return "August";
+         case "Sep": return "September";
+         case "Oct": return "October";
+         case "Nov": return "November";
+         default: return "December";}
+   };
+   var monthToInt = function (m) {
+      var _p3 = m;
+      switch (_p3.ctor)
+      {case "Jan": return 1;
+         case "Feb": return 2;
+         case "Mar": return 3;
+         case "Apr": return 4;
+         case "May": return 5;
+         case "Jun": return 6;
+         case "Jul": return 7;
+         case "Aug": return 8;
+         case "Sep": return 9;
+         case "Oct": return 10;
+         case "Nov": return 11;
+         default: return 12;}
+   };
+   var collapse = function (m) {
+      return A2($Maybe.andThen,m,$Basics.identity);
+   };
+   var formatToken = F2(function (d,m) {
+      var symbol = A2($Maybe.withDefault,
+      " ",
+      collapse(A2($Maybe.andThen,
+      $List.tail(m.submatches),
+      $List.head)));
+      var prefix = A2($Maybe.withDefault,
+      " ",
+      collapse($List.head(m.submatches)));
+      return A2($Basics._op["++"],
+      prefix,
+      function () {
+         var _p4 = symbol;
+         switch (_p4)
+         {case "Y": return $Basics.toString($Date.year(d));
+            case "m": return A3($String.padLeft,
+              2,
+              _U.chr("0"),
+              $Basics.toString(monthToInt($Date.month(d))));
+            case "B": return monthToFullName($Date.month(d));
+            case "b": return $Basics.toString($Date.month(d));
+            case "d": return A2(padWith,_U.chr("0"),$Date.day(d));
+            case "e": return A2(padWith,_U.chr(" "),$Date.day(d));
+            case "a": return $Basics.toString($Date.dayOfWeek(d));
+            case "A": return fullDayOfWeek($Date.dayOfWeek(d));
+            case "H": return A2(padWith,_U.chr("0"),$Date.hour(d));
+            case "k": return A2(padWith,_U.chr(" "),$Date.hour(d));
+            case "I": return A2(padWith,_U.chr("0"),mod12($Date.hour(d)));
+            case "l": return A2(padWith,_U.chr(" "),mod12($Date.hour(d)));
+            case "p": return _U.cmp($Date.hour(d),13) < 0 ? "AM" : "PM";
+            case "P": return _U.cmp($Date.hour(d),13) < 0 ? "am" : "pm";
+            case "M": return A2(padWith,_U.chr("0"),$Date.minute(d));
+            case "S": return A2(padWith,_U.chr("0"),$Date.second(d));
+            default: return "";}
+      }());
+   });
+   var re = $Regex.regex("(^|[^%])%(Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)");
+   var format = F2(function (s,d) {
+      return A4($Regex.replace,$Regex.All,re,formatToken(d),s);
+   });
+   return _elm.Date.Format.values = {_op: _op,format: format};
 };
 Elm.SelectionList = Elm.SelectionList || {};
 Elm.SelectionList.make = function (_elm) {
@@ -13880,18 +14574,38 @@ Elm.InnoCheckModel.make = function (_elm) {
                        ,sendAttempted: false
                        ,isDirty: true
                        ,aspectSelectionList: aspectSelectionList0
-                       ,splashScreenRead: false};
-   var Model = F9(function (a,b,c,d,e,f,g,h,i) {
-      return {questions: a
-             ,questionAnswers: b
-             ,person: c
-             ,sendSuccess: d
-             ,sendErrorMessage: e
-             ,sendAttempted: f
-             ,isDirty: g
-             ,aspectSelectionList: h
-             ,splashScreenRead: i};
-   });
+                       ,splashScreenRead: false
+                       ,actionTime: ""};
+   var Model = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return {questions: a
+                                        ,questionAnswers: b
+                                        ,person: c
+                                        ,sendSuccess: d
+                                        ,sendErrorMessage: e
+                                        ,sendAttempted: f
+                                        ,isDirty: g
+                                        ,aspectSelectionList: h
+                                        ,splashScreenRead: i
+                                        ,actionTime: j};
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
    return _elm.InnoCheckModel.values = {_op: _op
                                        ,Model: Model
                                        ,Leadership: Leadership
@@ -13923,123 +14637,6 @@ Elm.InnoCheckModel.make = function (_elm) {
                                        ,answerColorList: answerColorList
                                        ,answerColorEmpty: answerColorEmpty
                                        ,postUrl: postUrl};
-};
-Elm.InnoCheckUpdate = Elm.InnoCheckUpdate || {};
-Elm.InnoCheckUpdate.make = function (_elm) {
-   "use strict";
-   _elm.InnoCheckUpdate = _elm.InnoCheckUpdate || {};
-   if (_elm.InnoCheckUpdate.values)
-   return _elm.InnoCheckUpdate.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $ElmFire = Elm.ElmFire.make(_elm),
-   $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $SelectionList = Elm.SelectionList.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "Noop": return model;
-         case "SplashRead": return _U.update(model,
-           {splashScreenRead: true});
-         case "SelectAspect": return _U.update(model,
-           {aspectSelectionList: function () {
-              var index = A2($Maybe.withDefault,
-              0,
-              A2($Dict.get,
-              $Basics.toString(_p0._0),
-              $Dict.fromList($SelectionList.toList(A2($SelectionList.indexedMap,
-              F2(function (i,a) {
-                 return {ctor: "_Tuple2",_0: $Basics.toString(a),_1: i};
-              }),
-              model.aspectSelectionList)))));
-              return A2($SelectionList.$goto,index,model.aspectSelectionList);
-           }()});
-         case "NextAspect": return _U.update(model,
-           {aspectSelectionList: $SelectionList.next(model.aspectSelectionList)});
-         case "PrevAspect": return _U.update(model,
-           {aspectSelectionList: $SelectionList.previous(model.aspectSelectionList)});
-         case "SelectAnswer": return _U.update(model,
-           {questionAnswers: A3($Dict.insert,
-           _p0._0,
-           _p0._1,
-           model.questionAnswers)
-           ,isDirty: true});
-         case "HandleBackendResponse": var _p1 = _p0._0;
-           if (_p1.ctor === "Ok") {
-                 return _U.update(model,
-                 {sendAttempted: true,sendSuccess: true,isDirty: false});
-              } else {
-                 return _U.update(model,
-                 {sendAttempted: true
-                 ,sendSuccess: false
-                 ,sendErrorMessage: $Basics.toString(_p1._0)});
-              }
-         case "EditEmailAddress": var prs = model.person;
-           return _U.update(model,
-           {person: _U.update(prs,{email: _p0._0}),isDirty: true});
-         case "EditFirstName": var prs = model.person;
-           return _U.update(model,
-           {person: _U.update(prs,{firstname: _p0._0}),isDirty: true});
-         case "EditLastName": var prs = model.person;
-           return _U.update(model,
-           {person: _U.update(prs,{lastname: _p0._0}),isDirty: true});
-         case "EditCompanyName": var prs = model.person;
-           return _U.update(model,
-           {person: _U.update(prs,{companyname: _p0._0}),isDirty: true});
-         default: return _U.update(model,
-           {sendErrorMessage: ""
-           ,sendSuccess: false
-           ,sendAttempted: false});}
-   });
-   var SendButtonClicked = {ctor: "SendButtonClicked"};
-   var EditCompanyName = function (a) {
-      return {ctor: "EditCompanyName",_0: a};
-   };
-   var EditLastName = function (a) {
-      return {ctor: "EditLastName",_0: a};
-   };
-   var EditFirstName = function (a) {
-      return {ctor: "EditFirstName",_0: a};
-   };
-   var EditEmailAddress = function (a) {
-      return {ctor: "EditEmailAddress",_0: a};
-   };
-   var HandleBackendResponse = function (a) {
-      return {ctor: "HandleBackendResponse",_0: a};
-   };
-   var SelectAnswer = F2(function (a,b) {
-      return {ctor: "SelectAnswer",_0: a,_1: b};
-   });
-   var PrevAspect = {ctor: "PrevAspect"};
-   var NextAspect = {ctor: "NextAspect"};
-   var SelectAspect = function (a) {
-      return {ctor: "SelectAspect",_0: a};
-   };
-   var SplashRead = {ctor: "SplashRead"};
-   var Noop = {ctor: "Noop"};
-   var actionMailbox = $Signal.mailbox(Noop);
-   return _elm.InnoCheckUpdate.values = {_op: _op
-                                        ,Noop: Noop
-                                        ,SplashRead: SplashRead
-                                        ,SelectAspect: SelectAspect
-                                        ,NextAspect: NextAspect
-                                        ,PrevAspect: PrevAspect
-                                        ,SelectAnswer: SelectAnswer
-                                        ,HandleBackendResponse: HandleBackendResponse
-                                        ,EditEmailAddress: EditEmailAddress
-                                        ,EditFirstName: EditFirstName
-                                        ,EditLastName: EditLastName
-                                        ,EditCompanyName: EditCompanyName
-                                        ,SendButtonClicked: SendButtonClicked
-                                        ,update: update
-                                        ,actionMailbox: actionMailbox};
 };
 Elm.InnoCheckUtil = Elm.InnoCheckUtil || {};
 Elm.InnoCheckUtil.make = function (_elm) {
@@ -14245,15 +14842,13 @@ Elm.InnoCheckBackend.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $ElmFire = Elm.ElmFire.make(_elm),
    $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
    $InnoCheckUtil = Elm.InnoCheckUtil.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Task = Elm.Task.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var encodePerson = function (person) {
       return $Json$Encode.object(_U.list([{ctor: "_Tuple2"
@@ -14305,21 +14900,183 @@ Elm.InnoCheckBackend.make = function (_elm) {
                                           ,_1: encodeQuestions(model.questions)}
                                          ,{ctor: "_Tuple2"
                                           ,_0: "questionAnswers"
-                                          ,_1: encodeQuestionAnwsers(model.questionAnswers)}]));
+                                          ,_1: encodeQuestionAnwsers(model.questionAnswers)}
+                                         ,{ctor: "_Tuple2"
+                                          ,_0: "actionTime"
+                                          ,_1: $Json$Encode.string(model.actionTime)}]));
    };
-   var storeIrcObject = function (model) {
-      return A2($ElmFire.set,
-      ircObject(model),
-      $ElmFire.push($ElmFire.fromUrl($InnoCheckModel.postUrl)));
-   };
-   var storeMailbox = $Signal.mailbox($Task.succeed({ctor: "_Tuple0"}));
    return _elm.InnoCheckBackend.values = {_op: _op
-                                         ,storeMailbox: storeMailbox
                                          ,encodeQuestions: encodeQuestions
                                          ,encodeQuestionAnwsers: encodeQuestionAnwsers
                                          ,encodePerson: encodePerson
-                                         ,ircObject: ircObject
-                                         ,storeIrcObject: storeIrcObject};
+                                         ,ircObject: ircObject};
+};
+Elm.InnoCheckUpdate = Elm.InnoCheckUpdate || {};
+Elm.InnoCheckUpdate.make = function (_elm) {
+   "use strict";
+   _elm.InnoCheckUpdate = _elm.InnoCheckUpdate || {};
+   if (_elm.InnoCheckUpdate.values)
+   return _elm.InnoCheckUpdate.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Date$Format = Elm.Date.Format.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $ElmFire = Elm.ElmFire.make(_elm),
+   $InnoCheckBackend = Elm.InnoCheckBackend.make(_elm),
+   $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $SelectionList = Elm.SelectionList.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $TaskTutorial = Elm.TaskTutorial.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var HandleActionTime = function (a) {
+      return {ctor: "HandleActionTime",_0: a};
+   };
+   var getTime = $Effects.task(A2($Task.map,
+   HandleActionTime,
+   $Task.toMaybe($TaskTutorial.getCurrentTime)));
+   var HandleBackendResponse = function (a) {
+      return {ctor: "HandleBackendResponse",_0: a};
+   };
+   var storeIrcData = function (model) {
+      return $Effects.task(A2($Task.map,
+      HandleBackendResponse,
+      $Task.toResult(A2($ElmFire.set,
+      $InnoCheckBackend.ircObject(model),
+      $ElmFire.push($ElmFire.fromUrl($InnoCheckModel.postUrl))))));
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "Noop": return {ctor: "_Tuple2"
+                           ,_0: model
+                           ,_1: $Effects.none};
+         case "SplashRead": return {ctor: "_Tuple2"
+                                   ,_0: _U.update(model,{splashScreenRead: true})
+                                   ,_1: $Effects.none};
+         case "SelectAspect": return {ctor: "_Tuple2"
+                                     ,_0: _U.update(model,
+                                     {aspectSelectionList: function () {
+                                        var index = A2($Maybe.withDefault,
+                                        0,
+                                        A2($Dict.get,
+                                        $Basics.toString(_p0._0),
+                                        $Dict.fromList($SelectionList.toList(A2($SelectionList.indexedMap,
+                                        F2(function (i,a) {
+                                           return {ctor: "_Tuple2",_0: $Basics.toString(a),_1: i};
+                                        }),
+                                        model.aspectSelectionList)))));
+                                        return A2($SelectionList.$goto,index,model.aspectSelectionList);
+                                     }()})
+                                     ,_1: $Effects.none};
+         case "NextAspect": return {ctor: "_Tuple2"
+                                   ,_0: _U.update(model,
+                                   {aspectSelectionList: $SelectionList.next(model.aspectSelectionList)})
+                                   ,_1: $Effects.none};
+         case "PrevAspect": return {ctor: "_Tuple2"
+                                   ,_0: _U.update(model,
+                                   {aspectSelectionList: $SelectionList.previous(model.aspectSelectionList)})
+                                   ,_1: $Effects.none};
+         case "SelectAnswer": return {ctor: "_Tuple2"
+                                     ,_0: _U.update(model,
+                                     {questionAnswers: A3($Dict.insert,
+                                     _p0._0,
+                                     _p0._1,
+                                     model.questionAnswers)
+                                     ,isDirty: true})
+                                     ,_1: getTime};
+         case "HandleBackendResponse": var _p1 = _p0._0;
+           if (_p1.ctor === "Ok") {
+                 return {ctor: "_Tuple2"
+                        ,_0: _U.update(model,
+                        {sendAttempted: true,sendSuccess: true,isDirty: false})
+                        ,_1: $Effects.none};
+              } else {
+                 return {ctor: "_Tuple2"
+                        ,_0: _U.update(model,
+                        {sendAttempted: true
+                        ,sendSuccess: false
+                        ,sendErrorMessage: $Basics.toString(_p1._0)})
+                        ,_1: $Effects.none};
+              }
+         case "EditEmailAddress": var prs = model.person;
+           return {ctor: "_Tuple2"
+                  ,_0: _U.update(model,
+                  {person: _U.update(prs,{email: _p0._0}),isDirty: true})
+                  ,_1: getTime};
+         case "EditFirstName": var prs = model.person;
+           return {ctor: "_Tuple2"
+                  ,_0: _U.update(model,
+                  {person: _U.update(prs,{firstname: _p0._0}),isDirty: true})
+                  ,_1: getTime};
+         case "EditLastName": var prs = model.person;
+           return {ctor: "_Tuple2"
+                  ,_0: _U.update(model,
+                  {person: _U.update(prs,{lastname: _p0._0}),isDirty: true})
+                  ,_1: getTime};
+         case "EditCompanyName": var prs = model.person;
+           return {ctor: "_Tuple2"
+                  ,_0: _U.update(model,
+                  {person: _U.update(prs,{companyname: _p0._0}),isDirty: true})
+                  ,_1: getTime};
+         case "SendButtonClicked": return {ctor: "_Tuple2"
+                                          ,_0: _U.update(model,
+                                          {sendErrorMessage: "",sendSuccess: false,sendAttempted: false})
+                                          ,_1: storeIrcData(model)};
+         default: return {ctor: "_Tuple2"
+                         ,_0: _U.update(model,
+                         {actionTime: A2($Date$Format.format,
+                         "%d-%m-%Y %H:%M:%S",
+                         $Date.fromTime(A2($Maybe.withDefault,0,_p0._0)))})
+                         ,_1: $Effects.none};}
+   });
+   var SendButtonClicked = {ctor: "SendButtonClicked"};
+   var EditCompanyName = function (a) {
+      return {ctor: "EditCompanyName",_0: a};
+   };
+   var EditLastName = function (a) {
+      return {ctor: "EditLastName",_0: a};
+   };
+   var EditFirstName = function (a) {
+      return {ctor: "EditFirstName",_0: a};
+   };
+   var EditEmailAddress = function (a) {
+      return {ctor: "EditEmailAddress",_0: a};
+   };
+   var SelectAnswer = F2(function (a,b) {
+      return {ctor: "SelectAnswer",_0: a,_1: b};
+   });
+   var PrevAspect = {ctor: "PrevAspect"};
+   var NextAspect = {ctor: "NextAspect"};
+   var SelectAspect = function (a) {
+      return {ctor: "SelectAspect",_0: a};
+   };
+   var SplashRead = {ctor: "SplashRead"};
+   var Noop = {ctor: "Noop"};
+   return _elm.InnoCheckUpdate.values = {_op: _op
+                                        ,Noop: Noop
+                                        ,SplashRead: SplashRead
+                                        ,SelectAspect: SelectAspect
+                                        ,NextAspect: NextAspect
+                                        ,PrevAspect: PrevAspect
+                                        ,SelectAnswer: SelectAnswer
+                                        ,EditEmailAddress: EditEmailAddress
+                                        ,EditFirstName: EditFirstName
+                                        ,EditLastName: EditLastName
+                                        ,EditCompanyName: EditCompanyName
+                                        ,SendButtonClicked: SendButtonClicked
+                                        ,HandleBackendResponse: HandleBackendResponse
+                                        ,HandleActionTime: HandleActionTime
+                                        ,update: update
+                                        ,storeIrcData: storeIrcData
+                                        ,getTime: getTime};
 };
 Elm.InnoCheckViewUtil = Elm.InnoCheckViewUtil || {};
 Elm.InnoCheckViewUtil.make = function (_elm) {
@@ -14480,11 +15237,9 @@ Elm.InnoCheckView.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $ElmFire = Elm.ElmFire.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
-   $InnoCheckBackend = Elm.InnoCheckBackend.make(_elm),
    $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
    $InnoCheckUpdate = Elm.InnoCheckUpdate.make(_elm),
    $InnoCheckUtil = Elm.InnoCheckUtil.make(_elm),
@@ -14494,22 +15249,8 @@ Elm.InnoCheckView.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Task = Elm.Task.make(_elm);
+   $String = Elm.String.make(_elm);
    var _op = {};
-   var storeIrcData = F2(function (address,model) {
-      return A2($Task.andThen,
-      A2($Task.andThen,
-      A2($Signal.send,address,$InnoCheckUpdate.SendButtonClicked),
-      function (_p0) {
-         return $Task.toResult($InnoCheckBackend.storeIrcObject(model));
-      }),
-      function (_p1) {
-         return A2($Signal.send,
-         address,
-         $InnoCheckUpdate.HandleBackendResponse(_p1));
-      });
-   });
    var buttonComp = F3(function (address,action,buttonText) {
       return A2($Html.button,
       _U.list([$Html$Attributes.type$("button")
@@ -14559,10 +15300,10 @@ Elm.InnoCheckView.make = function (_elm) {
                               ,A3($Html$Events.on,
                               "input",
                               $Html$Events.targetValue,
-                              function (_p2) {
+                              function (_p0) {
                                  return A2($Signal.message,
                                  address,
-                                 $InnoCheckUpdate.EditCompanyName(_p2));
+                                 $InnoCheckUpdate.EditCompanyName(_p0));
                               })
                               ,$Html$Attributes.placeholder("Naam bedrijf")
                               ,$Html$Attributes.id("companyname")]),
@@ -14580,10 +15321,10 @@ Elm.InnoCheckView.make = function (_elm) {
                               ,A3($Html$Events.on,
                               "input",
                               $Html$Events.targetValue,
-                              function (_p3) {
+                              function (_p1) {
                                  return A2($Signal.message,
                                  address,
-                                 $InnoCheckUpdate.EditFirstName(_p3));
+                                 $InnoCheckUpdate.EditFirstName(_p1));
                               })
                               ,$Html$Attributes.placeholder("Voornaam")
                               ,$Html$Attributes.id("firstname")]),
@@ -14600,10 +15341,10 @@ Elm.InnoCheckView.make = function (_elm) {
                               ,A3($Html$Events.on,
                               "input",
                               $Html$Events.targetValue,
-                              function (_p4) {
+                              function (_p2) {
                                  return A2($Signal.message,
                                  address,
-                                 $InnoCheckUpdate.EditLastName(_p4));
+                                 $InnoCheckUpdate.EditLastName(_p2));
                               })
                               ,$Html$Attributes.placeholder("Achternaam")
                               ,$Html$Attributes.id("lastname")]),
@@ -14621,10 +15362,10 @@ Elm.InnoCheckView.make = function (_elm) {
                               ,A3($Html$Events.on,
                               "input",
                               $Html$Events.targetValue,
-                              function (_p5) {
+                              function (_p3) {
                                  return A2($Signal.message,
                                  address,
-                                 $InnoCheckUpdate.EditEmailAddress(_p5));
+                                 $InnoCheckUpdate.EditEmailAddress(_p3));
                               })
                               ,$Html$Attributes.placeholder("E-mailadres")
                               ,$Html$Attributes.id("emailaddress")]),
@@ -14638,9 +15379,12 @@ Elm.InnoCheckView.make = function (_elm) {
                       _U.list([$Html$Attributes.type$("button")
                               ,$Html$Attributes.disabled($Basics.not(model.isDirty))
                               ,A2($Html$Events.onClick,
-                              $InnoCheckBackend.storeMailbox.address,
-                              A2(storeIrcData,address,model))]),
-                      _U.list([$Html.text("Stuur template toe")]))]))]))
+                              address,
+                              $InnoCheckUpdate.SendButtonClicked)]),
+                      _U.list([$Html.text("Stuur template toe")]))]))
+                      ,A2($Html.div,
+                      _U.list([]),
+                      _U.list([$Html.text(model.actionTime)]))]))
               ,portMessageComp(model)]))]));
    });
    var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag\n\nGeef je gegevens op en we sturen je een praktische template waarmee je \ndirect aan de slag kan in jouw organisatie. En natuurlijk gaan we netjes \nom met jouw gegevens.\n");
@@ -14665,17 +15409,17 @@ Elm.InnoCheckView.make = function (_elm) {
    key,
    answerTextlist) {
       var checkAnswer = F2(function (answer,storedAnswer) {
-         var _p6 = storedAnswer;
-         if (_p6.ctor === "Nothing") {
+         var _p4 = storedAnswer;
+         if (_p4.ctor === "Nothing") {
                return false;
             } else {
-               return _U.eq(answer,_p6._0);
+               return _U.eq(answer,_p4._0);
             }
       });
-      var radios = function (_p7) {
-         var _p8 = _p7;
-         var _p11 = _p8._1;
-         var _p10 = _p8._0;
+      var radios = function (_p5) {
+         var _p6 = _p5;
+         var _p9 = _p6._1;
+         var _p8 = _p6._0;
          return A2($Html.label,
          _U.list([]),
          _U.list([A2($Html.input,
@@ -14683,18 +15427,18 @@ Elm.InnoCheckView.make = function (_elm) {
                          ,$Html$Attributes.name(A2($Basics._op["++"],
                          "qa_",
                          $Basics.toString(key)))
-                         ,$Html$Attributes.value(_p11)
+                         ,$Html$Attributes.value(_p9)
                          ,A3($Html$Events.on,
                          "change",
                          $Html$Events.targetChecked,
-                         function (_p9) {
+                         function (_p7) {
                             return A2($Signal.message,
                             address,
-                            A2($InnoCheckUpdate.SelectAnswer,key,_p10));
+                            A2($InnoCheckUpdate.SelectAnswer,key,_p8));
                          })
-                         ,$Html$Attributes.checked(A2(checkAnswer,_p10,storedAnswer))]),
+                         ,$Html$Attributes.checked(A2(checkAnswer,_p8,storedAnswer))]),
                  _U.list([]))
-                 ,$Html.text(_p11)]));
+                 ,$Html.text(_p9)]));
       };
       return A2($List.map,radios,answerTextlist);
    });
@@ -14819,8 +15563,7 @@ Elm.InnoCheckView.make = function (_elm) {
                                       ,showRecommendations: showRecommendations
                                       ,aspectTipComp: aspectTipComp
                                       ,portMessageComp: portMessageComp
-                                      ,buttonComp: buttonComp
-                                      ,storeIrcData: storeIrcData};
+                                      ,buttonComp: buttonComp};
 };
 Elm.InnoCheck = Elm.InnoCheck || {};
 Elm.InnoCheck.make = function (_elm) {
@@ -14830,9 +15573,7 @@ Elm.InnoCheck.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $ElmFire = Elm.ElmFire.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $InnoCheckBackend = Elm.InnoCheckBackend.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
    $InnoCheckModel = Elm.InnoCheckModel.make(_elm),
    $InnoCheckUpdate = Elm.InnoCheckUpdate.make(_elm),
    $InnoCheckView = Elm.InnoCheckView.make(_elm),
@@ -14840,13 +15581,17 @@ Elm.InnoCheck.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $StartApp$Simple = Elm.StartApp.Simple.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
-   var runStore = Elm.Native.Task.make(_elm).performSignal("runStore",
-   $InnoCheckBackend.storeMailbox.signal);
-   var main = $StartApp$Simple.start({model: $InnoCheckModel.initialModel0
-                                     ,update: $InnoCheckUpdate.update
-                                     ,view: $InnoCheckView.view});
-   return _elm.InnoCheck.values = {_op: _op,main: main};
+   var app = $StartApp.start({init: {ctor: "_Tuple2"
+                                    ,_0: $InnoCheckModel.initialModel0
+                                    ,_1: $Effects.none}
+                             ,update: $InnoCheckUpdate.update
+                             ,view: $InnoCheckView.view
+                             ,inputs: _U.list([])});
+   var main = app.html;
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
+   app.tasks);
+   return _elm.InnoCheck.values = {_op: _op,app: app,main: main};
 };
