@@ -14936,11 +14936,11 @@ Elm.InnoCheckUpdate.make = function (_elm) {
    $TaskTutorial = Elm.TaskTutorial.make(_elm),
    $Time = Elm.Time.make(_elm);
    var _op = {};
-   var HandleActionTime = function (a) {
-      return {ctor: "HandleActionTime",_0: a};
+   var HandleTimedStoreIrcData = function (a) {
+      return {ctor: "HandleTimedStoreIrcData",_0: a};
    };
-   var getTime = $Effects.task(A2($Task.map,
-   HandleActionTime,
+   var timedStoreIrcData = $Effects.task(A2($Task.map,
+   HandleTimedStoreIrcData,
    $Task.toMaybe($TaskTutorial.getCurrentTime)));
    var HandleBackendResponse = function (a) {
       return {ctor: "HandleBackendResponse",_0: a};
@@ -14991,7 +14991,7 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                      _p0._1,
                                      model.questionAnswers)
                                      ,isDirty: true})
-                                     ,_1: getTime};
+                                     ,_1: $Effects.none};
          case "HandleBackendResponse": var _p1 = _p0._0;
            if (_p1.ctor === "Ok") {
                  return {ctor: "_Tuple2"
@@ -15010,32 +15010,33 @@ Elm.InnoCheckUpdate.make = function (_elm) {
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
                   {person: _U.update(prs,{email: _p0._0}),isDirty: true})
-                  ,_1: getTime};
+                  ,_1: $Effects.none};
          case "EditFirstName": var prs = model.person;
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
                   {person: _U.update(prs,{firstname: _p0._0}),isDirty: true})
-                  ,_1: getTime};
+                  ,_1: $Effects.none};
          case "EditLastName": var prs = model.person;
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
                   {person: _U.update(prs,{lastname: _p0._0}),isDirty: true})
-                  ,_1: getTime};
+                  ,_1: $Effects.none};
          case "EditCompanyName": var prs = model.person;
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
                   {person: _U.update(prs,{companyname: _p0._0}),isDirty: true})
-                  ,_1: getTime};
+                  ,_1: $Effects.none};
          case "SendButtonClicked": return {ctor: "_Tuple2"
                                           ,_0: _U.update(model,
                                           {sendErrorMessage: "",sendSuccess: false,sendAttempted: false})
-                                          ,_1: storeIrcData(model)};
-         default: return {ctor: "_Tuple2"
-                         ,_0: _U.update(model,
-                         {actionTime: A2($Date$Format.format,
-                         "%d-%m-%Y %H:%M:%S",
-                         $Date.fromTime(A2($Maybe.withDefault,0,_p0._0)))})
-                         ,_1: $Effects.none};}
+                                          ,_1: timedStoreIrcData};
+         default: var newModel = _U.update(model,
+           {actionTime: A2($Date$Format.format,
+           "%d-%m-%Y %H:%M:%S",
+           $Date.fromTime(A2($Maybe.withDefault,0,_p0._0)))});
+           return {ctor: "_Tuple2"
+                  ,_0: newModel
+                  ,_1: storeIrcData(newModel)};}
    });
    var SendButtonClicked = {ctor: "SendButtonClicked"};
    var EditCompanyName = function (a) {
@@ -15073,10 +15074,10 @@ Elm.InnoCheckUpdate.make = function (_elm) {
                                         ,EditCompanyName: EditCompanyName
                                         ,SendButtonClicked: SendButtonClicked
                                         ,HandleBackendResponse: HandleBackendResponse
-                                        ,HandleActionTime: HandleActionTime
+                                        ,HandleTimedStoreIrcData: HandleTimedStoreIrcData
                                         ,update: update
                                         ,storeIrcData: storeIrcData
-                                        ,getTime: getTime};
+                                        ,timedStoreIrcData: timedStoreIrcData};
 };
 Elm.InnoCheckViewUtil = Elm.InnoCheckViewUtil || {};
 Elm.InnoCheckViewUtil.make = function (_elm) {
