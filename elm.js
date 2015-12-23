@@ -15381,10 +15381,7 @@ Elm.InnoCheckView.make = function (_elm) {
                               ,A2($Html$Events.onClick,
                               address,
                               $InnoCheckUpdate.SendButtonClicked)]),
-                      _U.list([$Html.text("Stuur template toe")]))]))
-                      ,A2($Html.div,
-                      _U.list([]),
-                      _U.list([$Html.text(model.actionTime)]))]))
+                      _U.list([$Html.text("Stuur template toe")]))]))]))
               ,portMessageComp(model)]))]));
    });
    var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag\n\nGeef je gegevens op en we sturen je een praktische template waarmee je \ndirect aan de slag kan in jouw organisatie. En natuurlijk gaan we netjes \nom met jouw gegevens.\n");
