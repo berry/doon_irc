@@ -15488,7 +15488,7 @@ Elm.InnoCheckView.make = function (_elm) {
    var questionBlockTopParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\nBeantwoord voor elk van de zes aspecten de vragen.\n");
    var showQuestionBlock = F2(function (address,model) {
       return A2($Html.section,
-      _U.list([]),
+      _U.list([$Html$Attributes.$class("row sqs-row")]),
       _U.list([questionBlockTopParagraph
               ,A2($Html.div,
               _U.list([$Html$Attributes.$class("aspect-questions-block")]),
@@ -15507,7 +15507,7 @@ Elm.InnoCheckView.make = function (_elm) {
               ,A2($Html.div,
               _U.list([$Html$Attributes.$class("row aspect-questions-block")]),
               _U.list([A2($Html.div,
-                      _U.list([$Html$Attributes.$class("questions col-sm-6")]),
+                      _U.list([$Html$Attributes.$class("questions col-sm-6 col sqs-col-6 span-6")]),
                       _U.list([A2($Html.ul,
                               _U.list([]),
                               A4(showQuestions,
@@ -15519,7 +15519,7 @@ Elm.InnoCheckView.make = function (_elm) {
                               $InnoCheckModel.answerTextList))
                               ,A2(showAspectButtons,address,model)]))
                       ,A2($Html.div,
-                      _U.list([$Html$Attributes.$class("canvas col-sm-6")]),
+                      _U.list([$Html$Attributes.$class("canvas col-sm-6 col sqs-col-6 span-6")]),
                       _U.list([A2($InnoCheckViewSvg.showCanvas,address,model)]))]))
               ,A2($Html.div,
               _U.list([]),
