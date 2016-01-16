@@ -15132,7 +15132,7 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
               ,$Svg$Attributes.width("80px")
               ,$Svg$Attributes.height("80px")
               ,$Svg$Attributes.xlinkHref(A2($Basics._op["++"],
-              "images/icon_",
+              "http://berry.github.io/doon_irc/images/icon_",
               A2($Basics._op["++"],
               $String.toLower($Basics.toString(aspect)),
               ".png")))]),
@@ -15495,7 +15495,7 @@ Elm.InnoCheckView.make = function (_elm) {
                       _U.list([$Html.text($InnoCheckUtil.getAspectText(model.aspectSelectionList.selected))]))
                       ,A2($Html.img,
                       _U.list([$Html$Attributes.src(A2($Basics._op["++"],
-                              "images/icon_",
+                              "http://berry.github.io/doon_irc/images/icon_",
                               A2($Basics._op["++"],
                               $String.toLower($Basics.toString(model.aspectSelectionList.selected)),
                               ".png")))
@@ -15537,7 +15537,7 @@ Elm.InnoCheckView.make = function (_elm) {
               ,A2($Html.div,
               _U.list([$Html$Attributes.$class("col-sm-6 splashimage")]),
               _U.list([A2($Html.img,
-              _U.list([$Html$Attributes.src("images/card_irc.png")
+              _U.list([$Html$Attributes.src("http://berry.github.io/doon_irc/images/card_irc.png")
                       ,$Html$Attributes.width(400)]),
               _U.list([]))]))])) : A2(showQuestionBlock,address,model);
    });
