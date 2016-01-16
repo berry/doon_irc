@@ -15253,12 +15253,14 @@ Elm.InnoCheckView.make = function (_elm) {
    $String = Elm.String.make(_elm);
    var _op = {};
    var buttonComp = F3(function (address,action,buttonText) {
-      return A2($Html.button,
+      return A2($Html.div,
+      _U.list([$Html$Attributes.$class("button-block sqs-block-button")]),
+      _U.list([A2($Html.button,
       _U.list([$Html$Attributes.type$("button")
               ,$Html$Attributes.$class("btn btn-primary sqs-block-button-element--medium sqs-block-button-element")
               ,A2($Html$Events.onClick,address,action)
               ,$Html$Attributes.disabled(false)]),
-      _U.list([$Html.text(buttonText)]));
+      _U.list([$Html.text(buttonText)]))]));
    });
    var portMessageComp = function (model) {
       var msgComp = function (msg) {
