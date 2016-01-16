@@ -15464,10 +15464,10 @@ Elm.InnoCheckView.make = function (_elm) {
    });
    var showAspectButtons = F2(function (address,model) {
       return A2($Html.div,
-      _U.list([$Html$Attributes.$class("aspect-questions-buttons")]),
+      _U.list([$Html$Attributes.$class("aspect-questions-buttons button-block sqs-block-button")]),
       _U.list([A2($Html.button,
               _U.list([$Html$Attributes.type$("button")
-                      ,$Html$Attributes.$class("btn btn-primary")
+                      ,$Html$Attributes.$class("btn btn-primary sqs-block-button-element--medium sqs-block-button-element")
                       ,$Html$Attributes.disabled(_U.eq($List.length(model.aspectSelectionList.previous),
                       0))
                       ,A2($Html$Events.onClick,address,$InnoCheckUpdate.PrevAspect)]),
@@ -15475,7 +15475,7 @@ Elm.InnoCheckView.make = function (_elm) {
               ,$Html.text(" ")
               ,A2($Html.button,
               _U.list([$Html$Attributes.type$("button")
-                      ,$Html$Attributes.$class("btn btn-primary")
+                      ,$Html$Attributes.$class("btn btn-primary sqs-block-button-element--medium sqs-block-button-element")
                       ,$Html$Attributes.disabled(_U.eq($List.length(model.aspectSelectionList.next),
                       0) || $Basics.not(A2($InnoCheckUtil.allQuestionsAnswered,
                       A2($InnoCheckUtil.aspectQuestions,
