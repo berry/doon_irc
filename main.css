@@ -6535,12 +6535,6 @@ section.contact form .form-group:after {
     display: none !important;
   }
 }
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: white;
-  color: #555555;
-  margin-top: 0.5em;
-}
 h1 {
   margin-bottom: 0.2em;
   color: #009f6b;
