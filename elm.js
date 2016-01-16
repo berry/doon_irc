@@ -15255,7 +15255,7 @@ Elm.InnoCheckView.make = function (_elm) {
    var buttonComp = F3(function (address,action,buttonText) {
       return A2($Html.button,
       _U.list([$Html$Attributes.type$("button")
-              ,$Html$Attributes.$class("btn btn-primary")
+              ,$Html$Attributes.$class("btn btn-primary sqs-block-button-element--medium sqs-block-button-element")
               ,A2($Html$Events.onClick,address,action)
               ,$Html$Attributes.disabled(false)]),
       _U.list([$Html.text(buttonText)]));
