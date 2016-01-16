@@ -15526,16 +15526,16 @@ Elm.InnoCheckView.make = function (_elm) {
    var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe \nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op \n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven \nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt \nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de \nuitgebreide internationaal geaccrediteerde Innovation Management Standard. \nDe resultaten geven een eerste indruk van de innovatiecapaciteit \nvan de organisatie.\n");
    var showSplashScreen = F2(function (address,model) {
       return _U.eq(model.splashScreenRead,false) ? A2($Html.div,
-      _U.list([$Html$Attributes.$class("row splash")]),
+      _U.list([$Html$Attributes.$class("row splash sqs-row")]),
       _U.list([A2($Html.section,
-              _U.list([$Html$Attributes.$class("col-sm-6 splashtext")]),
+              _U.list([$Html$Attributes.$class("col-sm-6 splashtext sqs-col-6 span-6")]),
               _U.list([splashParagraph
                       ,A3(buttonComp,
                       address,
                       $InnoCheckUpdate.SplashRead,
                       "Start de Quickscan »")]))
               ,A2($Html.div,
-              _U.list([$Html$Attributes.$class("col-sm-6 splashimage")]),
+              _U.list([$Html$Attributes.$class("col-sm-6 splashimage sqs-col-6 span-6")]),
               _U.list([A2($Html.img,
               _U.list([$Html$Attributes.src("http://berry.github.io/doon_irc/images/card_irc.png")
                       ,$Html$Attributes.width(400)]),
