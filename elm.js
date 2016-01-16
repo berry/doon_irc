@@ -15528,14 +15528,14 @@ Elm.InnoCheckView.make = function (_elm) {
       return _U.eq(model.splashScreenRead,false) ? A2($Html.div,
       _U.list([$Html$Attributes.$class("row splash sqs-row")]),
       _U.list([A2($Html.section,
-              _U.list([$Html$Attributes.$class("col-sm-6 splashtext sqs-col-6 span-6")]),
+              _U.list([$Html$Attributes.$class("col col-sm-6 splashtext sqs-col-6 span-6")]),
               _U.list([splashParagraph
                       ,A3(buttonComp,
                       address,
                       $InnoCheckUpdate.SplashRead,
                       "Start de Quickscan »")]))
               ,A2($Html.div,
-              _U.list([$Html$Attributes.$class("col-sm-6 splashimage sqs-col-6 span-6")]),
+              _U.list([$Html$Attributes.$class("col col-sm-6 splashimage sqs-col-6 span-6")]),
               _U.list([A2($Html.img,
               _U.list([$Html$Attributes.src("http://berry.github.io/doon_irc/images/card_irc.png")
                       ,$Html$Attributes.width(400)]),
