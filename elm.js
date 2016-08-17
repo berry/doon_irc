@@ -13712,7 +13712,7 @@ Elm.InnoCheckView.make = function (_elm) {
       var msgComp = function (msg) {
          return A2($Html.div,_U.list([$Html$Attributes.$class("portmessage")]),_U.list([A2($Html.p,_U.list([]),_U.list([$Html.text(msg)]))]));
       };
-      return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? msgComp("De gegevens van jouw quickscan zijn opgeslagen. We sturen de praktische template zo snel mogelijk naar je toe. Dank je wel!") : model.sendAttempted && $Basics.not(model.sendSuccess) ? msgComp(A2($Basics._op["++"],
+      return $Basics.not(model.isDirty) && (model.sendAttempted && model.sendSuccess) ? msgComp("De gegevens van jouw quickscan zijn opgeslagen.") : model.sendAttempted && $Basics.not(model.sendSuccess) ? msgComp(A2($Basics._op["++"],
       "Oh, oh... er is iets mis gegaan. Je data is niet opgeslagen. De technische foutmelding is: ",
       model.sendErrorMessage)) : $Html.text("");
    };
