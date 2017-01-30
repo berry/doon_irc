@@ -5,9 +5,7 @@ An entrepreneur or manager is questioned on 6 aspects of orgnisations readiness 
 
 ## Developer info
 
-This repository only contains the compiled code of the App. The source code is stored in a private Bitbucket repository.
+This repository only contains the compiled code of the App. The source code is stored in a private Bitbucket repository.  
 
 ## License/copyright
 Copyright 2015, Coöperatie DOON U.A., The Netherlands.
-
-
