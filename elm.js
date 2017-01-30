@@ -13945,7 +13945,7 @@ Elm.InnoCheckView.make = function (_elm) {
               ,A2($Html.div,
               _U.list([$Html$Attributes.$class("col col-sm-6 splashimage sqs-col-6 span-6")]),
               _U.list([A2($Html.img,
-              _U.list([$Html$Attributes.src("http://berry.github.io/doon_irc/images/card_irc.png"),$Html$Attributes.width(400)]),
+              _U.list([$Html$Attributes.src("/images/card_irc.png"),$Html$Attributes.width(400)]),
               _U.list([]))]))])) : A2(showQuestionBlock,address,model);
    });
    var view = F2(function (address,model) {
