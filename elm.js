@@ -13618,9 +13618,7 @@ Elm.InnoCheckViewSvg.make = function (_elm) {
               ,$Svg$Attributes.y($Basics.toString(_p1._1))
               ,$Svg$Attributes.width("80px")
               ,$Svg$Attributes.height("80px")
-              ,$Svg$Attributes.xlinkHref(A2($Basics._op["++"],
-              "http://berry.github.io/doon_irc/images/icon_",
-              A2($Basics._op["++"],$String.toLower($Basics.toString(aspect)),".png")))]),
+              ,$Svg$Attributes.xlinkHref(A2($Basics._op["++"],"images/icon_",A2($Basics._op["++"],$String.toLower($Basics.toString(aspect)),".png")))]),
       _U.list([]));
    });
    var showColorBlock = F5(function (address,model,aspect,_p3,_p2) {
@@ -13913,7 +13911,7 @@ Elm.InnoCheckView.make = function (_elm) {
               _U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text($InnoCheckUtil.getAspectText(model.aspectSelectionList.selected))]))
                       ,A2($Html.img,
                       _U.list([$Html$Attributes.src(A2($Basics._op["++"],
-                              "http://berry.github.io/doon_irc/images/icon_",
+                              "images/icon_",
                               A2($Basics._op["++"],$String.toLower($Basics.toString(model.aspectSelectionList.selected)),".png")))
                               ,$Html$Attributes.width(40)
                               ,$Html$Attributes.height(40)]),
