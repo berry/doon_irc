@@ -13819,12 +13819,13 @@ Elm.InnoCheckView.make = function (_elm) {
                       _U.list([A2($Html.button,
                       _U.list([$Html$Attributes.type$("button")
                               ,$Html$Attributes.disabled($Basics.not(model.isDirty))
+                              ,$Html$Attributes.$class("btn btn-primary sqs-block-button-element--small sqs-block-button-element")
                               ,A2($Html$Events.onClick,address,$InnoCheckUpdate.SendButtonClicked)]),
                       _U.list([$Html.text("Gegevens opslaan")]))]))]))
               ,portMessageComp(model)]))]));
    });
-   var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag? \n\nLaat hier je gegevens achter, dan neemt één van onze DOON \ninnovatieversnellers contact met je op voor een vrijblijvend \nadviesgesprek.\n");
-   var recommendationsTopParagraph = $Markdown.toHtml("\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende \npunten te werken binnen je organisatie.\n");
+   var moreInfoTopParagraph = $Markdown.toHtml("\n### Direct aan de slag?\n\nLaat hier je gegevens achter, dan neemt één van onze DOON\ninnovatieversnellers contact met je op voor een vrijblijvend\nadviesgesprek.\n");
+   var recommendationsTopParagraph = $Markdown.toHtml("\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende\npunten te werken binnen je organisatie.\n");
    var showRecommendations = F2(function (address,model) {
       return A2($InnoCheckUtil.allQuestionsAnswered,model.questions,model.questionAnswers) ? _U.list([A2($Html.section,
                                                                                                      _U.list([$Html$Attributes.$class("recommendations")]),
@@ -13934,7 +13935,7 @@ Elm.InnoCheckView.make = function (_elm) {
                       _U.list([A2($InnoCheckViewSvg.showCanvas,address,model)]))]))
               ,A2($Html.div,_U.list([]),A2(showRecommendations,address,model))]));
    });
-   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe \nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op \n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven \nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt \nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de \nuitgebreide internationaal geaccrediteerde Innovation Management Standard. \nDe resultaten geven een eerste indruk van de innovatiecapaciteit \nvan de organisatie.\n");
+   var splashParagraph = $Markdown.toHtml("\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe\nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op\n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven\nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt\nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de\nuitgebreide internationaal geaccrediteerde Innovation Management Standard.\nDe resultaten geven een eerste indruk van de innovatiecapaciteit\nvan de organisatie.\n");
    var showSplashScreen = F2(function (address,model) {
       return _U.eq(model.splashScreenRead,false) ? A2($Html.div,
       _U.list([$Html$Attributes.$class("row splash sqs-row")]),
