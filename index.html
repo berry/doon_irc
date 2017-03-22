@@ -18,9 +18,14 @@
 
   </head>
 
-  <body></body>
+  <body>
+<div id="main"></div>
+  </body>
 
   <script type="text/javascript">
-    Elm.fullscreen(Elm.InnoCheck);
+    // Elm.fullscreen(Elm.Main);
+    var node = document.getElementById('main');
+    Elm.Main.embed(node,
+      { baseUrl: ""}); // url should always end with a /
   </script>
 </html>
