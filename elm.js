@@ -9135,13 +9135,6 @@ var _user$project$InnoCheckModel$aspectSelectionList0 = A2(
 			}
 		}
 	});
-var _user$project$InnoCheckModel$initialModel0 = function (flags) {
-	return {
-		ctor: '_Tuple2',
-		_0: {questions: _user$project$InnoCheckModel$questions, questionAnswers: _user$project$InnoCheckModel$questionAnswersEmpty, person: _user$project$InnoCheckModel$person0, sendSuccess: false, sendErrorMessage: '', sendAttempted: false, isDirty: true, aspectSelectionList: _user$project$InnoCheckModel$aspectSelectionList0, splashScreenRead: false, actionTime: '', flags: flags},
-		_1: _elm_lang$core$Platform_Cmd$none
-	};
-};
 var _user$project$InnoCheckModel$No = {ctor: 'No'};
 var _user$project$InnoCheckModel$Partly = {ctor: 'Partly'};
 var _user$project$InnoCheckModel$Yes = {ctor: 'Yes'};
@@ -9195,6 +9188,13 @@ var _user$project$InnoCheckModel$questionAnswers0 = _elm_lang$core$Dict$fromList
 			}
 		}
 	});
+var _user$project$InnoCheckModel$initialModel0 = function (flags) {
+	return {
+		ctor: '_Tuple2',
+		_0: {questions: _user$project$InnoCheckModel$questions, questionAnswers: _user$project$InnoCheckModel$questionAnswers0, person: _user$project$InnoCheckModel$person0, sendSuccess: false, sendErrorMessage: '', sendAttempted: false, isDirty: true, aspectSelectionList: _user$project$InnoCheckModel$aspectSelectionList0, splashScreenRead: false, actionTime: '', flags: flags},
+		_1: _elm_lang$core$Platform_Cmd$none
+	};
+};
 var _user$project$InnoCheckModel$answerTextList = {
 	ctor: '::',
 	_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$Yes, _1: 'Ja'},
@@ -9981,26 +9981,25 @@ var _user$project$InnoCheckView$recommendationsTopParagraph = A2(
 	{ctor: '[]'},
 	'\n### Advies\n\nOp basis van je antwoorden adviseren we je om allereerst aandacht te schenken aan het volgende aspect.\n');
 var _user$project$InnoCheckView$showRecommendations = function (model) {
-	return A2(_user$project$InnoCheckUtil$allQuestionsAnswered, model.questions, model.questionAnswers) ? {
-		ctor: '::',
-		_0: A2(
-			_elm_lang$html$Html$section,
-			{
+	return A2(_user$project$InnoCheckUtil$allQuestionsAnswered, model.questions, model.questionAnswers) ? A2(
+		_elm_lang$html$Html$section,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('row sqs-row recommendations'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _user$project$InnoCheckView$recommendationsTopParagraph,
+			_1: {
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('recommendations'),
+				_0: _user$project$InnoCheckView$aspectTipComp(model),
 				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _user$project$InnoCheckView$recommendationsTopParagraph,
-				_1: {
-					ctor: '::',
-					_0: _user$project$InnoCheckView$aspectTipComp(model),
-					_1: {ctor: '[]'}
-				}
-			}),
-		_1: {ctor: '[]'}
-	} : {ctor: '[]'};
+			}
+		}) : A2(
+		_elm_lang$html$Html$span,
+		{ctor: '[]'},
+		{ctor: '[]'});
 };
 var _user$project$InnoCheckView$showInputRadios = F3(
 	function (storedAnswer, key, answerTextlist) {
@@ -10186,42 +10185,142 @@ var _user$project$InnoCheckView$showAspectButtons = function (model) {
 };
 var _user$project$InnoCheckView$questionBlockTopParagraph = A2(
 	_evancz$elm_markdown$Markdown$toHtml,
-	{ctor: '[]'},
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('row sqs-row title'),
+		_1: {ctor: '[]'}
+	},
 	'\n# Innovation Readiness Quickscan\n\nBeantwoord voor elk van de zes aspecten de vragen.\n');
 var _user$project$InnoCheckView$showQuestionBlock = function (model) {
-	return A2(
-		_elm_lang$html$Html$section,
-		{
+	return {
+		ctor: '::',
+		_0: _user$project$InnoCheckView$questionBlockTopParagraph,
+		_1: {
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('row sqs-row'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: _user$project$InnoCheckView$questionBlockTopParagraph,
+			_0: A2(
+				_elm_lang$html$Html$section,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('row sqs-row aspect-questions-block'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('aspect-questions-block'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$h3,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(
+										_user$project$InnoCheckUtil$getAspectText(model.aspectSelectionList.selected)),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(_user$project$InnoCheckViewUtil$iconImg, model.flags.baseUrl, model.aspectSelectionList.selected),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('row aspect-questions-block'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('questions col-sm-6 col sqs-col-6 span-6'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$ul,
+											{ctor: '[]'},
+											A3(
+												_user$project$InnoCheckView$showQuestions,
+												model,
+												A2(_user$project$InnoCheckUtil$aspectQuestions, model.questions, model.aspectSelectionList.selected),
+												_user$project$InnoCheckModel$answerTextList)),
+										_1: {
+											ctor: '::',
+											_0: _user$project$InnoCheckView$showAspectButtons(model),
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('canvas col-sm-6 col sqs-col-6 span-6'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _user$project$InnoCheckViewSvg$showCanvas(model),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}),
 			_1: {
 				ctor: '::',
+				_0: _user$project$InnoCheckView$showRecommendations(model),
+				_1: {ctor: '[]'}
+			}
+		}
+	};
+};
+var _user$project$InnoCheckView$splashParagraph = A2(
+	_evancz$elm_markdown$Markdown$toHtml,
+	{ctor: '[]'},
+	'\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe\nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op\n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven\nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt\nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de\nuitgebreide internationaal geaccrediteerde Innovation Management Standard.\nDe resultaten geven een eerste indruk van de innovatiecapaciteit\nvan de organisatie.\n');
+var _user$project$InnoCheckView$showSplashScreen = function (model) {
+	return _elm_lang$core$Native_Utils.eq(model.splashScreenRead, false) ? {
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('row splash sqs-row'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$div,
+					_elm_lang$html$Html$section,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('aspect-questions-block'),
+						_0: _elm_lang$html$Html_Attributes$class('col col-sm-6 splashtext sqs-col-6 span-6'),
 						_1: {ctor: '[]'}
 					},
 					{
 						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$h3,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(
-									_user$project$InnoCheckUtil$getAspectText(model.aspectSelectionList.selected)),
-								_1: {ctor: '[]'}
-							}),
+						_0: _user$project$InnoCheckView$splashParagraph,
 						_1: {
 							ctor: '::',
-							_0: A2(_user$project$InnoCheckViewUtil$iconImg, model.flags.baseUrl, model.aspectSelectionList.selected),
+							_0: A2(_user$project$InnoCheckView$buttonComp, _user$project$InnoCheckUpdate$SplashRead, 'Start de Quickscan »'),
 							_1: {ctor: '[]'}
 						}
 					}),
@@ -10231,122 +10330,31 @@ var _user$project$InnoCheckView$showQuestionBlock = function (model) {
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('row aspect-questions-block'),
+							_0: _elm_lang$html$Html_Attributes$class('col col-sm-6 splashimage sqs-col-6 span-6'),
 							_1: {ctor: '[]'}
 						},
 						{
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$div,
+								_elm_lang$html$Html$img,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('questions col-sm-6 col sqs-col-6 span-6'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$ul,
-										{ctor: '[]'},
-										A3(
-											_user$project$InnoCheckView$showQuestions,
-											model,
-											A2(_user$project$InnoCheckUtil$aspectQuestions, model.questions, model.aspectSelectionList.selected),
-											_user$project$InnoCheckModel$answerTextList)),
+									_0: _elm_lang$html$Html_Attributes$src(
+										A2(_user$project$InnoCheckViewUtil$imgUrl, model.flags.baseUrl, 'images/card_irc.png')),
 									_1: {
 										ctor: '::',
-										_0: _user$project$InnoCheckView$showAspectButtons(model),
+										_0: _elm_lang$html$Html_Attributes$width(400),
 										_1: {ctor: '[]'}
 									}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('canvas col-sm-6 col sqs-col-6 span-6'),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _user$project$InnoCheckViewSvg$showCanvas(model),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
-							}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
 						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
-							_user$project$InnoCheckView$showRecommendations(model)),
-						_1: {ctor: '[]'}
-					}
-				}
-			}
-		});
-};
-var _user$project$InnoCheckView$splashParagraph = A2(
-	_evancz$elm_markdown$Markdown$toHtml,
-	{ctor: '[]'},
-	'\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe\nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op\n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven\nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt\nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de\nuitgebreide internationaal geaccrediteerde Innovation Management Standard.\nDe resultaten geven een eerste indruk van de innovatiecapaciteit\nvan de organisatie.\n');
-var _user$project$InnoCheckView$showSplashScreen = function (model) {
-	return _elm_lang$core$Native_Utils.eq(model.splashScreenRead, false) ? A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('row splash sqs-row'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$section,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('col col-sm-6 splashtext sqs-col-6 span-6'),
 					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _user$project$InnoCheckView$splashParagraph,
-					_1: {
-						ctor: '::',
-						_0: A2(_user$project$InnoCheckView$buttonComp, _user$project$InnoCheckUpdate$SplashRead, 'Start de Quickscan »'),
-						_1: {ctor: '[]'}
-					}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('col col-sm-6 splashimage sqs-col-6 span-6'),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$img,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$src(
-									A2(_user$project$InnoCheckViewUtil$imgUrl, model.flags.baseUrl, 'images/card_irc.png')),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$width(400),
-									_1: {ctor: '[]'}
-								}
-							},
-							{ctor: '[]'}),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
-		}) : _user$project$InnoCheckView$showQuestionBlock(model);
+				}
+			}),
+		_1: {ctor: '[]'}
+	} : _user$project$InnoCheckView$showQuestionBlock(model);
 };
 var _user$project$InnoCheckView$view = function (model) {
 	return A2(
@@ -10356,11 +10364,7 @@ var _user$project$InnoCheckView$view = function (model) {
 			_0: _elm_lang$html$Html_Attributes$class('container'),
 			_1: {ctor: '[]'}
 		},
-		{
-			ctor: '::',
-			_0: _user$project$InnoCheckView$showSplashScreen(model),
-			_1: {ctor: '[]'}
-		});
+		_user$project$InnoCheckView$showSplashScreen(model));
 };
 
 var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
