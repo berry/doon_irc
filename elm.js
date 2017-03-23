@@ -9135,6 +9135,13 @@ var _user$project$InnoCheckModel$aspectSelectionList0 = A2(
 			}
 		}
 	});
+var _user$project$InnoCheckModel$initialModel0 = function (flags) {
+	return {
+		ctor: '_Tuple2',
+		_0: {questions: _user$project$InnoCheckModel$questions, questionAnswers: _user$project$InnoCheckModel$questionAnswersEmpty, person: _user$project$InnoCheckModel$person0, sendSuccess: false, sendErrorMessage: '', sendAttempted: false, isDirty: true, aspectSelectionList: _user$project$InnoCheckModel$aspectSelectionList0, splashScreenRead: false, actionTime: '', flags: flags},
+		_1: _elm_lang$core$Platform_Cmd$none
+	};
+};
 var _user$project$InnoCheckModel$No = {ctor: 'No'};
 var _user$project$InnoCheckModel$Partly = {ctor: 'Partly'};
 var _user$project$InnoCheckModel$Yes = {ctor: 'Yes'};
@@ -9188,13 +9195,6 @@ var _user$project$InnoCheckModel$questionAnswers0 = _elm_lang$core$Dict$fromList
 			}
 		}
 	});
-var _user$project$InnoCheckModel$initialModel0 = function (flags) {
-	return {
-		ctor: '_Tuple2',
-		_0: {questions: _user$project$InnoCheckModel$questions, questionAnswers: _user$project$InnoCheckModel$questionAnswers0, person: _user$project$InnoCheckModel$person0, sendSuccess: false, sendErrorMessage: '', sendAttempted: false, isDirty: true, aspectSelectionList: _user$project$InnoCheckModel$aspectSelectionList0, splashScreenRead: false, actionTime: '', flags: flags},
-		_1: _elm_lang$core$Platform_Cmd$none
-	};
-};
 var _user$project$InnoCheckModel$answerTextList = {
 	ctor: '::',
 	_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$Yes, _1: 'Ja'},
