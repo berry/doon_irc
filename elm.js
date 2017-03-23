@@ -9600,10 +9600,42 @@ var _user$project$InnoCheckUtil$aspectForTip = function (model) {
 		0) > 0) ? _elm_lang$core$List$head(scoreOrange) : _elm_lang$core$Maybe$Nothing);
 };
 
-var _user$project$InnoCheckViewUtil$imgSrc = F2(
+var _user$project$InnoCheckViewUtil$iconUrl = function (selectedAspect) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'images/icon_',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$String$toLower(
+				_elm_lang$core$Basics$toString(selectedAspect)),
+			'.png'));
+};
+var _user$project$InnoCheckViewUtil$imgUrl = F2(
 	function (baseUrl, imgUrl) {
-		return _elm_lang$html$Html_Attributes$src(
-			A2(_elm_lang$core$Basics_ops['++'], baseUrl, imgUrl));
+		return A2(_elm_lang$core$Basics_ops['++'], baseUrl, imgUrl);
+	});
+var _user$project$InnoCheckViewUtil$iconImg = F2(
+	function (baseUrl, aspect) {
+		return A2(
+			_elm_lang$html$Html$img,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$src(
+					A2(
+						_user$project$InnoCheckViewUtil$imgUrl,
+						baseUrl,
+						_user$project$InnoCheckViewUtil$iconUrl(aspect))),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$width(40),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$height(40),
+						_1: {ctor: '[]'}
+					}
+				}
+			},
+			{ctor: '[]'});
 	});
 var _user$project$InnoCheckViewUtil$clickable = _elm_lang$html$Html_Attributes$style(
 	{
@@ -9635,16 +9667,9 @@ var _user$project$InnoCheckViewSvg$showIcon = F3(
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$xlinkHref(
 									A2(
-										_elm_lang$core$Basics_ops['++'],
+										_user$project$InnoCheckViewUtil$imgUrl,
 										model.flags.baseUrl,
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											'images/icon_',
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												_elm_lang$core$String$toLower(
-													_elm_lang$core$Basics$toString(aspect)),
-												'.png')))),
+										_user$project$InnoCheckViewUtil$iconUrl(aspect))),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -9921,10 +9946,30 @@ var _user$project$InnoCheckView$aspectTipComp = function (model) {
 		{
 			ctor: '::',
 			_0: A2(
-				_evancz$elm_markdown$Markdown$toHtml,
-				{ctor: '[]'},
-				msg),
-			_1: {ctor: '[]'}
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _user$project$InnoCheckViewUtil$clickable,
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$InnoCheckUpdate$SelectAspect(aspect)),
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: A2(_user$project$InnoCheckViewUtil$iconImg, model.flags.baseUrl, aspect),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_evancz$elm_markdown$Markdown$toHtml,
+					{ctor: '[]'},
+					msg),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$InnoCheckView$moreInfoTopParagraph = A2(
@@ -9934,7 +9979,7 @@ var _user$project$InnoCheckView$moreInfoTopParagraph = A2(
 var _user$project$InnoCheckView$recommendationsTopParagraph = A2(
 	_evancz$elm_markdown$Markdown$toHtml,
 	{ctor: '[]'},
-	'\n### Advies\n\nOp basis van je antwoorden adviseren we je om aan de volgende\npunten te werken binnen je organisatie.\n');
+	'\n### Advies\n\nOp basis van je antwoorden adviseren we je om allereerst aandacht te schenken aan het volgende aspect.\n');
 var _user$project$InnoCheckView$showRecommendations = function (model) {
 	return A2(_user$project$InnoCheckUtil$allQuestionsAnswered, model.questions, model.questionAnswers) ? {
 		ctor: '::',
@@ -10176,32 +10221,7 @@ var _user$project$InnoCheckView$showQuestionBlock = function (model) {
 							}),
 						_1: {
 							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$img,
-								{
-									ctor: '::',
-									_0: A2(
-										_user$project$InnoCheckViewUtil$imgSrc,
-										model.flags.baseUrl,
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											'images/icon_',
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												_elm_lang$core$String$toLower(
-													_elm_lang$core$Basics$toString(model.aspectSelectionList.selected)),
-												'.png'))),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$width(40),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$height(40),
-											_1: {ctor: '[]'}
-										}
-									}
-								},
-								{ctor: '[]'}),
+							_0: A2(_user$project$InnoCheckViewUtil$iconImg, model.flags.baseUrl, model.aspectSelectionList.selected),
 							_1: {ctor: '[]'}
 						}
 					}),
@@ -10313,7 +10333,8 @@ var _user$project$InnoCheckView$showSplashScreen = function (model) {
 							_elm_lang$html$Html$img,
 							{
 								ctor: '::',
-								_0: A2(_user$project$InnoCheckViewUtil$imgSrc, model.flags.baseUrl, 'images/card_irc.png'),
+								_0: _elm_lang$html$Html_Attributes$src(
+									A2(_user$project$InnoCheckViewUtil$imgUrl, model.flags.baseUrl, 'images/card_irc.png')),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$width(400),
@@ -10342,11 +10363,15 @@ var _user$project$InnoCheckView$view = function (model) {
 		});
 };
 
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
-};
 var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
-	{init: _user$project$InnoCheckModel$initialModel0, view: _user$project$InnoCheckView$view, update: _user$project$InnoCheckUpdate$update, subscriptions: _user$project$Main$subscriptions})(
+	{
+		init: _user$project$InnoCheckModel$initialModel0,
+		view: _user$project$InnoCheckView$view,
+		update: _user$project$InnoCheckUpdate$update,
+		subscriptions: function (_p0) {
+			return _elm_lang$core$Platform_Sub$none;
+		}
+	})(
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (baseUrl) {
