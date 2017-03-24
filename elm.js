@@ -10140,7 +10140,7 @@ var _user$project$InnoCheckView$showAspectButtons = function (model) {
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('« Vorige aspect'),
+					_0: _elm_lang$html$Html$text('« Vorige'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -10175,7 +10175,7 @@ var _user$project$InnoCheckView$showAspectButtons = function (model) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Volgende aspect »'),
+							_0: _elm_lang$html$Html$text('Volgende »'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
