@@ -1,0 +1,33 @@
+.well {
+  padding: 1.5em;
+  background: rgba(249, 184, 98, 0.5);
+}
+div.aspect-questions-block {
+  margin-top: 1.5em;
+}
+div.aspect-questions-block h3 {
+  display: inline;
+}
+div.aspect-questions-block img {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+form.inputradios div label {
+  margin-right: 20px;
+  vertical-align: middle;
+}
+form.inputradios div label input {
+  margin-right: 5px;
+}
+.questions ul {
+  padding-left: 0px;
+}
+.questions ul li {
+  margin-left: 0px;
+}
+.questions ul li p {
+  margin-right: 5px;
+}
+section.recommendations {
+  margin-top: 1.5em;
+}
