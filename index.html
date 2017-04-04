@@ -1,31 +1,32 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <title>Innovation Readiness Scan</title>
-    <!-- BOOTSTRAP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
     <link rel="stylesheet" href="main.css">
 
-
+    <!-- BOOTSTRAP -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> -->
 
+</head>
 
-    <!-- ELM -->
-    <script type="text/javascript" src="elm.js"></script>
+<body>
+    <div id="main"></div>
+</body>
 
-  </head>
-
-  <body>
-<div id="main"></div>
-  </body>
-
-  <script type="text/javascript">
+<!-- ELM -->
+<script type="text/javascript" src="elm.js"></script>
+<script type="text/javascript">
     // Elm.fullscreen(Elm.Main);
     var node = document.getElementById('main');
-    Elm.Main.embed(node,
-      { baseUrl: ""}); // url should always end with a /
-  </script>
+    Elm.Main.embed(node, {
+        baseUrl: ""
+    }); // base url should always end with a /
+</script>
+
 </html>

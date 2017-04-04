@@ -2677,1077 +2677,6 @@ var _elm_lang$core$Array$Array = {ctor: 'Array'};
 
 //import Native.Utils //
 
-var _elm_lang$core$Native_Char = function() {
-
-return {
-	fromCode: function(c) { return _elm_lang$core$Native_Utils.chr(String.fromCharCode(c)); },
-	toCode: function(c) { return c.charCodeAt(0); },
-	toUpper: function(c) { return _elm_lang$core$Native_Utils.chr(c.toUpperCase()); },
-	toLower: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLowerCase()); },
-	toLocaleUpper: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLocaleUpperCase()); },
-	toLocaleLower: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLocaleLowerCase()); }
-};
-
-}();
-var _elm_lang$core$Char$fromCode = _elm_lang$core$Native_Char.fromCode;
-var _elm_lang$core$Char$toCode = _elm_lang$core$Native_Char.toCode;
-var _elm_lang$core$Char$toLocaleLower = _elm_lang$core$Native_Char.toLocaleLower;
-var _elm_lang$core$Char$toLocaleUpper = _elm_lang$core$Native_Char.toLocaleUpper;
-var _elm_lang$core$Char$toLower = _elm_lang$core$Native_Char.toLower;
-var _elm_lang$core$Char$toUpper = _elm_lang$core$Native_Char.toUpper;
-var _elm_lang$core$Char$isBetween = F3(
-	function (low, high, $char) {
-		var code = _elm_lang$core$Char$toCode($char);
-		return (_elm_lang$core$Native_Utils.cmp(
-			code,
-			_elm_lang$core$Char$toCode(low)) > -1) && (_elm_lang$core$Native_Utils.cmp(
-			code,
-			_elm_lang$core$Char$toCode(high)) < 1);
-	});
-var _elm_lang$core$Char$isUpper = A2(
-	_elm_lang$core$Char$isBetween,
-	_elm_lang$core$Native_Utils.chr('A'),
-	_elm_lang$core$Native_Utils.chr('Z'));
-var _elm_lang$core$Char$isLower = A2(
-	_elm_lang$core$Char$isBetween,
-	_elm_lang$core$Native_Utils.chr('a'),
-	_elm_lang$core$Native_Utils.chr('z'));
-var _elm_lang$core$Char$isDigit = A2(
-	_elm_lang$core$Char$isBetween,
-	_elm_lang$core$Native_Utils.chr('0'),
-	_elm_lang$core$Native_Utils.chr('9'));
-var _elm_lang$core$Char$isOctDigit = A2(
-	_elm_lang$core$Char$isBetween,
-	_elm_lang$core$Native_Utils.chr('0'),
-	_elm_lang$core$Native_Utils.chr('7'));
-var _elm_lang$core$Char$isHexDigit = function ($char) {
-	return _elm_lang$core$Char$isDigit($char) || (A3(
-		_elm_lang$core$Char$isBetween,
-		_elm_lang$core$Native_Utils.chr('a'),
-		_elm_lang$core$Native_Utils.chr('f'),
-		$char) || A3(
-		_elm_lang$core$Char$isBetween,
-		_elm_lang$core$Native_Utils.chr('A'),
-		_elm_lang$core$Native_Utils.chr('F'),
-		$char));
-};
-
-//import Native.Utils //
-
-var _elm_lang$core$Native_Scheduler = function() {
-
-var MAX_STEPS = 10000;
-
-
-// TASKS
-
-function succeed(value)
-{
-	return {
-		ctor: '_Task_succeed',
-		value: value
-	};
-}
-
-function fail(error)
-{
-	return {
-		ctor: '_Task_fail',
-		value: error
-	};
-}
-
-function nativeBinding(callback)
-{
-	return {
-		ctor: '_Task_nativeBinding',
-		callback: callback,
-		cancel: null
-	};
-}
-
-function andThen(callback, task)
-{
-	return {
-		ctor: '_Task_andThen',
-		callback: callback,
-		task: task
-	};
-}
-
-function onError(callback, task)
-{
-	return {
-		ctor: '_Task_onError',
-		callback: callback,
-		task: task
-	};
-}
-
-function receive(callback)
-{
-	return {
-		ctor: '_Task_receive',
-		callback: callback
-	};
-}
-
-
-// PROCESSES
-
-function rawSpawn(task)
-{
-	var process = {
-		ctor: '_Process',
-		id: _elm_lang$core$Native_Utils.guid(),
-		root: task,
-		stack: null,
-		mailbox: []
-	};
-
-	enqueue(process);
-
-	return process;
-}
-
-function spawn(task)
-{
-	return nativeBinding(function(callback) {
-		var process = rawSpawn(task);
-		callback(succeed(process));
-	});
-}
-
-function rawSend(process, msg)
-{
-	process.mailbox.push(msg);
-	enqueue(process);
-}
-
-function send(process, msg)
-{
-	return nativeBinding(function(callback) {
-		rawSend(process, msg);
-		callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
-	});
-}
-
-function kill(process)
-{
-	return nativeBinding(function(callback) {
-		var root = process.root;
-		if (root.ctor === '_Task_nativeBinding' && root.cancel)
-		{
-			root.cancel();
-		}
-
-		process.root = null;
-
-		callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
-	});
-}
-
-function sleep(time)
-{
-	return nativeBinding(function(callback) {
-		var id = setTimeout(function() {
-			callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
-		}, time);
-
-		return function() { clearTimeout(id); };
-	});
-}
-
-
-// STEP PROCESSES
-
-function step(numSteps, process)
-{
-	while (numSteps < MAX_STEPS)
-	{
-		var ctor = process.root.ctor;
-
-		if (ctor === '_Task_succeed')
-		{
-			while (process.stack && process.stack.ctor === '_Task_onError')
-			{
-				process.stack = process.stack.rest;
-			}
-			if (process.stack === null)
-			{
-				break;
-			}
-			process.root = process.stack.callback(process.root.value);
-			process.stack = process.stack.rest;
-			++numSteps;
-			continue;
-		}
-
-		if (ctor === '_Task_fail')
-		{
-			while (process.stack && process.stack.ctor === '_Task_andThen')
-			{
-				process.stack = process.stack.rest;
-			}
-			if (process.stack === null)
-			{
-				break;
-			}
-			process.root = process.stack.callback(process.root.value);
-			process.stack = process.stack.rest;
-			++numSteps;
-			continue;
-		}
-
-		if (ctor === '_Task_andThen')
-		{
-			process.stack = {
-				ctor: '_Task_andThen',
-				callback: process.root.callback,
-				rest: process.stack
-			};
-			process.root = process.root.task;
-			++numSteps;
-			continue;
-		}
-
-		if (ctor === '_Task_onError')
-		{
-			process.stack = {
-				ctor: '_Task_onError',
-				callback: process.root.callback,
-				rest: process.stack
-			};
-			process.root = process.root.task;
-			++numSteps;
-			continue;
-		}
-
-		if (ctor === '_Task_nativeBinding')
-		{
-			process.root.cancel = process.root.callback(function(newRoot) {
-				process.root = newRoot;
-				enqueue(process);
-			});
-
-			break;
-		}
-
-		if (ctor === '_Task_receive')
-		{
-			var mailbox = process.mailbox;
-			if (mailbox.length === 0)
-			{
-				break;
-			}
-
-			process.root = process.root.callback(mailbox.shift());
-			++numSteps;
-			continue;
-		}
-
-		throw new Error(ctor);
-	}
-
-	if (numSteps < MAX_STEPS)
-	{
-		return numSteps + 1;
-	}
-	enqueue(process);
-
-	return numSteps;
-}
-
-
-// WORK QUEUE
-
-var working = false;
-var workQueue = [];
-
-function enqueue(process)
-{
-	workQueue.push(process);
-
-	if (!working)
-	{
-		setTimeout(work, 0);
-		working = true;
-	}
-}
-
-function work()
-{
-	var numSteps = 0;
-	var process;
-	while (numSteps < MAX_STEPS && (process = workQueue.shift()))
-	{
-		if (process.root)
-		{
-			numSteps = step(numSteps, process);
-		}
-	}
-	if (!process)
-	{
-		working = false;
-		return;
-	}
-	setTimeout(work, 0);
-}
-
-
-return {
-	succeed: succeed,
-	fail: fail,
-	nativeBinding: nativeBinding,
-	andThen: F2(andThen),
-	onError: F2(onError),
-	receive: receive,
-
-	spawn: spawn,
-	kill: kill,
-	sleep: sleep,
-	send: F2(send),
-
-	rawSpawn: rawSpawn,
-	rawSend: rawSend
-};
-
-}();
-//import //
-
-var _elm_lang$core$Native_Platform = function() {
-
-
-// PROGRAMS
-
-function program(impl)
-{
-	return function(flagDecoder)
-	{
-		return function(object, moduleName)
-		{
-			object['worker'] = function worker(flags)
-			{
-				if (typeof flags !== 'undefined')
-				{
-					throw new Error(
-						'The `' + moduleName + '` module does not need flags.\n'
-						+ 'Call ' + moduleName + '.worker() with no arguments and you should be all set!'
-					);
-				}
-
-				return initialize(
-					impl.init,
-					impl.update,
-					impl.subscriptions,
-					renderer
-				);
-			};
-		};
-	};
-}
-
-function programWithFlags(impl)
-{
-	return function(flagDecoder)
-	{
-		return function(object, moduleName)
-		{
-			object['worker'] = function worker(flags)
-			{
-				if (typeof flagDecoder === 'undefined')
-				{
-					throw new Error(
-						'Are you trying to sneak a Never value into Elm? Trickster!\n'
-						+ 'It looks like ' + moduleName + '.main is defined with `programWithFlags` but has type `Program Never`.\n'
-						+ 'Use `program` instead if you do not want flags.'
-					);
-				}
-
-				var result = A2(_elm_lang$core$Native_Json.run, flagDecoder, flags);
-				if (result.ctor === 'Err')
-				{
-					throw new Error(
-						moduleName + '.worker(...) was called with an unexpected argument.\n'
-						+ 'I tried to convert it to an Elm value, but ran into this problem:\n\n'
-						+ result._0
-					);
-				}
-
-				return initialize(
-					impl.init(result._0),
-					impl.update,
-					impl.subscriptions,
-					renderer
-				);
-			};
-		};
-	};
-}
-
-function renderer(enqueue, _)
-{
-	return function(_) {};
-}
-
-
-// HTML TO PROGRAM
-
-function htmlToProgram(vnode)
-{
-	var emptyBag = batch(_elm_lang$core$Native_List.Nil);
-	var noChange = _elm_lang$core$Native_Utils.Tuple2(
-		_elm_lang$core$Native_Utils.Tuple0,
-		emptyBag
-	);
-
-	return _elm_lang$virtual_dom$VirtualDom$program({
-		init: noChange,
-		view: function(model) { return main; },
-		update: F2(function(msg, model) { return noChange; }),
-		subscriptions: function (model) { return emptyBag; }
-	});
-}
-
-
-// INITIALIZE A PROGRAM
-
-function initialize(init, update, subscriptions, renderer)
-{
-	// ambient state
-	var managers = {};
-	var updateView;
-
-	// init and update state in main process
-	var initApp = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-		var model = init._0;
-		updateView = renderer(enqueue, model);
-		var cmds = init._1;
-		var subs = subscriptions(model);
-		dispatchEffects(managers, cmds, subs);
-		callback(_elm_lang$core$Native_Scheduler.succeed(model));
-	});
-
-	function onMessage(msg, model)
-	{
-		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-			var results = A2(update, msg, model);
-			model = results._0;
-			updateView(model);
-			var cmds = results._1;
-			var subs = subscriptions(model);
-			dispatchEffects(managers, cmds, subs);
-			callback(_elm_lang$core$Native_Scheduler.succeed(model));
-		});
-	}
-
-	var mainProcess = spawnLoop(initApp, onMessage);
-
-	function enqueue(msg)
-	{
-		_elm_lang$core$Native_Scheduler.rawSend(mainProcess, msg);
-	}
-
-	var ports = setupEffects(managers, enqueue);
-
-	return ports ? { ports: ports } : {};
-}
-
-
-// EFFECT MANAGERS
-
-var effectManagers = {};
-
-function setupEffects(managers, callback)
-{
-	var ports;
-
-	// setup all necessary effect managers
-	for (var key in effectManagers)
-	{
-		var manager = effectManagers[key];
-
-		if (manager.isForeign)
-		{
-			ports = ports || {};
-			ports[key] = manager.tag === 'cmd'
-				? setupOutgoingPort(key)
-				: setupIncomingPort(key, callback);
-		}
-
-		managers[key] = makeManager(manager, callback);
-	}
-
-	return ports;
-}
-
-function makeManager(info, callback)
-{
-	var router = {
-		main: callback,
-		self: undefined
-	};
-
-	var tag = info.tag;
-	var onEffects = info.onEffects;
-	var onSelfMsg = info.onSelfMsg;
-
-	function onMessage(msg, state)
-	{
-		if (msg.ctor === 'self')
-		{
-			return A3(onSelfMsg, router, msg._0, state);
-		}
-
-		var fx = msg._0;
-		switch (tag)
-		{
-			case 'cmd':
-				return A3(onEffects, router, fx.cmds, state);
-
-			case 'sub':
-				return A3(onEffects, router, fx.subs, state);
-
-			case 'fx':
-				return A4(onEffects, router, fx.cmds, fx.subs, state);
-		}
-	}
-
-	var process = spawnLoop(info.init, onMessage);
-	router.self = process;
-	return process;
-}
-
-function sendToApp(router, msg)
-{
-	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
-	{
-		router.main(msg);
-		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
-	});
-}
-
-function sendToSelf(router, msg)
-{
-	return A2(_elm_lang$core$Native_Scheduler.send, router.self, {
-		ctor: 'self',
-		_0: msg
-	});
-}
-
-
-// HELPER for STATEFUL LOOPS
-
-function spawnLoop(init, onMessage)
-{
-	var andThen = _elm_lang$core$Native_Scheduler.andThen;
-
-	function loop(state)
-	{
-		var handleMsg = _elm_lang$core$Native_Scheduler.receive(function(msg) {
-			return onMessage(msg, state);
-		});
-		return A2(andThen, loop, handleMsg);
-	}
-
-	var task = A2(andThen, loop, init);
-
-	return _elm_lang$core$Native_Scheduler.rawSpawn(task);
-}
-
-
-// BAGS
-
-function leaf(home)
-{
-	return function(value)
-	{
-		return {
-			type: 'leaf',
-			home: home,
-			value: value
-		};
-	};
-}
-
-function batch(list)
-{
-	return {
-		type: 'node',
-		branches: list
-	};
-}
-
-function map(tagger, bag)
-{
-	return {
-		type: 'map',
-		tagger: tagger,
-		tree: bag
-	}
-}
-
-
-// PIPE BAGS INTO EFFECT MANAGERS
-
-function dispatchEffects(managers, cmdBag, subBag)
-{
-	var effectsDict = {};
-	gatherEffects(true, cmdBag, effectsDict, null);
-	gatherEffects(false, subBag, effectsDict, null);
-
-	for (var home in managers)
-	{
-		var fx = home in effectsDict
-			? effectsDict[home]
-			: {
-				cmds: _elm_lang$core$Native_List.Nil,
-				subs: _elm_lang$core$Native_List.Nil
-			};
-
-		_elm_lang$core$Native_Scheduler.rawSend(managers[home], { ctor: 'fx', _0: fx });
-	}
-}
-
-function gatherEffects(isCmd, bag, effectsDict, taggers)
-{
-	switch (bag.type)
-	{
-		case 'leaf':
-			var home = bag.home;
-			var effect = toEffect(isCmd, home, taggers, bag.value);
-			effectsDict[home] = insert(isCmd, effect, effectsDict[home]);
-			return;
-
-		case 'node':
-			var list = bag.branches;
-			while (list.ctor !== '[]')
-			{
-				gatherEffects(isCmd, list._0, effectsDict, taggers);
-				list = list._1;
-			}
-			return;
-
-		case 'map':
-			gatherEffects(isCmd, bag.tree, effectsDict, {
-				tagger: bag.tagger,
-				rest: taggers
-			});
-			return;
-	}
-}
-
-function toEffect(isCmd, home, taggers, value)
-{
-	function applyTaggers(x)
-	{
-		var temp = taggers;
-		while (temp)
-		{
-			x = temp.tagger(x);
-			temp = temp.rest;
-		}
-		return x;
-	}
-
-	var map = isCmd
-		? effectManagers[home].cmdMap
-		: effectManagers[home].subMap;
-
-	return A2(map, applyTaggers, value)
-}
-
-function insert(isCmd, newEffect, effects)
-{
-	effects = effects || {
-		cmds: _elm_lang$core$Native_List.Nil,
-		subs: _elm_lang$core$Native_List.Nil
-	};
-	if (isCmd)
-	{
-		effects.cmds = _elm_lang$core$Native_List.Cons(newEffect, effects.cmds);
-		return effects;
-	}
-	effects.subs = _elm_lang$core$Native_List.Cons(newEffect, effects.subs);
-	return effects;
-}
-
-
-// PORTS
-
-function checkPortName(name)
-{
-	if (name in effectManagers)
-	{
-		throw new Error('There can only be one port named `' + name + '`, but your program has multiple.');
-	}
-}
-
-
-// OUTGOING PORTS
-
-function outgoingPort(name, converter)
-{
-	checkPortName(name);
-	effectManagers[name] = {
-		tag: 'cmd',
-		cmdMap: outgoingPortMap,
-		converter: converter,
-		isForeign: true
-	};
-	return leaf(name);
-}
-
-var outgoingPortMap = F2(function cmdMap(tagger, value) {
-	return value;
-});
-
-function setupOutgoingPort(name)
-{
-	var subs = [];
-	var converter = effectManagers[name].converter;
-
-	// CREATE MANAGER
-
-	var init = _elm_lang$core$Native_Scheduler.succeed(null);
-
-	function onEffects(router, cmdList, state)
-	{
-		while (cmdList.ctor !== '[]')
-		{
-			// grab a separate reference to subs in case unsubscribe is called
-			var currentSubs = subs;
-			var value = converter(cmdList._0);
-			for (var i = 0; i < currentSubs.length; i++)
-			{
-				currentSubs[i](value);
-			}
-			cmdList = cmdList._1;
-		}
-		return init;
-	}
-
-	effectManagers[name].init = init;
-	effectManagers[name].onEffects = F3(onEffects);
-
-	// PUBLIC API
-
-	function subscribe(callback)
-	{
-		subs.push(callback);
-	}
-
-	function unsubscribe(callback)
-	{
-		// copy subs into a new array in case unsubscribe is called within a
-		// subscribed callback
-		subs = subs.slice();
-		var index = subs.indexOf(callback);
-		if (index >= 0)
-		{
-			subs.splice(index, 1);
-		}
-	}
-
-	return {
-		subscribe: subscribe,
-		unsubscribe: unsubscribe
-	};
-}
-
-
-// INCOMING PORTS
-
-function incomingPort(name, converter)
-{
-	checkPortName(name);
-	effectManagers[name] = {
-		tag: 'sub',
-		subMap: incomingPortMap,
-		converter: converter,
-		isForeign: true
-	};
-	return leaf(name);
-}
-
-var incomingPortMap = F2(function subMap(tagger, finalTagger)
-{
-	return function(value)
-	{
-		return tagger(finalTagger(value));
-	};
-});
-
-function setupIncomingPort(name, callback)
-{
-	var sentBeforeInit = [];
-	var subs = _elm_lang$core$Native_List.Nil;
-	var converter = effectManagers[name].converter;
-	var currentOnEffects = preInitOnEffects;
-	var currentSend = preInitSend;
-
-	// CREATE MANAGER
-
-	var init = _elm_lang$core$Native_Scheduler.succeed(null);
-
-	function preInitOnEffects(router, subList, state)
-	{
-		var postInitResult = postInitOnEffects(router, subList, state);
-
-		for(var i = 0; i < sentBeforeInit.length; i++)
-		{
-			postInitSend(sentBeforeInit[i]);
-		}
-
-		sentBeforeInit = null; // to release objects held in queue
-		currentSend = postInitSend;
-		currentOnEffects = postInitOnEffects;
-		return postInitResult;
-	}
-
-	function postInitOnEffects(router, subList, state)
-	{
-		subs = subList;
-		return init;
-	}
-
-	function onEffects(router, subList, state)
-	{
-		return currentOnEffects(router, subList, state);
-	}
-
-	effectManagers[name].init = init;
-	effectManagers[name].onEffects = F3(onEffects);
-
-	// PUBLIC API
-
-	function preInitSend(value)
-	{
-		sentBeforeInit.push(value);
-	}
-
-	function postInitSend(value)
-	{
-		var temp = subs;
-		while (temp.ctor !== '[]')
-		{
-			callback(temp._0(value));
-			temp = temp._1;
-		}
-	}
-
-	function send(incomingValue)
-	{
-		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
-		if (result.ctor === 'Err')
-		{
-			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
-		}
-
-		currentSend(result._0);
-	}
-
-	return { send: send };
-}
-
-return {
-	// routers
-	sendToApp: F2(sendToApp),
-	sendToSelf: F2(sendToSelf),
-
-	// global setup
-	effectManagers: effectManagers,
-	outgoingPort: outgoingPort,
-	incomingPort: incomingPort,
-
-	htmlToProgram: htmlToProgram,
-	program: program,
-	programWithFlags: programWithFlags,
-	initialize: initialize,
-
-	// effect bags
-	leaf: leaf,
-	batch: batch,
-	map: F2(map)
-};
-
-}();
-
-var _elm_lang$core$Platform_Cmd$batch = _elm_lang$core$Native_Platform.batch;
-var _elm_lang$core$Platform_Cmd$none = _elm_lang$core$Platform_Cmd$batch(
-	{ctor: '[]'});
-var _elm_lang$core$Platform_Cmd_ops = _elm_lang$core$Platform_Cmd_ops || {};
-_elm_lang$core$Platform_Cmd_ops['!'] = F2(
-	function (model, commands) {
-		return {
-			ctor: '_Tuple2',
-			_0: model,
-			_1: _elm_lang$core$Platform_Cmd$batch(commands)
-		};
-	});
-var _elm_lang$core$Platform_Cmd$map = _elm_lang$core$Native_Platform.map;
-var _elm_lang$core$Platform_Cmd$Cmd = {ctor: 'Cmd'};
-
-var _elm_lang$core$Platform_Sub$batch = _elm_lang$core$Native_Platform.batch;
-var _elm_lang$core$Platform_Sub$none = _elm_lang$core$Platform_Sub$batch(
-	{ctor: '[]'});
-var _elm_lang$core$Platform_Sub$map = _elm_lang$core$Native_Platform.map;
-var _elm_lang$core$Platform_Sub$Sub = {ctor: 'Sub'};
-
-var _elm_lang$core$Platform$hack = _elm_lang$core$Native_Scheduler.succeed;
-var _elm_lang$core$Platform$sendToSelf = _elm_lang$core$Native_Platform.sendToSelf;
-var _elm_lang$core$Platform$sendToApp = _elm_lang$core$Native_Platform.sendToApp;
-var _elm_lang$core$Platform$programWithFlags = _elm_lang$core$Native_Platform.programWithFlags;
-var _elm_lang$core$Platform$program = _elm_lang$core$Native_Platform.program;
-var _elm_lang$core$Platform$Program = {ctor: 'Program'};
-var _elm_lang$core$Platform$Task = {ctor: 'Task'};
-var _elm_lang$core$Platform$ProcessId = {ctor: 'ProcessId'};
-var _elm_lang$core$Platform$Router = {ctor: 'Router'};
-
-var _elm_lang$core$Result$toMaybe = function (result) {
-	var _p0 = result;
-	if (_p0.ctor === 'Ok') {
-		return _elm_lang$core$Maybe$Just(_p0._0);
-	} else {
-		return _elm_lang$core$Maybe$Nothing;
-	}
-};
-var _elm_lang$core$Result$withDefault = F2(
-	function (def, result) {
-		var _p1 = result;
-		if (_p1.ctor === 'Ok') {
-			return _p1._0;
-		} else {
-			return def;
-		}
-	});
-var _elm_lang$core$Result$Err = function (a) {
-	return {ctor: 'Err', _0: a};
-};
-var _elm_lang$core$Result$andThen = F2(
-	function (callback, result) {
-		var _p2 = result;
-		if (_p2.ctor === 'Ok') {
-			return callback(_p2._0);
-		} else {
-			return _elm_lang$core$Result$Err(_p2._0);
-		}
-	});
-var _elm_lang$core$Result$Ok = function (a) {
-	return {ctor: 'Ok', _0: a};
-};
-var _elm_lang$core$Result$map = F2(
-	function (func, ra) {
-		var _p3 = ra;
-		if (_p3.ctor === 'Ok') {
-			return _elm_lang$core$Result$Ok(
-				func(_p3._0));
-		} else {
-			return _elm_lang$core$Result$Err(_p3._0);
-		}
-	});
-var _elm_lang$core$Result$map2 = F3(
-	function (func, ra, rb) {
-		var _p4 = {ctor: '_Tuple2', _0: ra, _1: rb};
-		if (_p4._0.ctor === 'Ok') {
-			if (_p4._1.ctor === 'Ok') {
-				return _elm_lang$core$Result$Ok(
-					A2(func, _p4._0._0, _p4._1._0));
-			} else {
-				return _elm_lang$core$Result$Err(_p4._1._0);
-			}
-		} else {
-			return _elm_lang$core$Result$Err(_p4._0._0);
-		}
-	});
-var _elm_lang$core$Result$map3 = F4(
-	function (func, ra, rb, rc) {
-		var _p5 = {ctor: '_Tuple3', _0: ra, _1: rb, _2: rc};
-		if (_p5._0.ctor === 'Ok') {
-			if (_p5._1.ctor === 'Ok') {
-				if (_p5._2.ctor === 'Ok') {
-					return _elm_lang$core$Result$Ok(
-						A3(func, _p5._0._0, _p5._1._0, _p5._2._0));
-				} else {
-					return _elm_lang$core$Result$Err(_p5._2._0);
-				}
-			} else {
-				return _elm_lang$core$Result$Err(_p5._1._0);
-			}
-		} else {
-			return _elm_lang$core$Result$Err(_p5._0._0);
-		}
-	});
-var _elm_lang$core$Result$map4 = F5(
-	function (func, ra, rb, rc, rd) {
-		var _p6 = {ctor: '_Tuple4', _0: ra, _1: rb, _2: rc, _3: rd};
-		if (_p6._0.ctor === 'Ok') {
-			if (_p6._1.ctor === 'Ok') {
-				if (_p6._2.ctor === 'Ok') {
-					if (_p6._3.ctor === 'Ok') {
-						return _elm_lang$core$Result$Ok(
-							A4(func, _p6._0._0, _p6._1._0, _p6._2._0, _p6._3._0));
-					} else {
-						return _elm_lang$core$Result$Err(_p6._3._0);
-					}
-				} else {
-					return _elm_lang$core$Result$Err(_p6._2._0);
-				}
-			} else {
-				return _elm_lang$core$Result$Err(_p6._1._0);
-			}
-		} else {
-			return _elm_lang$core$Result$Err(_p6._0._0);
-		}
-	});
-var _elm_lang$core$Result$map5 = F6(
-	function (func, ra, rb, rc, rd, re) {
-		var _p7 = {ctor: '_Tuple5', _0: ra, _1: rb, _2: rc, _3: rd, _4: re};
-		if (_p7._0.ctor === 'Ok') {
-			if (_p7._1.ctor === 'Ok') {
-				if (_p7._2.ctor === 'Ok') {
-					if (_p7._3.ctor === 'Ok') {
-						if (_p7._4.ctor === 'Ok') {
-							return _elm_lang$core$Result$Ok(
-								A5(func, _p7._0._0, _p7._1._0, _p7._2._0, _p7._3._0, _p7._4._0));
-						} else {
-							return _elm_lang$core$Result$Err(_p7._4._0);
-						}
-					} else {
-						return _elm_lang$core$Result$Err(_p7._3._0);
-					}
-				} else {
-					return _elm_lang$core$Result$Err(_p7._2._0);
-				}
-			} else {
-				return _elm_lang$core$Result$Err(_p7._1._0);
-			}
-		} else {
-			return _elm_lang$core$Result$Err(_p7._0._0);
-		}
-	});
-var _elm_lang$core$Result$mapError = F2(
-	function (f, result) {
-		var _p8 = result;
-		if (_p8.ctor === 'Ok') {
-			return _elm_lang$core$Result$Ok(_p8._0);
-		} else {
-			return _elm_lang$core$Result$Err(
-				f(_p8._0));
-		}
-	});
-var _elm_lang$core$Result$fromMaybe = F2(
-	function (err, maybe) {
-		var _p9 = maybe;
-		if (_p9.ctor === 'Just') {
-			return _elm_lang$core$Result$Ok(_p9._0);
-		} else {
-			return _elm_lang$core$Result$Err(err);
-		}
-	});
-
-//import Native.Utils //
-
 var _elm_lang$core$Native_Debug = function() {
 
 function log(tag, value)
@@ -4115,6 +3044,205 @@ return {
 };
 
 }();
+
+//import Native.Utils //
+
+var _elm_lang$core$Native_Char = function() {
+
+return {
+	fromCode: function(c) { return _elm_lang$core$Native_Utils.chr(String.fromCharCode(c)); },
+	toCode: function(c) { return c.charCodeAt(0); },
+	toUpper: function(c) { return _elm_lang$core$Native_Utils.chr(c.toUpperCase()); },
+	toLower: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLowerCase()); },
+	toLocaleUpper: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLocaleUpperCase()); },
+	toLocaleLower: function(c) { return _elm_lang$core$Native_Utils.chr(c.toLocaleLowerCase()); }
+};
+
+}();
+var _elm_lang$core$Char$fromCode = _elm_lang$core$Native_Char.fromCode;
+var _elm_lang$core$Char$toCode = _elm_lang$core$Native_Char.toCode;
+var _elm_lang$core$Char$toLocaleLower = _elm_lang$core$Native_Char.toLocaleLower;
+var _elm_lang$core$Char$toLocaleUpper = _elm_lang$core$Native_Char.toLocaleUpper;
+var _elm_lang$core$Char$toLower = _elm_lang$core$Native_Char.toLower;
+var _elm_lang$core$Char$toUpper = _elm_lang$core$Native_Char.toUpper;
+var _elm_lang$core$Char$isBetween = F3(
+	function (low, high, $char) {
+		var code = _elm_lang$core$Char$toCode($char);
+		return (_elm_lang$core$Native_Utils.cmp(
+			code,
+			_elm_lang$core$Char$toCode(low)) > -1) && (_elm_lang$core$Native_Utils.cmp(
+			code,
+			_elm_lang$core$Char$toCode(high)) < 1);
+	});
+var _elm_lang$core$Char$isUpper = A2(
+	_elm_lang$core$Char$isBetween,
+	_elm_lang$core$Native_Utils.chr('A'),
+	_elm_lang$core$Native_Utils.chr('Z'));
+var _elm_lang$core$Char$isLower = A2(
+	_elm_lang$core$Char$isBetween,
+	_elm_lang$core$Native_Utils.chr('a'),
+	_elm_lang$core$Native_Utils.chr('z'));
+var _elm_lang$core$Char$isDigit = A2(
+	_elm_lang$core$Char$isBetween,
+	_elm_lang$core$Native_Utils.chr('0'),
+	_elm_lang$core$Native_Utils.chr('9'));
+var _elm_lang$core$Char$isOctDigit = A2(
+	_elm_lang$core$Char$isBetween,
+	_elm_lang$core$Native_Utils.chr('0'),
+	_elm_lang$core$Native_Utils.chr('7'));
+var _elm_lang$core$Char$isHexDigit = function ($char) {
+	return _elm_lang$core$Char$isDigit($char) || (A3(
+		_elm_lang$core$Char$isBetween,
+		_elm_lang$core$Native_Utils.chr('a'),
+		_elm_lang$core$Native_Utils.chr('f'),
+		$char) || A3(
+		_elm_lang$core$Char$isBetween,
+		_elm_lang$core$Native_Utils.chr('A'),
+		_elm_lang$core$Native_Utils.chr('F'),
+		$char));
+};
+
+var _elm_lang$core$Result$toMaybe = function (result) {
+	var _p0 = result;
+	if (_p0.ctor === 'Ok') {
+		return _elm_lang$core$Maybe$Just(_p0._0);
+	} else {
+		return _elm_lang$core$Maybe$Nothing;
+	}
+};
+var _elm_lang$core$Result$withDefault = F2(
+	function (def, result) {
+		var _p1 = result;
+		if (_p1.ctor === 'Ok') {
+			return _p1._0;
+		} else {
+			return def;
+		}
+	});
+var _elm_lang$core$Result$Err = function (a) {
+	return {ctor: 'Err', _0: a};
+};
+var _elm_lang$core$Result$andThen = F2(
+	function (callback, result) {
+		var _p2 = result;
+		if (_p2.ctor === 'Ok') {
+			return callback(_p2._0);
+		} else {
+			return _elm_lang$core$Result$Err(_p2._0);
+		}
+	});
+var _elm_lang$core$Result$Ok = function (a) {
+	return {ctor: 'Ok', _0: a};
+};
+var _elm_lang$core$Result$map = F2(
+	function (func, ra) {
+		var _p3 = ra;
+		if (_p3.ctor === 'Ok') {
+			return _elm_lang$core$Result$Ok(
+				func(_p3._0));
+		} else {
+			return _elm_lang$core$Result$Err(_p3._0);
+		}
+	});
+var _elm_lang$core$Result$map2 = F3(
+	function (func, ra, rb) {
+		var _p4 = {ctor: '_Tuple2', _0: ra, _1: rb};
+		if (_p4._0.ctor === 'Ok') {
+			if (_p4._1.ctor === 'Ok') {
+				return _elm_lang$core$Result$Ok(
+					A2(func, _p4._0._0, _p4._1._0));
+			} else {
+				return _elm_lang$core$Result$Err(_p4._1._0);
+			}
+		} else {
+			return _elm_lang$core$Result$Err(_p4._0._0);
+		}
+	});
+var _elm_lang$core$Result$map3 = F4(
+	function (func, ra, rb, rc) {
+		var _p5 = {ctor: '_Tuple3', _0: ra, _1: rb, _2: rc};
+		if (_p5._0.ctor === 'Ok') {
+			if (_p5._1.ctor === 'Ok') {
+				if (_p5._2.ctor === 'Ok') {
+					return _elm_lang$core$Result$Ok(
+						A3(func, _p5._0._0, _p5._1._0, _p5._2._0));
+				} else {
+					return _elm_lang$core$Result$Err(_p5._2._0);
+				}
+			} else {
+				return _elm_lang$core$Result$Err(_p5._1._0);
+			}
+		} else {
+			return _elm_lang$core$Result$Err(_p5._0._0);
+		}
+	});
+var _elm_lang$core$Result$map4 = F5(
+	function (func, ra, rb, rc, rd) {
+		var _p6 = {ctor: '_Tuple4', _0: ra, _1: rb, _2: rc, _3: rd};
+		if (_p6._0.ctor === 'Ok') {
+			if (_p6._1.ctor === 'Ok') {
+				if (_p6._2.ctor === 'Ok') {
+					if (_p6._3.ctor === 'Ok') {
+						return _elm_lang$core$Result$Ok(
+							A4(func, _p6._0._0, _p6._1._0, _p6._2._0, _p6._3._0));
+					} else {
+						return _elm_lang$core$Result$Err(_p6._3._0);
+					}
+				} else {
+					return _elm_lang$core$Result$Err(_p6._2._0);
+				}
+			} else {
+				return _elm_lang$core$Result$Err(_p6._1._0);
+			}
+		} else {
+			return _elm_lang$core$Result$Err(_p6._0._0);
+		}
+	});
+var _elm_lang$core$Result$map5 = F6(
+	function (func, ra, rb, rc, rd, re) {
+		var _p7 = {ctor: '_Tuple5', _0: ra, _1: rb, _2: rc, _3: rd, _4: re};
+		if (_p7._0.ctor === 'Ok') {
+			if (_p7._1.ctor === 'Ok') {
+				if (_p7._2.ctor === 'Ok') {
+					if (_p7._3.ctor === 'Ok') {
+						if (_p7._4.ctor === 'Ok') {
+							return _elm_lang$core$Result$Ok(
+								A5(func, _p7._0._0, _p7._1._0, _p7._2._0, _p7._3._0, _p7._4._0));
+						} else {
+							return _elm_lang$core$Result$Err(_p7._4._0);
+						}
+					} else {
+						return _elm_lang$core$Result$Err(_p7._3._0);
+					}
+				} else {
+					return _elm_lang$core$Result$Err(_p7._2._0);
+				}
+			} else {
+				return _elm_lang$core$Result$Err(_p7._1._0);
+			}
+		} else {
+			return _elm_lang$core$Result$Err(_p7._0._0);
+		}
+	});
+var _elm_lang$core$Result$mapError = F2(
+	function (f, result) {
+		var _p8 = result;
+		if (_p8.ctor === 'Ok') {
+			return _elm_lang$core$Result$Ok(_p8._0);
+		} else {
+			return _elm_lang$core$Result$Err(
+				f(_p8._0));
+		}
+	});
+var _elm_lang$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		var _p9 = maybe;
+		if (_p9.ctor === 'Just') {
+			return _elm_lang$core$Result$Ok(_p9._0);
+		} else {
+			return _elm_lang$core$Result$Err(err);
+		}
+	});
 
 var _elm_lang$core$String$fromList = _elm_lang$core$Native_String.fromList;
 var _elm_lang$core$String$toList = _elm_lang$core$Native_String.toList;
@@ -5077,9 +4205,6 @@ var _elm_lang$core$Dict$diff = F2(
 			t2);
 	});
 
-var _elm_lang$core$Debug$crash = _elm_lang$core$Native_Debug.crash;
-var _elm_lang$core$Debug$log = _elm_lang$core$Native_Debug.log;
-
 //import Maybe, Native.Array, Native.List, Native.Utils, Result //
 
 var _elm_lang$core$Native_Json = function() {
@@ -5729,33 +4854,6 @@ var _elm_lang$core$Json_Decode$int = _elm_lang$core$Native_Json.decodePrimitive(
 var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive('bool');
 var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
-
-var _elm_lang$core$Tuple$mapSecond = F2(
-	function (func, _p0) {
-		var _p1 = _p0;
-		return {
-			ctor: '_Tuple2',
-			_0: _p1._0,
-			_1: func(_p1._1)
-		};
-	});
-var _elm_lang$core$Tuple$mapFirst = F2(
-	function (func, _p2) {
-		var _p3 = _p2;
-		return {
-			ctor: '_Tuple2',
-			_0: func(_p3._0),
-			_1: _p3._1
-		};
-	});
-var _elm_lang$core$Tuple$second = function (_p4) {
-	var _p5 = _p4;
-	return _p5._1;
-};
-var _elm_lang$core$Tuple$first = function (_p6) {
-	var _p7 = _p6;
-	return _p7._0;
-};
 
 var _elm_lang$virtual_dom$VirtualDom_Debug$wrap;
 var _elm_lang$virtual_dom$VirtualDom_Debug$wrapWithFlags;
@@ -7639,6 +6737,908 @@ return {
 
 }();
 
+var _elm_lang$core$Debug$crash = _elm_lang$core$Native_Debug.crash;
+var _elm_lang$core$Debug$log = _elm_lang$core$Native_Debug.log;
+
+var _elm_lang$core$Tuple$mapSecond = F2(
+	function (func, _p0) {
+		var _p1 = _p0;
+		return {
+			ctor: '_Tuple2',
+			_0: _p1._0,
+			_1: func(_p1._1)
+		};
+	});
+var _elm_lang$core$Tuple$mapFirst = F2(
+	function (func, _p2) {
+		var _p3 = _p2;
+		return {
+			ctor: '_Tuple2',
+			_0: func(_p3._0),
+			_1: _p3._1
+		};
+	});
+var _elm_lang$core$Tuple$second = function (_p4) {
+	var _p5 = _p4;
+	return _p5._1;
+};
+var _elm_lang$core$Tuple$first = function (_p6) {
+	var _p7 = _p6;
+	return _p7._0;
+};
+
+//import //
+
+var _elm_lang$core$Native_Platform = function() {
+
+
+// PROGRAMS
+
+function program(impl)
+{
+	return function(flagDecoder)
+	{
+		return function(object, moduleName)
+		{
+			object['worker'] = function worker(flags)
+			{
+				if (typeof flags !== 'undefined')
+				{
+					throw new Error(
+						'The `' + moduleName + '` module does not need flags.\n'
+						+ 'Call ' + moduleName + '.worker() with no arguments and you should be all set!'
+					);
+				}
+
+				return initialize(
+					impl.init,
+					impl.update,
+					impl.subscriptions,
+					renderer
+				);
+			};
+		};
+	};
+}
+
+function programWithFlags(impl)
+{
+	return function(flagDecoder)
+	{
+		return function(object, moduleName)
+		{
+			object['worker'] = function worker(flags)
+			{
+				if (typeof flagDecoder === 'undefined')
+				{
+					throw new Error(
+						'Are you trying to sneak a Never value into Elm? Trickster!\n'
+						+ 'It looks like ' + moduleName + '.main is defined with `programWithFlags` but has type `Program Never`.\n'
+						+ 'Use `program` instead if you do not want flags.'
+					);
+				}
+
+				var result = A2(_elm_lang$core$Native_Json.run, flagDecoder, flags);
+				if (result.ctor === 'Err')
+				{
+					throw new Error(
+						moduleName + '.worker(...) was called with an unexpected argument.\n'
+						+ 'I tried to convert it to an Elm value, but ran into this problem:\n\n'
+						+ result._0
+					);
+				}
+
+				return initialize(
+					impl.init(result._0),
+					impl.update,
+					impl.subscriptions,
+					renderer
+				);
+			};
+		};
+	};
+}
+
+function renderer(enqueue, _)
+{
+	return function(_) {};
+}
+
+
+// HTML TO PROGRAM
+
+function htmlToProgram(vnode)
+{
+	var emptyBag = batch(_elm_lang$core$Native_List.Nil);
+	var noChange = _elm_lang$core$Native_Utils.Tuple2(
+		_elm_lang$core$Native_Utils.Tuple0,
+		emptyBag
+	);
+
+	return _elm_lang$virtual_dom$VirtualDom$program({
+		init: noChange,
+		view: function(model) { return main; },
+		update: F2(function(msg, model) { return noChange; }),
+		subscriptions: function (model) { return emptyBag; }
+	});
+}
+
+
+// INITIALIZE A PROGRAM
+
+function initialize(init, update, subscriptions, renderer)
+{
+	// ambient state
+	var managers = {};
+	var updateView;
+
+	// init and update state in main process
+	var initApp = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+		var model = init._0;
+		updateView = renderer(enqueue, model);
+		var cmds = init._1;
+		var subs = subscriptions(model);
+		dispatchEffects(managers, cmds, subs);
+		callback(_elm_lang$core$Native_Scheduler.succeed(model));
+	});
+
+	function onMessage(msg, model)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+			var results = A2(update, msg, model);
+			model = results._0;
+			updateView(model);
+			var cmds = results._1;
+			var subs = subscriptions(model);
+			dispatchEffects(managers, cmds, subs);
+			callback(_elm_lang$core$Native_Scheduler.succeed(model));
+		});
+	}
+
+	var mainProcess = spawnLoop(initApp, onMessage);
+
+	function enqueue(msg)
+	{
+		_elm_lang$core$Native_Scheduler.rawSend(mainProcess, msg);
+	}
+
+	var ports = setupEffects(managers, enqueue);
+
+	return ports ? { ports: ports } : {};
+}
+
+
+// EFFECT MANAGERS
+
+var effectManagers = {};
+
+function setupEffects(managers, callback)
+{
+	var ports;
+
+	// setup all necessary effect managers
+	for (var key in effectManagers)
+	{
+		var manager = effectManagers[key];
+
+		if (manager.isForeign)
+		{
+			ports = ports || {};
+			ports[key] = manager.tag === 'cmd'
+				? setupOutgoingPort(key)
+				: setupIncomingPort(key, callback);
+		}
+
+		managers[key] = makeManager(manager, callback);
+	}
+
+	return ports;
+}
+
+function makeManager(info, callback)
+{
+	var router = {
+		main: callback,
+		self: undefined
+	};
+
+	var tag = info.tag;
+	var onEffects = info.onEffects;
+	var onSelfMsg = info.onSelfMsg;
+
+	function onMessage(msg, state)
+	{
+		if (msg.ctor === 'self')
+		{
+			return A3(onSelfMsg, router, msg._0, state);
+		}
+
+		var fx = msg._0;
+		switch (tag)
+		{
+			case 'cmd':
+				return A3(onEffects, router, fx.cmds, state);
+
+			case 'sub':
+				return A3(onEffects, router, fx.subs, state);
+
+			case 'fx':
+				return A4(onEffects, router, fx.cmds, fx.subs, state);
+		}
+	}
+
+	var process = spawnLoop(info.init, onMessage);
+	router.self = process;
+	return process;
+}
+
+function sendToApp(router, msg)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		router.main(msg);
+		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
+	});
+}
+
+function sendToSelf(router, msg)
+{
+	return A2(_elm_lang$core$Native_Scheduler.send, router.self, {
+		ctor: 'self',
+		_0: msg
+	});
+}
+
+
+// HELPER for STATEFUL LOOPS
+
+function spawnLoop(init, onMessage)
+{
+	var andThen = _elm_lang$core$Native_Scheduler.andThen;
+
+	function loop(state)
+	{
+		var handleMsg = _elm_lang$core$Native_Scheduler.receive(function(msg) {
+			return onMessage(msg, state);
+		});
+		return A2(andThen, loop, handleMsg);
+	}
+
+	var task = A2(andThen, loop, init);
+
+	return _elm_lang$core$Native_Scheduler.rawSpawn(task);
+}
+
+
+// BAGS
+
+function leaf(home)
+{
+	return function(value)
+	{
+		return {
+			type: 'leaf',
+			home: home,
+			value: value
+		};
+	};
+}
+
+function batch(list)
+{
+	return {
+		type: 'node',
+		branches: list
+	};
+}
+
+function map(tagger, bag)
+{
+	return {
+		type: 'map',
+		tagger: tagger,
+		tree: bag
+	}
+}
+
+
+// PIPE BAGS INTO EFFECT MANAGERS
+
+function dispatchEffects(managers, cmdBag, subBag)
+{
+	var effectsDict = {};
+	gatherEffects(true, cmdBag, effectsDict, null);
+	gatherEffects(false, subBag, effectsDict, null);
+
+	for (var home in managers)
+	{
+		var fx = home in effectsDict
+			? effectsDict[home]
+			: {
+				cmds: _elm_lang$core$Native_List.Nil,
+				subs: _elm_lang$core$Native_List.Nil
+			};
+
+		_elm_lang$core$Native_Scheduler.rawSend(managers[home], { ctor: 'fx', _0: fx });
+	}
+}
+
+function gatherEffects(isCmd, bag, effectsDict, taggers)
+{
+	switch (bag.type)
+	{
+		case 'leaf':
+			var home = bag.home;
+			var effect = toEffect(isCmd, home, taggers, bag.value);
+			effectsDict[home] = insert(isCmd, effect, effectsDict[home]);
+			return;
+
+		case 'node':
+			var list = bag.branches;
+			while (list.ctor !== '[]')
+			{
+				gatherEffects(isCmd, list._0, effectsDict, taggers);
+				list = list._1;
+			}
+			return;
+
+		case 'map':
+			gatherEffects(isCmd, bag.tree, effectsDict, {
+				tagger: bag.tagger,
+				rest: taggers
+			});
+			return;
+	}
+}
+
+function toEffect(isCmd, home, taggers, value)
+{
+	function applyTaggers(x)
+	{
+		var temp = taggers;
+		while (temp)
+		{
+			x = temp.tagger(x);
+			temp = temp.rest;
+		}
+		return x;
+	}
+
+	var map = isCmd
+		? effectManagers[home].cmdMap
+		: effectManagers[home].subMap;
+
+	return A2(map, applyTaggers, value)
+}
+
+function insert(isCmd, newEffect, effects)
+{
+	effects = effects || {
+		cmds: _elm_lang$core$Native_List.Nil,
+		subs: _elm_lang$core$Native_List.Nil
+	};
+	if (isCmd)
+	{
+		effects.cmds = _elm_lang$core$Native_List.Cons(newEffect, effects.cmds);
+		return effects;
+	}
+	effects.subs = _elm_lang$core$Native_List.Cons(newEffect, effects.subs);
+	return effects;
+}
+
+
+// PORTS
+
+function checkPortName(name)
+{
+	if (name in effectManagers)
+	{
+		throw new Error('There can only be one port named `' + name + '`, but your program has multiple.');
+	}
+}
+
+
+// OUTGOING PORTS
+
+function outgoingPort(name, converter)
+{
+	checkPortName(name);
+	effectManagers[name] = {
+		tag: 'cmd',
+		cmdMap: outgoingPortMap,
+		converter: converter,
+		isForeign: true
+	};
+	return leaf(name);
+}
+
+var outgoingPortMap = F2(function cmdMap(tagger, value) {
+	return value;
+});
+
+function setupOutgoingPort(name)
+{
+	var subs = [];
+	var converter = effectManagers[name].converter;
+
+	// CREATE MANAGER
+
+	var init = _elm_lang$core$Native_Scheduler.succeed(null);
+
+	function onEffects(router, cmdList, state)
+	{
+		while (cmdList.ctor !== '[]')
+		{
+			// grab a separate reference to subs in case unsubscribe is called
+			var currentSubs = subs;
+			var value = converter(cmdList._0);
+			for (var i = 0; i < currentSubs.length; i++)
+			{
+				currentSubs[i](value);
+			}
+			cmdList = cmdList._1;
+		}
+		return init;
+	}
+
+	effectManagers[name].init = init;
+	effectManagers[name].onEffects = F3(onEffects);
+
+	// PUBLIC API
+
+	function subscribe(callback)
+	{
+		subs.push(callback);
+	}
+
+	function unsubscribe(callback)
+	{
+		// copy subs into a new array in case unsubscribe is called within a
+		// subscribed callback
+		subs = subs.slice();
+		var index = subs.indexOf(callback);
+		if (index >= 0)
+		{
+			subs.splice(index, 1);
+		}
+	}
+
+	return {
+		subscribe: subscribe,
+		unsubscribe: unsubscribe
+	};
+}
+
+
+// INCOMING PORTS
+
+function incomingPort(name, converter)
+{
+	checkPortName(name);
+	effectManagers[name] = {
+		tag: 'sub',
+		subMap: incomingPortMap,
+		converter: converter,
+		isForeign: true
+	};
+	return leaf(name);
+}
+
+var incomingPortMap = F2(function subMap(tagger, finalTagger)
+{
+	return function(value)
+	{
+		return tagger(finalTagger(value));
+	};
+});
+
+function setupIncomingPort(name, callback)
+{
+	var sentBeforeInit = [];
+	var subs = _elm_lang$core$Native_List.Nil;
+	var converter = effectManagers[name].converter;
+	var currentOnEffects = preInitOnEffects;
+	var currentSend = preInitSend;
+
+	// CREATE MANAGER
+
+	var init = _elm_lang$core$Native_Scheduler.succeed(null);
+
+	function preInitOnEffects(router, subList, state)
+	{
+		var postInitResult = postInitOnEffects(router, subList, state);
+
+		for(var i = 0; i < sentBeforeInit.length; i++)
+		{
+			postInitSend(sentBeforeInit[i]);
+		}
+
+		sentBeforeInit = null; // to release objects held in queue
+		currentSend = postInitSend;
+		currentOnEffects = postInitOnEffects;
+		return postInitResult;
+	}
+
+	function postInitOnEffects(router, subList, state)
+	{
+		subs = subList;
+		return init;
+	}
+
+	function onEffects(router, subList, state)
+	{
+		return currentOnEffects(router, subList, state);
+	}
+
+	effectManagers[name].init = init;
+	effectManagers[name].onEffects = F3(onEffects);
+
+	// PUBLIC API
+
+	function preInitSend(value)
+	{
+		sentBeforeInit.push(value);
+	}
+
+	function postInitSend(value)
+	{
+		var temp = subs;
+		while (temp.ctor !== '[]')
+		{
+			callback(temp._0(value));
+			temp = temp._1;
+		}
+	}
+
+	function send(incomingValue)
+	{
+		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
+		if (result.ctor === 'Err')
+		{
+			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
+		}
+
+		currentSend(result._0);
+	}
+
+	return { send: send };
+}
+
+return {
+	// routers
+	sendToApp: F2(sendToApp),
+	sendToSelf: F2(sendToSelf),
+
+	// global setup
+	effectManagers: effectManagers,
+	outgoingPort: outgoingPort,
+	incomingPort: incomingPort,
+
+	htmlToProgram: htmlToProgram,
+	program: program,
+	programWithFlags: programWithFlags,
+	initialize: initialize,
+
+	// effect bags
+	leaf: leaf,
+	batch: batch,
+	map: F2(map)
+};
+
+}();
+
+//import Native.Utils //
+
+var _elm_lang$core$Native_Scheduler = function() {
+
+var MAX_STEPS = 10000;
+
+
+// TASKS
+
+function succeed(value)
+{
+	return {
+		ctor: '_Task_succeed',
+		value: value
+	};
+}
+
+function fail(error)
+{
+	return {
+		ctor: '_Task_fail',
+		value: error
+	};
+}
+
+function nativeBinding(callback)
+{
+	return {
+		ctor: '_Task_nativeBinding',
+		callback: callback,
+		cancel: null
+	};
+}
+
+function andThen(callback, task)
+{
+	return {
+		ctor: '_Task_andThen',
+		callback: callback,
+		task: task
+	};
+}
+
+function onError(callback, task)
+{
+	return {
+		ctor: '_Task_onError',
+		callback: callback,
+		task: task
+	};
+}
+
+function receive(callback)
+{
+	return {
+		ctor: '_Task_receive',
+		callback: callback
+	};
+}
+
+
+// PROCESSES
+
+function rawSpawn(task)
+{
+	var process = {
+		ctor: '_Process',
+		id: _elm_lang$core$Native_Utils.guid(),
+		root: task,
+		stack: null,
+		mailbox: []
+	};
+
+	enqueue(process);
+
+	return process;
+}
+
+function spawn(task)
+{
+	return nativeBinding(function(callback) {
+		var process = rawSpawn(task);
+		callback(succeed(process));
+	});
+}
+
+function rawSend(process, msg)
+{
+	process.mailbox.push(msg);
+	enqueue(process);
+}
+
+function send(process, msg)
+{
+	return nativeBinding(function(callback) {
+		rawSend(process, msg);
+		callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
+	});
+}
+
+function kill(process)
+{
+	return nativeBinding(function(callback) {
+		var root = process.root;
+		if (root.ctor === '_Task_nativeBinding' && root.cancel)
+		{
+			root.cancel();
+		}
+
+		process.root = null;
+
+		callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
+	});
+}
+
+function sleep(time)
+{
+	return nativeBinding(function(callback) {
+		var id = setTimeout(function() {
+			callback(succeed(_elm_lang$core$Native_Utils.Tuple0));
+		}, time);
+
+		return function() { clearTimeout(id); };
+	});
+}
+
+
+// STEP PROCESSES
+
+function step(numSteps, process)
+{
+	while (numSteps < MAX_STEPS)
+	{
+		var ctor = process.root.ctor;
+
+		if (ctor === '_Task_succeed')
+		{
+			while (process.stack && process.stack.ctor === '_Task_onError')
+			{
+				process.stack = process.stack.rest;
+			}
+			if (process.stack === null)
+			{
+				break;
+			}
+			process.root = process.stack.callback(process.root.value);
+			process.stack = process.stack.rest;
+			++numSteps;
+			continue;
+		}
+
+		if (ctor === '_Task_fail')
+		{
+			while (process.stack && process.stack.ctor === '_Task_andThen')
+			{
+				process.stack = process.stack.rest;
+			}
+			if (process.stack === null)
+			{
+				break;
+			}
+			process.root = process.stack.callback(process.root.value);
+			process.stack = process.stack.rest;
+			++numSteps;
+			continue;
+		}
+
+		if (ctor === '_Task_andThen')
+		{
+			process.stack = {
+				ctor: '_Task_andThen',
+				callback: process.root.callback,
+				rest: process.stack
+			};
+			process.root = process.root.task;
+			++numSteps;
+			continue;
+		}
+
+		if (ctor === '_Task_onError')
+		{
+			process.stack = {
+				ctor: '_Task_onError',
+				callback: process.root.callback,
+				rest: process.stack
+			};
+			process.root = process.root.task;
+			++numSteps;
+			continue;
+		}
+
+		if (ctor === '_Task_nativeBinding')
+		{
+			process.root.cancel = process.root.callback(function(newRoot) {
+				process.root = newRoot;
+				enqueue(process);
+			});
+
+			break;
+		}
+
+		if (ctor === '_Task_receive')
+		{
+			var mailbox = process.mailbox;
+			if (mailbox.length === 0)
+			{
+				break;
+			}
+
+			process.root = process.root.callback(mailbox.shift());
+			++numSteps;
+			continue;
+		}
+
+		throw new Error(ctor);
+	}
+
+	if (numSteps < MAX_STEPS)
+	{
+		return numSteps + 1;
+	}
+	enqueue(process);
+
+	return numSteps;
+}
+
+
+// WORK QUEUE
+
+var working = false;
+var workQueue = [];
+
+function enqueue(process)
+{
+	workQueue.push(process);
+
+	if (!working)
+	{
+		setTimeout(work, 0);
+		working = true;
+	}
+}
+
+function work()
+{
+	var numSteps = 0;
+	var process;
+	while (numSteps < MAX_STEPS && (process = workQueue.shift()))
+	{
+		if (process.root)
+		{
+			numSteps = step(numSteps, process);
+		}
+	}
+	if (!process)
+	{
+		working = false;
+		return;
+	}
+	setTimeout(work, 0);
+}
+
+
+return {
+	succeed: succeed,
+	fail: fail,
+	nativeBinding: nativeBinding,
+	andThen: F2(andThen),
+	onError: F2(onError),
+	receive: receive,
+
+	spawn: spawn,
+	kill: kill,
+	sleep: sleep,
+	send: F2(send),
+
+	rawSpawn: rawSpawn,
+	rawSend: rawSend
+};
+
+}();
+var _elm_lang$core$Platform_Cmd$batch = _elm_lang$core$Native_Platform.batch;
+var _elm_lang$core$Platform_Cmd$none = _elm_lang$core$Platform_Cmd$batch(
+	{ctor: '[]'});
+var _elm_lang$core$Platform_Cmd_ops = _elm_lang$core$Platform_Cmd_ops || {};
+_elm_lang$core$Platform_Cmd_ops['!'] = F2(
+	function (model, commands) {
+		return {
+			ctor: '_Tuple2',
+			_0: model,
+			_1: _elm_lang$core$Platform_Cmd$batch(commands)
+		};
+	});
+var _elm_lang$core$Platform_Cmd$map = _elm_lang$core$Native_Platform.map;
+var _elm_lang$core$Platform_Cmd$Cmd = {ctor: 'Cmd'};
+
+var _elm_lang$core$Platform_Sub$batch = _elm_lang$core$Native_Platform.batch;
+var _elm_lang$core$Platform_Sub$none = _elm_lang$core$Platform_Sub$batch(
+	{ctor: '[]'});
+var _elm_lang$core$Platform_Sub$map = _elm_lang$core$Native_Platform.map;
+var _elm_lang$core$Platform_Sub$Sub = {ctor: 'Sub'};
+
+var _elm_lang$core$Platform$hack = _elm_lang$core$Native_Scheduler.succeed;
+var _elm_lang$core$Platform$sendToSelf = _elm_lang$core$Native_Platform.sendToSelf;
+var _elm_lang$core$Platform$sendToApp = _elm_lang$core$Native_Platform.sendToApp;
+var _elm_lang$core$Platform$programWithFlags = _elm_lang$core$Native_Platform.programWithFlags;
+var _elm_lang$core$Platform$program = _elm_lang$core$Native_Platform.program;
+var _elm_lang$core$Platform$Program = {ctor: 'Program'};
+var _elm_lang$core$Platform$Task = {ctor: 'Task'};
+var _elm_lang$core$Platform$ProcessId = {ctor: 'ProcessId'};
+var _elm_lang$core$Platform$Router = {ctor: 'Router'};
+
 var _elm_lang$virtual_dom$VirtualDom$programWithFlags = function (impl) {
 	return A2(_elm_lang$virtual_dom$Native_VirtualDom.programWithFlags, _elm_lang$virtual_dom$VirtualDom_Debug$wrapWithFlags, impl);
 };
@@ -7794,6 +7794,2988 @@ var _elm_lang$html$Html$details = _elm_lang$html$Html$node('details');
 var _elm_lang$html$Html$summary = _elm_lang$html$Html$node('summary');
 var _elm_lang$html$Html$menuitem = _elm_lang$html$Html$node('menuitem');
 var _elm_lang$html$Html$menu = _elm_lang$html$Html$node('menu');
+
+var _canadaduane$typed_svg$TypedSvg_Core$map = _elm_lang$virtual_dom$VirtualDom$map;
+var _canadaduane$typed_svg$TypedSvg_Core$text = _elm_lang$virtual_dom$VirtualDom$text;
+var _canadaduane$typed_svg$TypedSvg_Core$attributeNS = _elm_lang$virtual_dom$VirtualDom$attributeNS;
+var _canadaduane$typed_svg$TypedSvg_Core$attribute = _elm_lang$virtual_dom$VirtualDom$attribute;
+var _canadaduane$typed_svg$TypedSvg_Core$svgNamespace = A2(
+	_elm_lang$virtual_dom$VirtualDom$property,
+	'namespace',
+	_elm_lang$core$Json_Encode$string('http://www.w3.org/2000/svg'));
+var _canadaduane$typed_svg$TypedSvg_Core$node = F3(
+	function (name, attributes, children) {
+		return A3(
+			_elm_lang$virtual_dom$VirtualDom$node,
+			name,
+			{ctor: '::', _0: _canadaduane$typed_svg$TypedSvg_Core$svgNamespace, _1: attributes},
+			children);
+	});
+
+var _canadaduane$typed_svg$TypedSvg$view = _canadaduane$typed_svg$TypedSvg_Core$node('view');
+var _canadaduane$typed_svg$TypedSvg$style = _canadaduane$typed_svg$TypedSvg_Core$node('style');
+var _canadaduane$typed_svg$TypedSvg$script = _canadaduane$typed_svg$TypedSvg_Core$node('script');
+var _canadaduane$typed_svg$TypedSvg$filter = _canadaduane$typed_svg$TypedSvg_Core$node('filter');
+var _canadaduane$typed_svg$TypedSvg$cursor = _canadaduane$typed_svg$TypedSvg_Core$node('cursor');
+var _canadaduane$typed_svg$TypedSvg$colorProfile = _canadaduane$typed_svg$TypedSvg_Core$node('colorProfile');
+var _canadaduane$typed_svg$TypedSvg$clipPath = _canadaduane$typed_svg$TypedSvg_Core$node('clipPath');
+var _canadaduane$typed_svg$TypedSvg$tspan = _canadaduane$typed_svg$TypedSvg_Core$node('tspan');
+var _canadaduane$typed_svg$TypedSvg$tref = _canadaduane$typed_svg$TypedSvg_Core$node('tref');
+var _canadaduane$typed_svg$TypedSvg$text_ = _canadaduane$typed_svg$TypedSvg_Core$node('text');
+var _canadaduane$typed_svg$TypedSvg$textPath = _canadaduane$typed_svg$TypedSvg_Core$node('textPath');
+var _canadaduane$typed_svg$TypedSvg$glyphRef = _canadaduane$typed_svg$TypedSvg_Core$node('glyphRef');
+var _canadaduane$typed_svg$TypedSvg$glyph = _canadaduane$typed_svg$TypedSvg_Core$node('glyph');
+var _canadaduane$typed_svg$TypedSvg$use = _canadaduane$typed_svg$TypedSvg_Core$node('use');
+var _canadaduane$typed_svg$TypedSvg$rect = _canadaduane$typed_svg$TypedSvg_Core$node('rect');
+var _canadaduane$typed_svg$TypedSvg$polyline = _canadaduane$typed_svg$TypedSvg_Core$node('polyline');
+var _canadaduane$typed_svg$TypedSvg$polygon = _canadaduane$typed_svg$TypedSvg_Core$node('polygon');
+var _canadaduane$typed_svg$TypedSvg$path = _canadaduane$typed_svg$TypedSvg_Core$node('path');
+var _canadaduane$typed_svg$TypedSvg$line = _canadaduane$typed_svg$TypedSvg_Core$node('line');
+var _canadaduane$typed_svg$TypedSvg$image = _canadaduane$typed_svg$TypedSvg_Core$node('image');
+var _canadaduane$typed_svg$TypedSvg$ellipse = _canadaduane$typed_svg$TypedSvg_Core$node('ellipse');
+var _canadaduane$typed_svg$TypedSvg$circle = _canadaduane$typed_svg$TypedSvg_Core$node('circle');
+var _canadaduane$typed_svg$TypedSvg$stop = _canadaduane$typed_svg$TypedSvg_Core$node('stop');
+var _canadaduane$typed_svg$TypedSvg$radialGradient = _canadaduane$typed_svg$TypedSvg_Core$node('radialGradient');
+var _canadaduane$typed_svg$TypedSvg$linearGradient = _canadaduane$typed_svg$TypedSvg_Core$node('linearGradient');
+var _canadaduane$typed_svg$TypedSvg$font = _canadaduane$typed_svg$TypedSvg_Core$node('font');
+var _canadaduane$typed_svg$TypedSvg$title = _canadaduane$typed_svg$TypedSvg_Core$node('title');
+var _canadaduane$typed_svg$TypedSvg$metadata = _canadaduane$typed_svg$TypedSvg_Core$node('metadata');
+var _canadaduane$typed_svg$TypedSvg$desc = _canadaduane$typed_svg$TypedSvg_Core$node('desc');
+var _canadaduane$typed_svg$TypedSvg$symbol = _canadaduane$typed_svg$TypedSvg_Core$node('symbol');
+var _canadaduane$typed_svg$TypedSvg$switch = _canadaduane$typed_svg$TypedSvg_Core$node('switch');
+var _canadaduane$typed_svg$TypedSvg$pattern = _canadaduane$typed_svg$TypedSvg_Core$node('pattern');
+var _canadaduane$typed_svg$TypedSvg$mask = _canadaduane$typed_svg$TypedSvg_Core$node('mask');
+var _canadaduane$typed_svg$TypedSvg$marker = _canadaduane$typed_svg$TypedSvg_Core$node('marker');
+var _canadaduane$typed_svg$TypedSvg$g = _canadaduane$typed_svg$TypedSvg_Core$node('g');
+var _canadaduane$typed_svg$TypedSvg$defs = _canadaduane$typed_svg$TypedSvg_Core$node('defs');
+var _canadaduane$typed_svg$TypedSvg$a = _canadaduane$typed_svg$TypedSvg_Core$node('a');
+var _canadaduane$typed_svg$TypedSvg$set = _canadaduane$typed_svg$TypedSvg_Core$node('set');
+var _canadaduane$typed_svg$TypedSvg$mpath = _canadaduane$typed_svg$TypedSvg_Core$node('mpath');
+var _canadaduane$typed_svg$TypedSvg$animateTransform = _canadaduane$typed_svg$TypedSvg_Core$node('animateTransform');
+var _canadaduane$typed_svg$TypedSvg$animateMotion = _canadaduane$typed_svg$TypedSvg_Core$node('animateMotion');
+var _canadaduane$typed_svg$TypedSvg$animateColor = _canadaduane$typed_svg$TypedSvg_Core$node('animateColor');
+var _canadaduane$typed_svg$TypedSvg$animate = _canadaduane$typed_svg$TypedSvg_Core$node('animate');
+var _canadaduane$typed_svg$TypedSvg$svg = _canadaduane$typed_svg$TypedSvg_Core$node('svg');
+
+var _elm_lang$core$Color$fmod = F2(
+	function (f, n) {
+		var integer = _elm_lang$core$Basics$floor(f);
+		return (_elm_lang$core$Basics$toFloat(
+			A2(_elm_lang$core$Basics_ops['%'], integer, n)) + f) - _elm_lang$core$Basics$toFloat(integer);
+	});
+var _elm_lang$core$Color$rgbToHsl = F3(
+	function (red, green, blue) {
+		var b = _elm_lang$core$Basics$toFloat(blue) / 255;
+		var g = _elm_lang$core$Basics$toFloat(green) / 255;
+		var r = _elm_lang$core$Basics$toFloat(red) / 255;
+		var cMax = A2(
+			_elm_lang$core$Basics$max,
+			A2(_elm_lang$core$Basics$max, r, g),
+			b);
+		var cMin = A2(
+			_elm_lang$core$Basics$min,
+			A2(_elm_lang$core$Basics$min, r, g),
+			b);
+		var c = cMax - cMin;
+		var lightness = (cMax + cMin) / 2;
+		var saturation = _elm_lang$core$Native_Utils.eq(lightness, 0) ? 0 : (c / (1 - _elm_lang$core$Basics$abs((2 * lightness) - 1)));
+		var hue = _elm_lang$core$Basics$degrees(60) * (_elm_lang$core$Native_Utils.eq(cMax, r) ? A2(_elm_lang$core$Color$fmod, (g - b) / c, 6) : (_elm_lang$core$Native_Utils.eq(cMax, g) ? (((b - r) / c) + 2) : (((r - g) / c) + 4)));
+		return {ctor: '_Tuple3', _0: hue, _1: saturation, _2: lightness};
+	});
+var _elm_lang$core$Color$hslToRgb = F3(
+	function (hue, saturation, lightness) {
+		var normHue = hue / _elm_lang$core$Basics$degrees(60);
+		var chroma = (1 - _elm_lang$core$Basics$abs((2 * lightness) - 1)) * saturation;
+		var x = chroma * (1 - _elm_lang$core$Basics$abs(
+			A2(_elm_lang$core$Color$fmod, normHue, 2) - 1));
+		var _p0 = (_elm_lang$core$Native_Utils.cmp(normHue, 0) < 0) ? {ctor: '_Tuple3', _0: 0, _1: 0, _2: 0} : ((_elm_lang$core$Native_Utils.cmp(normHue, 1) < 0) ? {ctor: '_Tuple3', _0: chroma, _1: x, _2: 0} : ((_elm_lang$core$Native_Utils.cmp(normHue, 2) < 0) ? {ctor: '_Tuple3', _0: x, _1: chroma, _2: 0} : ((_elm_lang$core$Native_Utils.cmp(normHue, 3) < 0) ? {ctor: '_Tuple3', _0: 0, _1: chroma, _2: x} : ((_elm_lang$core$Native_Utils.cmp(normHue, 4) < 0) ? {ctor: '_Tuple3', _0: 0, _1: x, _2: chroma} : ((_elm_lang$core$Native_Utils.cmp(normHue, 5) < 0) ? {ctor: '_Tuple3', _0: x, _1: 0, _2: chroma} : ((_elm_lang$core$Native_Utils.cmp(normHue, 6) < 0) ? {ctor: '_Tuple3', _0: chroma, _1: 0, _2: x} : {ctor: '_Tuple3', _0: 0, _1: 0, _2: 0}))))));
+		var r = _p0._0;
+		var g = _p0._1;
+		var b = _p0._2;
+		var m = lightness - (chroma / 2);
+		return {ctor: '_Tuple3', _0: r + m, _1: g + m, _2: b + m};
+	});
+var _elm_lang$core$Color$toRgb = function (color) {
+	var _p1 = color;
+	if (_p1.ctor === 'RGBA') {
+		return {red: _p1._0, green: _p1._1, blue: _p1._2, alpha: _p1._3};
+	} else {
+		var _p2 = A3(_elm_lang$core$Color$hslToRgb, _p1._0, _p1._1, _p1._2);
+		var r = _p2._0;
+		var g = _p2._1;
+		var b = _p2._2;
+		return {
+			red: _elm_lang$core$Basics$round(255 * r),
+			green: _elm_lang$core$Basics$round(255 * g),
+			blue: _elm_lang$core$Basics$round(255 * b),
+			alpha: _p1._3
+		};
+	}
+};
+var _elm_lang$core$Color$toHsl = function (color) {
+	var _p3 = color;
+	if (_p3.ctor === 'HSLA') {
+		return {hue: _p3._0, saturation: _p3._1, lightness: _p3._2, alpha: _p3._3};
+	} else {
+		var _p4 = A3(_elm_lang$core$Color$rgbToHsl, _p3._0, _p3._1, _p3._2);
+		var h = _p4._0;
+		var s = _p4._1;
+		var l = _p4._2;
+		return {hue: h, saturation: s, lightness: l, alpha: _p3._3};
+	}
+};
+var _elm_lang$core$Color$HSLA = F4(
+	function (a, b, c, d) {
+		return {ctor: 'HSLA', _0: a, _1: b, _2: c, _3: d};
+	});
+var _elm_lang$core$Color$hsla = F4(
+	function (hue, saturation, lightness, alpha) {
+		return A4(
+			_elm_lang$core$Color$HSLA,
+			hue - _elm_lang$core$Basics$turns(
+				_elm_lang$core$Basics$toFloat(
+					_elm_lang$core$Basics$floor(hue / (2 * _elm_lang$core$Basics$pi)))),
+			saturation,
+			lightness,
+			alpha);
+	});
+var _elm_lang$core$Color$hsl = F3(
+	function (hue, saturation, lightness) {
+		return A4(_elm_lang$core$Color$hsla, hue, saturation, lightness, 1);
+	});
+var _elm_lang$core$Color$complement = function (color) {
+	var _p5 = color;
+	if (_p5.ctor === 'HSLA') {
+		return A4(
+			_elm_lang$core$Color$hsla,
+			_p5._0 + _elm_lang$core$Basics$degrees(180),
+			_p5._1,
+			_p5._2,
+			_p5._3);
+	} else {
+		var _p6 = A3(_elm_lang$core$Color$rgbToHsl, _p5._0, _p5._1, _p5._2);
+		var h = _p6._0;
+		var s = _p6._1;
+		var l = _p6._2;
+		return A4(
+			_elm_lang$core$Color$hsla,
+			h + _elm_lang$core$Basics$degrees(180),
+			s,
+			l,
+			_p5._3);
+	}
+};
+var _elm_lang$core$Color$grayscale = function (p) {
+	return A4(_elm_lang$core$Color$HSLA, 0, 0, 1 - p, 1);
+};
+var _elm_lang$core$Color$greyscale = function (p) {
+	return A4(_elm_lang$core$Color$HSLA, 0, 0, 1 - p, 1);
+};
+var _elm_lang$core$Color$RGBA = F4(
+	function (a, b, c, d) {
+		return {ctor: 'RGBA', _0: a, _1: b, _2: c, _3: d};
+	});
+var _elm_lang$core$Color$rgba = _elm_lang$core$Color$RGBA;
+var _elm_lang$core$Color$rgb = F3(
+	function (r, g, b) {
+		return A4(_elm_lang$core$Color$RGBA, r, g, b, 1);
+	});
+var _elm_lang$core$Color$lightRed = A4(_elm_lang$core$Color$RGBA, 239, 41, 41, 1);
+var _elm_lang$core$Color$red = A4(_elm_lang$core$Color$RGBA, 204, 0, 0, 1);
+var _elm_lang$core$Color$darkRed = A4(_elm_lang$core$Color$RGBA, 164, 0, 0, 1);
+var _elm_lang$core$Color$lightOrange = A4(_elm_lang$core$Color$RGBA, 252, 175, 62, 1);
+var _elm_lang$core$Color$orange = A4(_elm_lang$core$Color$RGBA, 245, 121, 0, 1);
+var _elm_lang$core$Color$darkOrange = A4(_elm_lang$core$Color$RGBA, 206, 92, 0, 1);
+var _elm_lang$core$Color$lightYellow = A4(_elm_lang$core$Color$RGBA, 255, 233, 79, 1);
+var _elm_lang$core$Color$yellow = A4(_elm_lang$core$Color$RGBA, 237, 212, 0, 1);
+var _elm_lang$core$Color$darkYellow = A4(_elm_lang$core$Color$RGBA, 196, 160, 0, 1);
+var _elm_lang$core$Color$lightGreen = A4(_elm_lang$core$Color$RGBA, 138, 226, 52, 1);
+var _elm_lang$core$Color$green = A4(_elm_lang$core$Color$RGBA, 115, 210, 22, 1);
+var _elm_lang$core$Color$darkGreen = A4(_elm_lang$core$Color$RGBA, 78, 154, 6, 1);
+var _elm_lang$core$Color$lightBlue = A4(_elm_lang$core$Color$RGBA, 114, 159, 207, 1);
+var _elm_lang$core$Color$blue = A4(_elm_lang$core$Color$RGBA, 52, 101, 164, 1);
+var _elm_lang$core$Color$darkBlue = A4(_elm_lang$core$Color$RGBA, 32, 74, 135, 1);
+var _elm_lang$core$Color$lightPurple = A4(_elm_lang$core$Color$RGBA, 173, 127, 168, 1);
+var _elm_lang$core$Color$purple = A4(_elm_lang$core$Color$RGBA, 117, 80, 123, 1);
+var _elm_lang$core$Color$darkPurple = A4(_elm_lang$core$Color$RGBA, 92, 53, 102, 1);
+var _elm_lang$core$Color$lightBrown = A4(_elm_lang$core$Color$RGBA, 233, 185, 110, 1);
+var _elm_lang$core$Color$brown = A4(_elm_lang$core$Color$RGBA, 193, 125, 17, 1);
+var _elm_lang$core$Color$darkBrown = A4(_elm_lang$core$Color$RGBA, 143, 89, 2, 1);
+var _elm_lang$core$Color$black = A4(_elm_lang$core$Color$RGBA, 0, 0, 0, 1);
+var _elm_lang$core$Color$white = A4(_elm_lang$core$Color$RGBA, 255, 255, 255, 1);
+var _elm_lang$core$Color$lightGrey = A4(_elm_lang$core$Color$RGBA, 238, 238, 236, 1);
+var _elm_lang$core$Color$grey = A4(_elm_lang$core$Color$RGBA, 211, 215, 207, 1);
+var _elm_lang$core$Color$darkGrey = A4(_elm_lang$core$Color$RGBA, 186, 189, 182, 1);
+var _elm_lang$core$Color$lightGray = A4(_elm_lang$core$Color$RGBA, 238, 238, 236, 1);
+var _elm_lang$core$Color$gray = A4(_elm_lang$core$Color$RGBA, 211, 215, 207, 1);
+var _elm_lang$core$Color$darkGray = A4(_elm_lang$core$Color$RGBA, 186, 189, 182, 1);
+var _elm_lang$core$Color$lightCharcoal = A4(_elm_lang$core$Color$RGBA, 136, 138, 133, 1);
+var _elm_lang$core$Color$charcoal = A4(_elm_lang$core$Color$RGBA, 85, 87, 83, 1);
+var _elm_lang$core$Color$darkCharcoal = A4(_elm_lang$core$Color$RGBA, 46, 52, 54, 1);
+var _elm_lang$core$Color$Radial = F5(
+	function (a, b, c, d, e) {
+		return {ctor: 'Radial', _0: a, _1: b, _2: c, _3: d, _4: e};
+	});
+var _elm_lang$core$Color$radial = _elm_lang$core$Color$Radial;
+var _elm_lang$core$Color$Linear = F3(
+	function (a, b, c) {
+		return {ctor: 'Linear', _0: a, _1: b, _2: c};
+	});
+var _elm_lang$core$Color$linear = _elm_lang$core$Color$Linear;
+
+var _fredcy$elm_parseint$ParseInt$charFromInt = function (i) {
+	return (_elm_lang$core$Native_Utils.cmp(i, 10) < 0) ? _elm_lang$core$Char$fromCode(
+		i + _elm_lang$core$Char$toCode(
+			_elm_lang$core$Native_Utils.chr('0'))) : ((_elm_lang$core$Native_Utils.cmp(i, 36) < 0) ? _elm_lang$core$Char$fromCode(
+		(i - 10) + _elm_lang$core$Char$toCode(
+			_elm_lang$core$Native_Utils.chr('A'))) : _elm_lang$core$Native_Utils.crash(
+		'ParseInt',
+		{
+			start: {line: 158, column: 9},
+			end: {line: 158, column: 20}
+		})(
+		_elm_lang$core$Basics$toString(i)));
+};
+var _fredcy$elm_parseint$ParseInt$toRadixUnsafe = F2(
+	function (radix, i) {
+		return (_elm_lang$core$Native_Utils.cmp(i, radix) < 0) ? _elm_lang$core$String$fromChar(
+			_fredcy$elm_parseint$ParseInt$charFromInt(i)) : A2(
+			_elm_lang$core$Basics_ops['++'],
+			A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, (i / radix) | 0),
+			_elm_lang$core$String$fromChar(
+				_fredcy$elm_parseint$ParseInt$charFromInt(
+					A2(_elm_lang$core$Basics_ops['%'], i, radix))));
+	});
+var _fredcy$elm_parseint$ParseInt$toOct = _fredcy$elm_parseint$ParseInt$toRadixUnsafe(8);
+var _fredcy$elm_parseint$ParseInt$toHex = _fredcy$elm_parseint$ParseInt$toRadixUnsafe(16);
+var _fredcy$elm_parseint$ParseInt$isBetween = F3(
+	function (lower, upper, c) {
+		var ci = _elm_lang$core$Char$toCode(c);
+		return (_elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$Char$toCode(lower),
+			ci) < 1) && (_elm_lang$core$Native_Utils.cmp(
+			ci,
+			_elm_lang$core$Char$toCode(upper)) < 1);
+	});
+var _fredcy$elm_parseint$ParseInt$charOffset = F2(
+	function (basis, c) {
+		return _elm_lang$core$Char$toCode(c) - _elm_lang$core$Char$toCode(basis);
+	});
+var _fredcy$elm_parseint$ParseInt$InvalidRadix = function (a) {
+	return {ctor: 'InvalidRadix', _0: a};
+};
+var _fredcy$elm_parseint$ParseInt$toRadix = F2(
+	function (radix, i) {
+		return ((_elm_lang$core$Native_Utils.cmp(2, radix) < 1) && (_elm_lang$core$Native_Utils.cmp(radix, 36) < 1)) ? ((_elm_lang$core$Native_Utils.cmp(i, 0) < 0) ? _elm_lang$core$Result$Ok(
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'-',
+				A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, 0 - i))) : _elm_lang$core$Result$Ok(
+			A2(_fredcy$elm_parseint$ParseInt$toRadixUnsafe, radix, i))) : _elm_lang$core$Result$Err(
+			_fredcy$elm_parseint$ParseInt$InvalidRadix(radix));
+	});
+var _fredcy$elm_parseint$ParseInt$OutOfRange = function (a) {
+	return {ctor: 'OutOfRange', _0: a};
+};
+var _fredcy$elm_parseint$ParseInt$InvalidChar = function (a) {
+	return {ctor: 'InvalidChar', _0: a};
+};
+var _fredcy$elm_parseint$ParseInt$intFromChar = F2(
+	function (radix, c) {
+		var validInt = function (i) {
+			return (_elm_lang$core$Native_Utils.cmp(i, radix) < 0) ? _elm_lang$core$Result$Ok(i) : _elm_lang$core$Result$Err(
+				_fredcy$elm_parseint$ParseInt$OutOfRange(c));
+		};
+		var toInt = A3(
+			_fredcy$elm_parseint$ParseInt$isBetween,
+			_elm_lang$core$Native_Utils.chr('0'),
+			_elm_lang$core$Native_Utils.chr('9'),
+			c) ? _elm_lang$core$Result$Ok(
+			A2(
+				_fredcy$elm_parseint$ParseInt$charOffset,
+				_elm_lang$core$Native_Utils.chr('0'),
+				c)) : (A3(
+			_fredcy$elm_parseint$ParseInt$isBetween,
+			_elm_lang$core$Native_Utils.chr('a'),
+			_elm_lang$core$Native_Utils.chr('z'),
+			c) ? _elm_lang$core$Result$Ok(
+			10 + A2(
+				_fredcy$elm_parseint$ParseInt$charOffset,
+				_elm_lang$core$Native_Utils.chr('a'),
+				c)) : (A3(
+			_fredcy$elm_parseint$ParseInt$isBetween,
+			_elm_lang$core$Native_Utils.chr('A'),
+			_elm_lang$core$Native_Utils.chr('Z'),
+			c) ? _elm_lang$core$Result$Ok(
+			10 + A2(
+				_fredcy$elm_parseint$ParseInt$charOffset,
+				_elm_lang$core$Native_Utils.chr('A'),
+				c)) : _elm_lang$core$Result$Err(
+			_fredcy$elm_parseint$ParseInt$InvalidChar(c))));
+		return A2(_elm_lang$core$Result$andThen, validInt, toInt);
+	});
+var _fredcy$elm_parseint$ParseInt$parseIntR = F2(
+	function (radix, rstring) {
+		var _p0 = _elm_lang$core$String$uncons(rstring);
+		if (_p0.ctor === 'Nothing') {
+			return _elm_lang$core$Result$Ok(0);
+		} else {
+			return A2(
+				_elm_lang$core$Result$andThen,
+				function (ci) {
+					return A2(
+						_elm_lang$core$Result$andThen,
+						function (ri) {
+							return _elm_lang$core$Result$Ok(ci + (ri * radix));
+						},
+						A2(_fredcy$elm_parseint$ParseInt$parseIntR, radix, _p0._0._1));
+				},
+				A2(_fredcy$elm_parseint$ParseInt$intFromChar, radix, _p0._0._0));
+		}
+	});
+var _fredcy$elm_parseint$ParseInt$parseIntRadix = F2(
+	function (radix, string) {
+		return ((_elm_lang$core$Native_Utils.cmp(2, radix) < 1) && (_elm_lang$core$Native_Utils.cmp(radix, 36) < 1)) ? A2(
+			_fredcy$elm_parseint$ParseInt$parseIntR,
+			radix,
+			_elm_lang$core$String$reverse(string)) : _elm_lang$core$Result$Err(
+			_fredcy$elm_parseint$ParseInt$InvalidRadix(radix));
+	});
+var _fredcy$elm_parseint$ParseInt$parseInt = _fredcy$elm_parseint$ParseInt$parseIntRadix(10);
+var _fredcy$elm_parseint$ParseInt$parseIntOct = _fredcy$elm_parseint$ParseInt$parseIntRadix(8);
+var _fredcy$elm_parseint$ParseInt$parseIntHex = _fredcy$elm_parseint$ParseInt$parseIntRadix(16);
+
+//import Maybe, Native.List //
+
+var _elm_lang$core$Native_Regex = function() {
+
+function escape(str)
+{
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+function caseInsensitive(re)
+{
+	return new RegExp(re.source, 'gi');
+}
+function regex(raw)
+{
+	return new RegExp(raw, 'g');
+}
+
+function contains(re, string)
+{
+	return string.match(re) !== null;
+}
+
+function find(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex === re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		out.push({
+			match: result[0],
+			submatches: _elm_lang$core$Native_List.fromArray(subs),
+			index: result.index,
+			number: number
+		});
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+function replace(n, re, replacer, string)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		return replacer({
+			match: match,
+			submatches: _elm_lang$core$Native_List.fromArray(submatches),
+			index: arguments[arguments.length - 2],
+			number: count
+		});
+	}
+	return string.replace(re, jsReplacer);
+}
+
+function split(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	if (n === Infinity)
+	{
+		return _elm_lang$core$Native_List.fromArray(str.split(re));
+	}
+	var string = str;
+	var result;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		if (!(result = re.exec(string))) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+return {
+	regex: regex,
+	caseInsensitive: caseInsensitive,
+	escape: escape,
+
+	contains: F2(contains),
+	find: F3(find),
+	replace: F4(replace),
+	split: F3(split)
+};
+
+}();
+
+var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
+var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
+var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
+var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
+var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
+var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
+var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
+var _elm_lang$core$Regex$Match = F4(
+	function (a, b, c, d) {
+		return {match: a, submatches: b, index: c, number: d};
+	});
+var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
+var _elm_lang$core$Regex$AtMost = function (a) {
+	return {ctor: 'AtMost', _0: a};
+};
+var _elm_lang$core$Regex$All = {ctor: 'All'};
+
+var _eskimoblood$elm_color_extra$Color_Convert$xyzToColor = function (_p0) {
+	var _p1 = _p0;
+	var c = function (ch) {
+		var ch_ = (_elm_lang$core$Native_Utils.cmp(ch, 3.1308e-3) > 0) ? ((1.055 * Math.pow(ch, 1 / 2.4)) - 5.5e-2) : (12.92 * ch);
+		return _elm_lang$core$Basics$round(
+			A3(_elm_lang$core$Basics$clamp, 0, 255, ch_ * 255));
+	};
+	var z_ = _p1.z / 100;
+	var y_ = _p1.y / 100;
+	var x_ = _p1.x / 100;
+	var r = ((x_ * 3.2404542) + (y_ * -1.5371385)) + (z_ * -0.4986);
+	var g = ((x_ * -0.969266) + (y_ * 1.8760108)) + (z_ * 4.1556e-2);
+	var b = ((x_ * 5.56434e-2) + (y_ * -0.2040259)) + (z_ * 1.0572252);
+	return A3(
+		_elm_lang$core$Color$rgb,
+		c(r),
+		c(g),
+		c(b));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$labToXyz = function (_p2) {
+	var _p3 = _p2;
+	var y = (_p3.l + 16) / 116;
+	var c = function (ch) {
+		var ch_ = (ch * ch) * ch;
+		return (_elm_lang$core$Native_Utils.cmp(ch_, 8.856e-3) > 0) ? ch_ : ((ch - (16 / 116)) / 7.787);
+	};
+	return {
+		y: c(y) * 100,
+		x: c(y + (_p3.a / 500)) * 95.047,
+		z: c(y - (_p3.b / 200)) * 108.883
+	};
+};
+var _eskimoblood$elm_color_extra$Color_Convert$labToColor = function (_p4) {
+	return _eskimoblood$elm_color_extra$Color_Convert$xyzToColor(
+		_eskimoblood$elm_color_extra$Color_Convert$labToXyz(_p4));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$xyzToLab = function (_p5) {
+	var _p6 = _p5;
+	var c = function (ch) {
+		return (_elm_lang$core$Native_Utils.cmp(ch, 8.856e-3) > 0) ? Math.pow(ch, 1 / 3) : ((7.787 * ch) + (16 / 116));
+	};
+	var x_ = c(_p6.x / 95.047);
+	var y_ = c(_p6.y / 100);
+	var z_ = c(_p6.z / 108.883);
+	return {l: (116 * y_) - 16, a: 500 * (x_ - y_), b: 200 * (y_ - z_)};
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToXyz = function (cl) {
+	var _p7 = _elm_lang$core$Color$toRgb(cl);
+	var red = _p7.red;
+	var green = _p7.green;
+	var blue = _p7.blue;
+	var c = function (ch) {
+		var ch_ = _elm_lang$core$Basics$toFloat(ch) / 255;
+		var ch__ = (_elm_lang$core$Native_Utils.cmp(ch_, 4.045e-2) > 0) ? Math.pow((ch_ + 5.5e-2) / 1.055, 2.4) : (ch_ / 12.92);
+		return ch__ * 100;
+	};
+	var r = c(red);
+	var g = c(green);
+	var b = c(blue);
+	return {x: ((r * 0.4124) + (g * 0.3576)) + (b * 0.1805), y: ((r * 0.2126) + (g * 0.7152)) + (b * 7.22e-2), z: ((r * 1.93e-2) + (g * 0.1192)) + (b * 0.9505)};
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToLab = function (_p8) {
+	return _eskimoblood$elm_color_extra$Color_Convert$xyzToLab(
+		_eskimoblood$elm_color_extra$Color_Convert$colorToXyz(_p8));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$toRadix = function (n) {
+	var getChr = function (c) {
+		return (_elm_lang$core$Native_Utils.cmp(c, 10) < 0) ? _elm_lang$core$Basics$toString(c) : _elm_lang$core$String$fromChar(
+			_elm_lang$core$Char$fromCode(87 + c));
+	};
+	return (_elm_lang$core$Native_Utils.cmp(n, 16) < 0) ? getChr(n) : A2(
+		_elm_lang$core$Basics_ops['++'],
+		_eskimoblood$elm_color_extra$Color_Convert$toRadix((n / 16) | 0),
+		getChr(
+			A2(_elm_lang$core$Basics_ops['%'], n, 16)));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$toHex = function (_p9) {
+	return A3(
+		_elm_lang$core$String$padLeft,
+		2,
+		_elm_lang$core$Native_Utils.chr('0'),
+		_eskimoblood$elm_color_extra$Color_Convert$toRadix(_p9));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToHex = function (cl) {
+	var _p10 = _elm_lang$core$Color$toRgb(cl);
+	var red = _p10.red;
+	var green = _p10.green;
+	var blue = _p10.blue;
+	return A2(
+		_elm_lang$core$String$join,
+		'',
+		A2(
+			F2(
+				function (x, y) {
+					return {ctor: '::', _0: x, _1: y};
+				}),
+			'#',
+			A2(
+				_elm_lang$core$List$map,
+				_eskimoblood$elm_color_extra$Color_Convert$toHex,
+				{
+					ctor: '::',
+					_0: red,
+					_1: {
+						ctor: '::',
+						_0: green,
+						_1: {
+							ctor: '::',
+							_0: blue,
+							_1: {ctor: '[]'}
+						}
+					}
+				})));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$hexToColor = function () {
+	var pattern = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			'^',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'#?',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'(?:',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'(?:([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2}))',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'|',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'(?:([a-f\\d])([a-f\\d])([a-f\\d]))',
+								A2(_elm_lang$core$Basics_ops['++'], ')', '$'))))))));
+	var extend = function (token) {
+		var _p11 = _elm_lang$core$String$toList(token);
+		if ((_p11.ctor === '::') && (_p11._1.ctor === '[]')) {
+			var _p12 = _p11._0;
+			return _elm_lang$core$String$fromList(
+				{
+					ctor: '::',
+					_0: _p12,
+					_1: {
+						ctor: '::',
+						_0: _p12,
+						_1: {ctor: '[]'}
+					}
+				});
+		} else {
+			return token;
+		}
+	};
+	return function (_p13) {
+		return A2(
+			_elm_lang$core$Result$andThen,
+			function (colors) {
+				var _p15 = A2(
+					_elm_lang$core$List$map,
+					function (_p14) {
+						return _fredcy$elm_parseint$ParseInt$parseIntHex(
+							extend(_p14));
+					},
+					colors);
+				if (((((((_p15.ctor === '::') && (_p15._0.ctor === 'Ok')) && (_p15._1.ctor === '::')) && (_p15._1._0.ctor === 'Ok')) && (_p15._1._1.ctor === '::')) && (_p15._1._1._0.ctor === 'Ok')) && (_p15._1._1._1.ctor === '[]')) {
+					return _elm_lang$core$Result$Ok(
+						A3(_elm_lang$core$Color$rgb, _p15._0._0, _p15._1._0._0, _p15._1._1._0._0));
+				} else {
+					return _elm_lang$core$Result$Err('Parsing ints from hex failed');
+				}
+			},
+			A2(
+				_elm_lang$core$Result$fromMaybe,
+				'Parsing hex regex failed',
+				A2(
+					_elm_lang$core$Maybe$map,
+					_elm_lang$core$List$filterMap(_elm_lang$core$Basics$identity),
+					A2(
+						_elm_lang$core$Maybe$map,
+						function (_) {
+							return _.submatches;
+						},
+						_elm_lang$core$List$head(
+							A3(
+								_elm_lang$core$Regex$find,
+								_elm_lang$core$Regex$AtMost(1),
+								_elm_lang$core$Regex$regex(pattern),
+								_elm_lang$core$String$toLower(_p13)))))));
+	};
+}();
+var _eskimoblood$elm_color_extra$Color_Convert$cssColorString = F2(
+	function (kind, values) {
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			kind,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'(',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(_elm_lang$core$String$join, ', ', values),
+					')')));
+	});
+var _eskimoblood$elm_color_extra$Color_Convert$toPercentString = function (_p16) {
+	return A3(
+		_elm_lang$core$Basics$flip,
+		F2(
+			function (x, y) {
+				return A2(_elm_lang$core$Basics_ops['++'], x, y);
+			}),
+		'%',
+		_elm_lang$core$Basics$toString(
+			_elm_lang$core$Basics$round(
+				A2(
+					F2(
+						function (x, y) {
+							return x * y;
+						}),
+					100,
+					_p16))));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$hueToString = function (_p17) {
+	return _elm_lang$core$Basics$toString(
+		_elm_lang$core$Basics$round(
+			A3(
+				_elm_lang$core$Basics$flip,
+				F2(
+					function (x, y) {
+						return x / y;
+					}),
+				_elm_lang$core$Basics$pi,
+				A2(
+					F2(
+						function (x, y) {
+							return x * y;
+						}),
+					180,
+					_p17))));
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToCssHsla = function (cl) {
+	var _p18 = _elm_lang$core$Color$toHsl(cl);
+	var hue = _p18.hue;
+	var saturation = _p18.saturation;
+	var lightness = _p18.lightness;
+	var alpha = _p18.alpha;
+	return A2(
+		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
+		'hsla',
+		{
+			ctor: '::',
+			_0: _eskimoblood$elm_color_extra$Color_Convert$hueToString(hue),
+			_1: {
+				ctor: '::',
+				_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(saturation),
+				_1: {
+					ctor: '::',
+					_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(lightness),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$core$Basics$toString(alpha),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToCssHsl = function (cl) {
+	var _p19 = _elm_lang$core$Color$toHsl(cl);
+	var hue = _p19.hue;
+	var saturation = _p19.saturation;
+	var lightness = _p19.lightness;
+	var alpha = _p19.alpha;
+	return A2(
+		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
+		'hsl',
+		{
+			ctor: '::',
+			_0: _eskimoblood$elm_color_extra$Color_Convert$hueToString(hue),
+			_1: {
+				ctor: '::',
+				_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(saturation),
+				_1: {
+					ctor: '::',
+					_0: _eskimoblood$elm_color_extra$Color_Convert$toPercentString(lightness),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba = function (cl) {
+	var _p20 = _elm_lang$core$Color$toRgb(cl);
+	var red = _p20.red;
+	var green = _p20.green;
+	var blue = _p20.blue;
+	var alpha = _p20.alpha;
+	return A2(
+		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
+		'rgba',
+		{
+			ctor: '::',
+			_0: _elm_lang$core$Basics$toString(red),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$core$Basics$toString(green),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$core$Basics$toString(blue),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$core$Basics$toString(alpha),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
+var _eskimoblood$elm_color_extra$Color_Convert$colorToCssRgb = function (cl) {
+	var _p21 = _elm_lang$core$Color$toRgb(cl);
+	var red = _p21.red;
+	var green = _p21.green;
+	var blue = _p21.blue;
+	var alpha = _p21.alpha;
+	return A2(
+		_eskimoblood$elm_color_extra$Color_Convert$cssColorString,
+		'rgb',
+		{
+			ctor: '::',
+			_0: _elm_lang$core$Basics$toString(red),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$core$Basics$toString(green),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$core$Basics$toString(blue),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _eskimoblood$elm_color_extra$Color_Convert$XYZ = F3(
+	function (a, b, c) {
+		return {x: a, y: b, z: c};
+	});
+var _eskimoblood$elm_color_extra$Color_Convert$Lab = F3(
+	function (a, b, c) {
+		return {l: a, a: b, b: c};
+	});
+
+var _canadaduane$typed_svg$TypedSvg_Types$AccumulateSum = {ctor: 'AccumulateSum'};
+var _canadaduane$typed_svg$TypedSvg_Types$AccumulateNone = {ctor: 'AccumulateNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$AdditiveReplace = {ctor: 'AdditiveReplace'};
+var _canadaduane$typed_svg$TypedSvg_Types$AdditiveNone = {ctor: 'AdditiveNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignNone = {ctor: 'AlignNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$Align = F2(
+	function (a, b) {
+		return {ctor: 'Align', _0: a, _1: b};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentInherit = {ctor: 'AlignmentInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentMathematical = {ctor: 'AlignmentMathematical'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentHanging = {ctor: 'AlignmentHanging'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentAlphabetic = {ctor: 'AlignmentAlphabetic'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentIdeographic = {ctor: 'AlignmentIdeographic'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentTextAfterEdge = {ctor: 'AlignmentTextAfterEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentAfterEdge = {ctor: 'AlignmentAfterEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentCentral = {ctor: 'AlignmentCentral'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentMiddle = {ctor: 'AlignmentMiddle'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentTextBeforeEdge = {ctor: 'AlignmentTextBeforeEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentBeforeEdge = {ctor: 'AlignmentBeforeEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentBaseline = {ctor: 'AlignmentBaseline'};
+var _canadaduane$typed_svg$TypedSvg_Types$AlignmentAuto = {ctor: 'AlignmentAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnchorEnd = {ctor: 'AnchorEnd'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnchorMiddle = {ctor: 'AnchorMiddle'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnchorStart = {ctor: 'AnchorStart'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnchorInherit = {ctor: 'AnchorInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnimateTransformTypeSkewY = {ctor: 'AnimateTransformTypeSkewY'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnimateTransformTypeSkewX = {ctor: 'AnimateTransformTypeSkewX'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnimateTransformTypeRotate = {ctor: 'AnimateTransformTypeRotate'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnimateTransformTypeScale = {ctor: 'AnimateTransformTypeScale'};
+var _canadaduane$typed_svg$TypedSvg_Types$AnimateTransformTypeTranslate = {ctor: 'AnimateTransformTypeTranslate'};
+var _canadaduane$typed_svg$TypedSvg_Types$AttributeTypeXml = {ctor: 'AttributeTypeXml'};
+var _canadaduane$typed_svg$TypedSvg_Types$AttributeTypeCss = {ctor: 'AttributeTypeCss'};
+var _canadaduane$typed_svg$TypedSvg_Types$AttributeTypeAuto = {ctor: 'AttributeTypeAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftInherit = {ctor: 'ShiftInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftLength = function (a) {
+	return {ctor: 'ShiftLength', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftPercentage = function (a) {
+	return {ctor: 'ShiftPercentage', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftSub = {ctor: 'ShiftSub'};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftSuper = {ctor: 'ShiftSuper'};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftBaseline = {ctor: 'ShiftBaseline'};
+var _canadaduane$typed_svg$TypedSvg_Types$ShiftAuto = {ctor: 'ShiftAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$CalcModeSpline = {ctor: 'CalcModeSpline'};
+var _canadaduane$typed_svg$TypedSvg_Types$CalcModePaced = {ctor: 'CalcModePaced'};
+var _canadaduane$typed_svg$TypedSvg_Types$CalcModeLinear = {ctor: 'CalcModeLinear'};
+var _canadaduane$typed_svg$TypedSvg_Types$CalcModeDiscrete = {ctor: 'CalcModeDiscrete'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipShape = F4(
+	function (a, b, c, d) {
+		return {ctor: 'ClipShape', _0: a, _1: b, _2: c, _3: d};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$ClipInherit = {ctor: 'ClipInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipAuto = {ctor: 'ClipAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipPathFunc = function (a) {
+	return {ctor: 'ClipPathFunc', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipPathInherit = {ctor: 'ClipPathInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipPathNone = {ctor: 'ClipPathNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipRuleInherit = {ctor: 'ClipRuleInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipRuleEvenOdd = {ctor: 'ClipRuleEvenOdd'};
+var _canadaduane$typed_svg$TypedSvg_Types$ClipRuleNonZero = {ctor: 'ClipRuleNonZero'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorInterpolationInherit = {ctor: 'ColorInterpolationInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorInterpolationLinearRGB = {ctor: 'ColorInterpolationLinearRGB'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorInterpolationSRGB = {ctor: 'ColorInterpolationSRGB'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorInterpolationAuto = {ctor: 'ColorInterpolationAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorMatrixTypeLuminanceToAlpha = {ctor: 'ColorMatrixTypeLuminanceToAlpha'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorMatrixTypeHueRotate = {ctor: 'ColorMatrixTypeHueRotate'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorMatrixTypeSaturate = {ctor: 'ColorMatrixTypeSaturate'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorMatrixTypeMatrix = {ctor: 'ColorMatrixTypeMatrix'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorProfileInherit = {ctor: 'ColorProfileInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorProfile = function (a) {
+	return {ctor: 'ColorProfile', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorProfileSRGB = {ctor: 'ColorProfileSRGB'};
+var _canadaduane$typed_svg$TypedSvg_Types$ColorProfileAuto = {ctor: 'ColorProfileAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorArithmetic = {ctor: 'CompositeOperatorArithmetic'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorXor = {ctor: 'CompositeOperatorXor'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorAtop = {ctor: 'CompositeOperatorAtop'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorOut = {ctor: 'CompositeOperatorOut'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorIn = {ctor: 'CompositeOperatorIn'};
+var _canadaduane$typed_svg$TypedSvg_Types$CompositeOperatorOver = {ctor: 'CompositeOperatorOver'};
+var _canadaduane$typed_svg$TypedSvg_Types$CoordinateSystemObjectBoundingBox = {ctor: 'CoordinateSystemObjectBoundingBox'};
+var _canadaduane$typed_svg$TypedSvg_Types$CoordinateSystemUserSpaceOnUse = {ctor: 'CoordinateSystemUserSpaceOnUse'};
+var _canadaduane$typed_svg$TypedSvg_Types$Cursor = function (a) {
+	return {ctor: 'Cursor', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorInherit = {ctor: 'CursorInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorHelp = {ctor: 'CursorHelp'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorWait = {ctor: 'CursorWait'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorText = {ctor: 'CursorText'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorWResize = {ctor: 'CursorWResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorSWResize = {ctor: 'CursorSWResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorSEResize = {ctor: 'CursorSEResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorNResize = {ctor: 'CursorNResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorNWResize = {ctor: 'CursorNWResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorNEResize = {ctor: 'CursorNEResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorEResize = {ctor: 'CursorEResize'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorMove = {ctor: 'CursorMove'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorPointer = {ctor: 'CursorPointer'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorCrosshair = {ctor: 'CursorCrosshair'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorDefault = {ctor: 'CursorDefault'};
+var _canadaduane$typed_svg$TypedSvg_Types$CursorAuto = {ctor: 'CursorAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$DirectionInherit = {ctor: 'DirectionInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$DirectionRTL = {ctor: 'DirectionRTL'};
+var _canadaduane$typed_svg$TypedSvg_Types$DirectionLTR = {ctor: 'DirectionLTR'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayInherit = {ctor: 'DisplayInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayNone = {ctor: 'DisplayNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableCaption = {ctor: 'DisplayTableCaption'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableCell = {ctor: 'DisplayTableCell'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableColumn = {ctor: 'DisplayTableColumn'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableColumnGroup = {ctor: 'DisplayTableColumnGroup'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableRow = {ctor: 'DisplayTableRow'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableFooterGroup = {ctor: 'DisplayTableFooterGroup'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableHeaderGroup = {ctor: 'DisplayTableHeaderGroup'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTableRowGroup = {ctor: 'DisplayTableRowGroup'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayInlineTable = {ctor: 'DisplayInlineTable'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayTable = {ctor: 'DisplayTable'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayMarker = {ctor: 'DisplayMarker'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayCompact = {ctor: 'DisplayCompact'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayRunIn = {ctor: 'DisplayRunIn'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayListItem = {ctor: 'DisplayListItem'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayBlock = {ctor: 'DisplayBlock'};
+var _canadaduane$typed_svg$TypedSvg_Types$DisplayInline = {ctor: 'DisplayInline'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineInherit = {ctor: 'DominantBaselineInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineTextBeforeEdge = {ctor: 'DominantBaselineTextBeforeEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineTextAfterEdge = {ctor: 'DominantBaselineTextAfterEdge'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineMiddle = {ctor: 'DominantBaselineMiddle'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineCentral = {ctor: 'DominantBaselineCentral'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineMathematical = {ctor: 'DominantBaselineMathematical'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineHanging = {ctor: 'DominantBaselineHanging'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineAlphabetic = {ctor: 'DominantBaselineAlphabetic'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineIdeographic = {ctor: 'DominantBaselineIdeographic'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineResetSize = {ctor: 'DominantBaselineResetSize'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineNoChange = {ctor: 'DominantBaselineNoChange'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineUseScript = {ctor: 'DominantBaselineUseScript'};
+var _canadaduane$typed_svg$TypedSvg_Types$DominantBaselineAuto = {ctor: 'DominantBaselineAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$DurationIndefinite = {ctor: 'DurationIndefinite'};
+var _canadaduane$typed_svg$TypedSvg_Types$Duration = function (a) {
+	return {ctor: 'Duration', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$EdgeModeNone = {ctor: 'EdgeModeNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$EdgeModeWrap = {ctor: 'EdgeModeWrap'};
+var _canadaduane$typed_svg$TypedSvg_Types$EdgeModeDuplicate = {ctor: 'EdgeModeDuplicate'};
+var _canadaduane$typed_svg$TypedSvg_Types$FillRuleEvenOdd = {ctor: 'FillRuleEvenOdd'};
+var _canadaduane$typed_svg$TypedSvg_Types$FillRuleNonZero = {ctor: 'FillRuleNonZero'};
+var _canadaduane$typed_svg$TypedSvg_Types$Filter = function (a) {
+	return {ctor: 'Filter', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$FilterInherit = {ctor: 'FilterInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FilterNone = {ctor: 'FilterNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$FloodICC = function (a) {
+	return {ctor: 'FloodICC', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$Flood = function (a) {
+	return {ctor: 'Flood', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$FloodCurrentColor = {ctor: 'FloodCurrentColor'};
+var _canadaduane$typed_svg$TypedSvg_Types$FloodInherit = {ctor: 'FloodInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontSizeAdjust = function (a) {
+	return {ctor: 'FontSizeAdjust', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$FontSizeAdjustInherit = {ctor: 'FontSizeAdjustInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontSizeAdjustNone = {ctor: 'FontSizeAdjustNone'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchInherit = {ctor: 'FontStretchInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchUltraExpanded = {ctor: 'FontStretchUltraExpanded'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchExtraExpanded = {ctor: 'FontStretchExtraExpanded'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchExpanded = {ctor: 'FontStretchExpanded'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchSemiExpanded = {ctor: 'FontStretchSemiExpanded'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchSemiCondensed = {ctor: 'FontStretchSemiCondensed'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchCondensed = {ctor: 'FontStretchCondensed'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchExtraCondensed = {ctor: 'FontStretchExtraCondensed'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchUltraCondensed = {ctor: 'FontStretchUltraCondensed'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchNarrower = {ctor: 'FontStretchNarrower'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchWider = {ctor: 'FontStretchWider'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStretchNormal = {ctor: 'FontStretchNormal'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStyleInherit = {ctor: 'FontStyleInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStyleOblique = {ctor: 'FontStyleOblique'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStyleItalic = {ctor: 'FontStyleItalic'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontStyleNormal = {ctor: 'FontStyleNormal'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontVariantInherit = {ctor: 'FontVariantInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontVariantSmallCaps = {ctor: 'FontVariantSmallCaps'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontVariantNormal = {ctor: 'FontVariantNormal'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeight = function (a) {
+	return {ctor: 'FontWeight', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeightInherit = {ctor: 'FontWeightInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeightLighter = {ctor: 'FontWeightLighter'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeightBolder = {ctor: 'FontWeightBolder'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeightBold = {ctor: 'FontWeightBold'};
+var _canadaduane$typed_svg$TypedSvg_Types$FontWeightNormal = {ctor: 'FontWeightNormal'};
+var _canadaduane$typed_svg$TypedSvg_Types$FuncTypeGamma = {ctor: 'FuncTypeGamma'};
+var _canadaduane$typed_svg$TypedSvg_Types$FuncTypeLinear = {ctor: 'FuncTypeLinear'};
+var _canadaduane$typed_svg$TypedSvg_Types$FuncTypeDiscrete = {ctor: 'FuncTypeDiscrete'};
+var _canadaduane$typed_svg$TypedSvg_Types$FuncTypeTable = {ctor: 'FuncTypeTable'};
+var _canadaduane$typed_svg$TypedSvg_Types$FuncTypeIdentity = {ctor: 'FuncTypeIdentity'};
+var _canadaduane$typed_svg$TypedSvg_Types$InReference = function (a) {
+	return {ctor: 'InReference', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$InStrokePaint = {ctor: 'InStrokePaint'};
+var _canadaduane$typed_svg$TypedSvg_Types$InFillPaint = {ctor: 'InFillPaint'};
+var _canadaduane$typed_svg$TypedSvg_Types$InBackgroundAlpha = {ctor: 'InBackgroundAlpha'};
+var _canadaduane$typed_svg$TypedSvg_Types$InSourceAlpha = {ctor: 'InSourceAlpha'};
+var _canadaduane$typed_svg$TypedSvg_Types$InSourceGraphic = {ctor: 'InSourceGraphic'};
+var _canadaduane$typed_svg$TypedSvg_Types$KerningLength = function (a) {
+	return {ctor: 'KerningLength', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$KerningInherit = {ctor: 'KerningInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$KerningAuto = {ctor: 'KerningAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$Px = function (a) {
+	return {ctor: 'Px', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$px = _canadaduane$typed_svg$TypedSvg_Types$Px;
+var _canadaduane$typed_svg$TypedSvg_Types$Pt = function (a) {
+	return {ctor: 'Pt', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$pt = _canadaduane$typed_svg$TypedSvg_Types$Pt;
+var _canadaduane$typed_svg$TypedSvg_Types$Percent = function (a) {
+	return {ctor: 'Percent', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$percent = _canadaduane$typed_svg$TypedSvg_Types$Percent;
+var _canadaduane$typed_svg$TypedSvg_Types$Pc = function (a) {
+	return {ctor: 'Pc', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$pc = _canadaduane$typed_svg$TypedSvg_Types$Pc;
+var _canadaduane$typed_svg$TypedSvg_Types$Num = function (a) {
+	return {ctor: 'Num', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$num = _canadaduane$typed_svg$TypedSvg_Types$Num;
+var _canadaduane$typed_svg$TypedSvg_Types$Mm = function (a) {
+	return {ctor: 'Mm', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$mm = _canadaduane$typed_svg$TypedSvg_Types$Mm;
+var _canadaduane$typed_svg$TypedSvg_Types$In = function (a) {
+	return {ctor: 'In', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$inch = _canadaduane$typed_svg$TypedSvg_Types$In;
+var _canadaduane$typed_svg$TypedSvg_Types$Ex = function (a) {
+	return {ctor: 'Ex', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$ex = _canadaduane$typed_svg$TypedSvg_Types$Ex;
+var _canadaduane$typed_svg$TypedSvg_Types$Em = function (a) {
+	return {ctor: 'Em', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$em = _canadaduane$typed_svg$TypedSvg_Types$Em;
+var _canadaduane$typed_svg$TypedSvg_Types$Cm = function (a) {
+	return {ctor: 'Cm', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$cm = _canadaduane$typed_svg$TypedSvg_Types$Cm;
+var _canadaduane$typed_svg$TypedSvg_Types$LengthAdjustSpacingAndGlyphs = {ctor: 'LengthAdjustSpacingAndGlyphs'};
+var _canadaduane$typed_svg$TypedSvg_Types$LengthAdjustSpacing = {ctor: 'LengthAdjustSpacing'};
+var _canadaduane$typed_svg$TypedSvg_Types$MarkerCoordinateSystemStrokeWidth = {ctor: 'MarkerCoordinateSystemStrokeWidth'};
+var _canadaduane$typed_svg$TypedSvg_Types$MarkerCoordinateSystemUserSpaceOnUse = {ctor: 'MarkerCoordinateSystemUserSpaceOnUse'};
+var _canadaduane$typed_svg$TypedSvg_Types$Slice = {ctor: 'Slice'};
+var _canadaduane$typed_svg$TypedSvg_Types$Meet = {ctor: 'Meet'};
+var _canadaduane$typed_svg$TypedSvg_Types$ModeLighten = {ctor: 'ModeLighten'};
+var _canadaduane$typed_svg$TypedSvg_Types$ModeDarken = {ctor: 'ModeDarken'};
+var _canadaduane$typed_svg$TypedSvg_Types$ModeScreen = {ctor: 'ModeScreen'};
+var _canadaduane$typed_svg$TypedSvg_Types$ModeMultiply = {ctor: 'ModeMultiply'};
+var _canadaduane$typed_svg$TypedSvg_Types$ModeNormal = {ctor: 'ModeNormal'};
+var _canadaduane$typed_svg$TypedSvg_Types$MorphologyOperatorDilate = {ctor: 'MorphologyOperatorDilate'};
+var _canadaduane$typed_svg$TypedSvg_Types$MorphologyOperatorErode = {ctor: 'MorphologyOperatorErode'};
+var _canadaduane$typed_svg$TypedSvg_Types$OpacityInherit = {ctor: 'OpacityInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$Opacity = function (a) {
+	return {ctor: 'Opacity', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderingInherit = {ctor: 'RenderingInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderingOptimizeQuality = {ctor: 'RenderingOptimizeQuality'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderingOptimizeSpeed = {ctor: 'RenderingOptimizeSpeed'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderingAuto = {ctor: 'RenderingAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$RepeatIndefinite = {ctor: 'RepeatIndefinite'};
+var _canadaduane$typed_svg$TypedSvg_Types$RepeatCount = function (a) {
+	return {ctor: 'RepeatCount', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$RestartNever = {ctor: 'RestartNever'};
+var _canadaduane$typed_svg$TypedSvg_Types$RestartWhenNotActive = {ctor: 'RestartWhenNotActive'};
+var _canadaduane$typed_svg$TypedSvg_Types$RestartAlways = {ctor: 'RestartAlways'};
+var _canadaduane$typed_svg$TypedSvg_Types$ScaleMax = {ctor: 'ScaleMax'};
+var _canadaduane$typed_svg$TypedSvg_Types$ScaleMid = {ctor: 'ScaleMid'};
+var _canadaduane$typed_svg$TypedSvg_Types$ScaleMin = {ctor: 'ScaleMin'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderInherit = {ctor: 'RenderInherit'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderGeometricPrecision = {ctor: 'RenderGeometricPrecision'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderCrispEdges = {ctor: 'RenderCrispEdges'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderOptimizeSpeed = {ctor: 'RenderOptimizeSpeed'};
+var _canadaduane$typed_svg$TypedSvg_Types$RenderAuto = {ctor: 'RenderAuto'};
+var _canadaduane$typed_svg$TypedSvg_Types$Translate = F2(
+	function (a, b) {
+		return {ctor: 'Translate', _0: a, _1: b};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$SkewY = function (a) {
+	return {ctor: 'SkewY', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$SkewX = function (a) {
+	return {ctor: 'SkewX', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$Scale = F2(
+	function (a, b) {
+		return {ctor: 'Scale', _0: a, _1: b};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$Rotate = F3(
+	function (a, b, c) {
+		return {ctor: 'Rotate', _0: a, _1: b, _2: c};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$Matrix = F6(
+	function (a, b, c, d, e, f) {
+		return {ctor: 'Matrix', _0: a, _1: b, _2: c, _3: d, _4: e, _5: f};
+	});
+var _canadaduane$typed_svg$TypedSvg_Types$TimingIndefinite = {ctor: 'TimingIndefinite'};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingWallclockSyncValue = function (a) {
+	return {ctor: 'TimingWallclockSyncValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingAccessKeyValue = function (a) {
+	return {ctor: 'TimingAccessKeyValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingRepeatValue = function (a) {
+	return {ctor: 'TimingRepeatValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingEventValue = function (a) {
+	return {ctor: 'TimingEventValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingSyncBaseValue = function (a) {
+	return {ctor: 'TimingSyncBaseValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TimingOffsetValue = function (a) {
+	return {ctor: 'TimingOffsetValue', _0: a};
+};
+var _canadaduane$typed_svg$TypedSvg_Types$TurbulenceTypeTurbulence = {ctor: 'TurbulenceTypeTurbulence'};
+var _canadaduane$typed_svg$TypedSvg_Types$TurbulenceTypeFractalNoise = {ctor: 'TurbulenceTypeFractalNoise'};
+var _canadaduane$typed_svg$TypedSvg_Types$No = {ctor: 'No'};
+var _canadaduane$typed_svg$TypedSvg_Types$Yes = {ctor: 'Yes'};
+
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$yesNoToString = function (question) {
+	var _p0 = question;
+	if (_p0.ctor === 'Yes') {
+		return 'yes';
+	} else {
+		return 'no';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$turbulenceTypeToString = function (turbulenceType) {
+	var _p1 = turbulenceType;
+	if (_p1.ctor === 'TurbulenceTypeFractalNoise') {
+		return 'fractalNoise';
+	} else {
+		return 'turbulence';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$timingValueAsString = function (timingValue) {
+	var _p2 = timingValue;
+	switch (_p2.ctor) {
+		case 'TimingOffsetValue':
+			return _p2._0;
+		case 'TimingSyncBaseValue':
+			return _p2._0;
+		case 'TimingEventValue':
+			return _p2._0;
+		case 'TimingRepeatValue':
+			return _p2._0;
+		case 'TimingAccessKeyValue':
+			return _p2._0;
+		case 'TimingWallclockSyncValue':
+			return _p2._0;
+		default:
+			return 'indefinite';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$transformToString = function (xform) {
+	var tr = F2(
+		function (name, args) {
+			return _elm_lang$core$String$concat(
+				{
+					ctor: '::',
+					_0: name,
+					_1: {
+						ctor: '::',
+						_0: '(',
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$core$String$join,
+								' ',
+								A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, args)),
+							_1: {
+								ctor: '::',
+								_0: ')',
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				});
+		});
+	var _p3 = xform;
+	switch (_p3.ctor) {
+		case 'Matrix':
+			return A2(
+				tr,
+				'matrix',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {
+						ctor: '::',
+						_0: _p3._1,
+						_1: {
+							ctor: '::',
+							_0: _p3._2,
+							_1: {
+								ctor: '::',
+								_0: _p3._3,
+								_1: {
+									ctor: '::',
+									_0: _p3._4,
+									_1: {
+										ctor: '::',
+										_0: _p3._5,
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}
+				});
+		case 'Rotate':
+			return A2(
+				tr,
+				'rotate',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {
+						ctor: '::',
+						_0: _p3._1,
+						_1: {
+							ctor: '::',
+							_0: _p3._2,
+							_1: {ctor: '[]'}
+						}
+					}
+				});
+		case 'Scale':
+			return A2(
+				tr,
+				'scale',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {
+						ctor: '::',
+						_0: _p3._1,
+						_1: {ctor: '[]'}
+					}
+				});
+		case 'SkewX':
+			return A2(
+				tr,
+				'skewX',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {ctor: '[]'}
+				});
+		case 'SkewY':
+			return A2(
+				tr,
+				'skewY',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {ctor: '[]'}
+				});
+		default:
+			return A2(
+				tr,
+				'translate',
+				{
+					ctor: '::',
+					_0: _p3._0,
+					_1: {
+						ctor: '::',
+						_0: _p3._1,
+						_1: {ctor: '[]'}
+					}
+				});
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$shapeRenderingToString = function (shapeRendering) {
+	var _p4 = shapeRendering;
+	switch (_p4.ctor) {
+		case 'RenderAuto':
+			return 'auto';
+		case 'RenderOptimizeSpeed':
+			return 'optimizeSpeed';
+		case 'RenderCrispEdges':
+			return 'crispEdges';
+		case 'RenderGeometricPrecision':
+			return 'geometricPrecision';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$scaleToString = function (scale) {
+	var _p5 = scale;
+	switch (_p5.ctor) {
+		case 'ScaleMin':
+			return 'min';
+		case 'ScaleMid':
+			return 'mid';
+		default:
+			return 'max';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$restartToString = function (restart) {
+	var _p6 = restart;
+	switch (_p6.ctor) {
+		case 'RestartAlways':
+			return 'always';
+		case 'RestartWhenNotActive':
+			return 'whenNotActive';
+		default:
+			return 'never';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$repeatCountToString = function (repeatCount) {
+	var _p7 = repeatCount;
+	if (_p7.ctor === 'RepeatCount') {
+		return _elm_lang$core$Basics$toString(_p7._0);
+	} else {
+		return 'indefinite';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$renderingToString = function (rendering) {
+	var _p8 = rendering;
+	switch (_p8.ctor) {
+		case 'RenderingAuto':
+			return 'auto';
+		case 'RenderingOptimizeSpeed':
+			return 'optimizeSpeed';
+		case 'RenderingOptimizeQuality':
+			return 'optimizeQuality';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$opacityToString = function (opacity) {
+	var _p9 = opacity;
+	if (_p9.ctor === 'Opacity') {
+		return _elm_lang$core$Basics$toString(_p9._0);
+	} else {
+		return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$morphologyOperatorToString = function (morphologyOperator) {
+	var _p10 = morphologyOperator;
+	if (_p10.ctor === 'MorphologyOperatorErode') {
+		return 'erode';
+	} else {
+		return 'dilate';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$modeToString = function (mode) {
+	var _p11 = mode;
+	switch (_p11.ctor) {
+		case 'ModeNormal':
+			return 'normal';
+		case 'ModeMultiply':
+			return 'multiply';
+		case 'ModeScreen':
+			return 'screen';
+		case 'ModeDarken':
+			return 'darken';
+		default:
+			return 'lighten';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$meetOrSliceToString = function (meetOrSlice) {
+	var _p12 = meetOrSlice;
+	if (_p12.ctor === 'Meet') {
+		return 'meet';
+	} else {
+		return 'slice';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$markerCoordinateSystemToString = function (markerCoordinateSystem) {
+	var _p13 = markerCoordinateSystem;
+	if (_p13.ctor === 'MarkerCoordinateSystemUserSpaceOnUse') {
+		return 'userSpaceOnUse';
+	} else {
+		return 'strokeWidth';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthAdjustToString = function (lengthAdjust) {
+	var _p14 = lengthAdjust;
+	if (_p14.ctor === 'LengthAdjustSpacing') {
+		return 'spacing';
+	} else {
+		return 'spacingAndGlyphs';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString = function (length) {
+	var _p15 = length;
+	switch (_p15.ctor) {
+		case 'Cm':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'cm');
+		case 'Em':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'em');
+		case 'Ex':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'ex');
+		case 'In':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'in');
+		case 'Mm':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'mm');
+		case 'Num':
+			return _elm_lang$core$Basics$toString(_p15._0);
+		case 'Pc':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'pc');
+		case 'Percent':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'%');
+		case 'Pt':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'pt');
+		default:
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p15._0),
+				'px');
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$kerningToString = function (kerning) {
+	var _p16 = kerning;
+	switch (_p16.ctor) {
+		case 'KerningAuto':
+			return 'auto';
+		case 'KerningInherit':
+			return 'inherit';
+		default:
+			return _canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(_p16._0);
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$inValueToString = function (inValue) {
+	var _p17 = inValue;
+	switch (_p17.ctor) {
+		case 'InSourceGraphic':
+			return 'sourceGraphic';
+		case 'InSourceAlpha':
+			return 'sourceAlpha';
+		case 'InBackgroundAlpha':
+			return 'backgroundAlpha';
+		case 'InFillPaint':
+			return 'fillPaint';
+		case 'InStrokePaint':
+			return 'strokePaint';
+		default:
+			return _p17._0;
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$funcTypeToString = function (funcType) {
+	var _p18 = funcType;
+	switch (_p18.ctor) {
+		case 'FuncTypeIdentity':
+			return 'identity';
+		case 'FuncTypeTable':
+			return 'table';
+		case 'FuncTypeDiscrete':
+			return 'discrete';
+		case 'FuncTypeLinear':
+			return 'linear';
+		default:
+			return 'gamma';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fontWeightToString = function (fontWeight) {
+	var fontWeightClamped = function (weight) {
+		return A3(_elm_lang$core$Basics$clamp, 100, 900, (((weight + 50) / 100) | 0) * 100);
+	};
+	var _p19 = fontWeight;
+	switch (_p19.ctor) {
+		case 'FontWeightNormal':
+			return 'normal';
+		case 'FontWeightBold':
+			return 'bold';
+		case 'FontWeightBolder':
+			return 'bolder';
+		case 'FontWeightLighter':
+			return 'lighter';
+		case 'FontWeightInherit':
+			return 'inherit';
+		default:
+			return _elm_lang$core$Basics$toString(
+				fontWeightClamped(_p19._0));
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fontVariantToString = function (fontVariant) {
+	var _p20 = fontVariant;
+	switch (_p20.ctor) {
+		case 'FontVariantNormal':
+			return 'normal';
+		case 'FontVariantSmallCaps':
+			return 'small-caps';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fontStyleToString = function (fontStyle) {
+	var _p21 = fontStyle;
+	switch (_p21.ctor) {
+		case 'FontStyleNormal':
+			return 'normal';
+		case 'FontStyleItalic':
+			return 'italic';
+		case 'FontStyleOblique':
+			return 'oblique';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fontStretchToString = function (fontStretch) {
+	var _p22 = fontStretch;
+	switch (_p22.ctor) {
+		case 'FontStretchNormal':
+			return 'normal';
+		case 'FontStretchWider':
+			return 'wider';
+		case 'FontStretchNarrower':
+			return 'narrower';
+		case 'FontStretchUltraCondensed':
+			return 'ultra-condensed';
+		case 'FontStretchExtraCondensed':
+			return 'extra-condensed';
+		case 'FontStretchCondensed':
+			return 'condensed';
+		case 'FontStretchSemiCondensed':
+			return 'semi-condensed';
+		case 'FontStretchSemiExpanded':
+			return 'semi-expanded';
+		case 'FontStretchExpanded':
+			return 'expanded';
+		case 'FontStretchExtraExpanded':
+			return 'extra-expanded';
+		case 'FontStretchUltraExpanded':
+			return 'ultra-expanded';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fontSizeAdjustToString = function (fontSizeAdjust) {
+	var _p23 = fontSizeAdjust;
+	switch (_p23.ctor) {
+		case 'FontSizeAdjustNone':
+			return 'none';
+		case 'FontSizeAdjustInherit':
+			return 'inherit';
+		default:
+			return _elm_lang$core$Basics$toString(_p23._0);
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$floodColorToString = function (floodColor) {
+	var _p24 = floodColor;
+	switch (_p24.ctor) {
+		case 'FloodInherit':
+			return 'inherit';
+		case 'FloodCurrentColor':
+			return 'currentColor';
+		case 'Flood':
+			return _eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba(_p24._0);
+		default:
+			return _p24._0;
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$filterToString = function (f) {
+	var _p25 = f;
+	switch (_p25.ctor) {
+		case 'FilterNone':
+			return 'none';
+		case 'FilterInherit':
+			return 'inherit';
+		default:
+			return _p25._0;
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$fillRuleToString = function (fillRule) {
+	var _p26 = fillRule;
+	if (_p26.ctor === 'FillRuleNonZero') {
+		return 'nonzero';
+	} else {
+		return 'evenodd';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$edgeModeToString = function (edgeMode) {
+	var _p27 = edgeMode;
+	switch (_p27.ctor) {
+		case 'EdgeModeDuplicate':
+			return 'duplicate';
+		case 'EdgeModeWrap':
+			return 'wrap';
+		default:
+			return 'none';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$durationToString = function (duration) {
+	var _p28 = duration;
+	if (_p28.ctor === 'Duration') {
+		return _p28._0;
+	} else {
+		return 'indefinite';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$dominantBaselineToString = function (dominantBaseline) {
+	var _p29 = dominantBaseline;
+	switch (_p29.ctor) {
+		case 'DominantBaselineAuto':
+			return 'auto';
+		case 'DominantBaselineUseScript':
+			return 'use-script';
+		case 'DominantBaselineNoChange':
+			return 'no-change';
+		case 'DominantBaselineResetSize':
+			return 'reset-size';
+		case 'DominantBaselineIdeographic':
+			return 'ideographic';
+		case 'DominantBaselineAlphabetic':
+			return 'alphabetic';
+		case 'DominantBaselineHanging':
+			return 'hanging';
+		case 'DominantBaselineMathematical':
+			return 'mathematical';
+		case 'DominantBaselineCentral':
+			return 'central';
+		case 'DominantBaselineMiddle':
+			return 'middle';
+		case 'DominantBaselineTextAfterEdge':
+			return 'text-after-edge';
+		case 'DominantBaselineTextBeforeEdge':
+			return 'text-before-edge';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$displayToString = function (display) {
+	var _p30 = display;
+	switch (_p30.ctor) {
+		case 'DisplayInline':
+			return 'inline';
+		case 'DisplayBlock':
+			return 'block';
+		case 'DisplayListItem':
+			return 'list-item';
+		case 'DisplayRunIn':
+			return 'run-in';
+		case 'DisplayCompact':
+			return 'compact';
+		case 'DisplayMarker':
+			return 'marker';
+		case 'DisplayTable':
+			return 'table';
+		case 'DisplayInlineTable':
+			return 'inline-table';
+		case 'DisplayTableRowGroup':
+			return 'table-row-group';
+		case 'DisplayTableHeaderGroup':
+			return 'table-header-group';
+		case 'DisplayTableFooterGroup':
+			return 'table-footer-group';
+		case 'DisplayTableRow':
+			return 'table-row';
+		case 'DisplayTableColumnGroup':
+			return 'table-column-group';
+		case 'DisplayTableColumn':
+			return 'table-column';
+		case 'DisplayTableCell':
+			return 'table-cell';
+		case 'DisplayTableCaption':
+			return 'table-caption';
+		case 'DisplayNone':
+			return 'none';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$directionToString = function (direction) {
+	var _p31 = direction;
+	switch (_p31.ctor) {
+		case 'DirectionLTR':
+			return 'ltr';
+		case 'DirectionRTL':
+			return 'rtl';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$cursorToString = function (cursor) {
+	var _p32 = cursor;
+	switch (_p32.ctor) {
+		case 'CursorAuto':
+			return 'auto';
+		case 'CursorDefault':
+			return 'default';
+		case 'CursorCrosshair':
+			return 'crosshair';
+		case 'CursorPointer':
+			return 'pointer';
+		case 'CursorMove':
+			return 'move';
+		case 'CursorEResize':
+			return 'e-resize';
+		case 'CursorNEResize':
+			return 'ne-resize';
+		case 'CursorNWResize':
+			return 'nw-resize';
+		case 'CursorNResize':
+			return 'n-resize';
+		case 'CursorSEResize':
+			return 'se-resize';
+		case 'CursorSWResize':
+			return 'sw-resize';
+		case 'CursorWResize':
+			return 'w-resize';
+		case 'CursorText':
+			return 'text';
+		case 'CursorWait':
+			return 'wait';
+		case 'CursorHelp':
+			return 'help';
+		case 'CursorInherit':
+			return 'inherit';
+		default:
+			return _p32._0;
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString = function (coordinateSystem) {
+	var _p33 = coordinateSystem;
+	if (_p33.ctor === 'CoordinateSystemUserSpaceOnUse') {
+		return 'userSpaceOnUse';
+	} else {
+		return 'objectBoundingBox';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$compositeOperatorToString = function (compositeOperator) {
+	var _p34 = compositeOperator;
+	switch (_p34.ctor) {
+		case 'CompositeOperatorOver':
+			return 'over';
+		case 'CompositeOperatorIn':
+			return 'in';
+		case 'CompositeOperatorOut':
+			return 'out';
+		case 'CompositeOperatorAtop':
+			return 'atop';
+		case 'CompositeOperatorXor':
+			return 'xor';
+		default:
+			return 'arithmetic';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$colorProfileToString = function (colorProfile) {
+	var _p35 = colorProfile;
+	switch (_p35.ctor) {
+		case 'ColorProfileAuto':
+			return 'auto';
+		case 'ColorProfileSRGB':
+			return 'sRGB';
+		case 'ColorProfile':
+			return _p35._0;
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$colorMatrixTypeToString = function (colorMatrixType) {
+	var _p36 = colorMatrixType;
+	switch (_p36.ctor) {
+		case 'ColorMatrixTypeMatrix':
+			return 'matrix';
+		case 'ColorMatrixTypeSaturate':
+			return 'saturate';
+		case 'ColorMatrixTypeHueRotate':
+			return 'hueRotate';
+		default:
+			return 'luminanceToAlpha';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$colorInterpolationToString = function (colorInterpolation) {
+	var _p37 = colorInterpolation;
+	switch (_p37.ctor) {
+		case 'ColorInterpolationAuto':
+			return 'auto';
+		case 'ColorInterpolationSRGB':
+			return 'sRGB';
+		case 'ColorInterpolationLinearRGB':
+			return 'linearRGB';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$clipRuleToString = function (clipRule) {
+	var _p38 = clipRule;
+	switch (_p38.ctor) {
+		case 'ClipRuleNonZero':
+			return 'nonzero';
+		case 'ClipRuleEvenOdd':
+			return 'evenodd';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$clipPathToString = function (clipPath) {
+	var _p39 = clipPath;
+	switch (_p39.ctor) {
+		case 'ClipPathNone':
+			return 'none';
+		case 'ClipPathInherit':
+			return 'inherit';
+		default:
+			return _p39._0;
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$clipToString = function (clip) {
+	var _p40 = clip;
+	switch (_p40.ctor) {
+		case 'ClipAuto':
+			return 'auto';
+		case 'ClipInherit':
+			return 'inherit';
+		default:
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'rect(',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(_p40._0),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						' ',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_elm_lang$core$Basics$toString(_p40._1),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_elm_lang$core$Basics$toString(_p40._2),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										' ',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											_elm_lang$core$Basics$toString(_p40._3),
+											')'))))))));
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$calcModeToString = function (calcMode) {
+	var _p41 = calcMode;
+	switch (_p41.ctor) {
+		case 'CalcModeDiscrete':
+			return 'discrete';
+		case 'CalcModeLinear':
+			return 'linear';
+		case 'CalcModePaced':
+			return 'paced';
+		default:
+			return 'spline';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$bezierAnchorPointToString = function (_p42) {
+	var _p43 = _p42;
+	return A2(
+		_elm_lang$core$String$join,
+		' ',
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Basics$toString,
+			{
+				ctor: '::',
+				_0: _p43._0,
+				_1: {
+					ctor: '::',
+					_0: _p43._1,
+					_1: {
+						ctor: '::',
+						_0: _p43._2,
+						_1: {
+							ctor: '::',
+							_0: _p43._3,
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}));
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$baselineShiftToString = function (baselineShift) {
+	var _p44 = baselineShift;
+	switch (_p44.ctor) {
+		case 'ShiftAuto':
+			return 'auto';
+		case 'ShiftBaseline':
+			return 'baseline';
+		case 'ShiftSuper':
+			return 'super';
+		case 'ShiftSub':
+			return 'sub';
+		case 'ShiftPercentage':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(_p44._0),
+				'%');
+		case 'ShiftLength':
+			return _canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(_p44._0);
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$attributeTypeToString = function (attributeType) {
+	var _p45 = attributeType;
+	switch (_p45.ctor) {
+		case 'AttributeTypeAuto':
+			return 'auto';
+		case 'AttributeTypeCss':
+			return 'CSS';
+		default:
+			return 'XML';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$animateTransformTypeToString = function (animateTransformType) {
+	var _p46 = animateTransformType;
+	switch (_p46.ctor) {
+		case 'AnimateTransformTypeTranslate':
+			return 'translate';
+		case 'AnimateTransformTypeScale':
+			return 'scale';
+		case 'AnimateTransformTypeRotate':
+			return 'rotate';
+		case 'AnimateTransformTypeSkewX':
+			return 'skewX';
+		default:
+			return 'skewY';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$anchorAlignmentToString = function (anchorAlignment) {
+	var _p47 = anchorAlignment;
+	switch (_p47.ctor) {
+		case 'AnchorInherit':
+			return 'inherit';
+		case 'AnchorStart':
+			return 'start';
+		case 'AnchorMiddle':
+			return 'middle';
+		default:
+			return 'end';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$alignmentBaselineToString = function (alignmentBaseline) {
+	var _p48 = alignmentBaseline;
+	switch (_p48.ctor) {
+		case 'AlignmentAuto':
+			return 'auto';
+		case 'AlignmentBaseline':
+			return 'baseline';
+		case 'AlignmentBeforeEdge':
+			return 'before-edge';
+		case 'AlignmentTextBeforeEdge':
+			return 'text-before-edge';
+		case 'AlignmentMiddle':
+			return 'middle';
+		case 'AlignmentCentral':
+			return 'central';
+		case 'AlignmentAfterEdge':
+			return 'after-edge';
+		case 'AlignmentTextAfterEdge':
+			return 'text-after-edge';
+		case 'AlignmentIdeographic':
+			return 'ideographic';
+		case 'AlignmentAlphabetic':
+			return 'alphabetic';
+		case 'AlignmentHanging':
+			return 'hanging';
+		case 'AlignmentMathematical':
+			return 'mathematical';
+		default:
+			return 'inherit';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$alignToString = function (align) {
+	var _p49 = align;
+	if (_p49.ctor === 'AlignNone') {
+		return 'none';
+	} else {
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			'x',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				_canadaduane$typed_svg$TypedSvg_TypesToStrings$scaleToString(_p49._0),
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'y',
+					_canadaduane$typed_svg$TypedSvg_TypesToStrings$scaleToString(_p49._1))));
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$additiveToString = function (additive) {
+	var _p50 = additive;
+	if (_p50.ctor === 'AdditiveNone') {
+		return 'none';
+	} else {
+		return 'replace';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$accumulateToString = function (accumulate) {
+	var _p51 = accumulate;
+	if (_p51.ctor === 'AccumulateNone') {
+		return 'none';
+	} else {
+		return 'sum';
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_TypesToStrings$boolToString = function (bool) {
+	var _p52 = bool;
+	if (_p52 === true) {
+		return 'true';
+	} else {
+		return 'false';
+	}
+};
+
+var _canadaduane$typed_svg$TypedSvg_Attributes$zoomAndPan = _canadaduane$typed_svg$TypedSvg_Core$attribute('zoomAndPan');
+var _canadaduane$typed_svg$TypedSvg_Attributes$yChannelSelector = _canadaduane$typed_svg$TypedSvg_Core$attribute('yChannelSelector');
+var _canadaduane$typed_svg$TypedSvg_Attributes$y2 = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'y2',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$y1 = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'y1',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$y = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'y',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$xmlSpace = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:space');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xmlLang = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:lang');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xmlBase = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:base');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkType = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:type');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkTitle = function (str) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'xlinkTitle', str);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkShow = function (str) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'xlinkShow', str);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkRole = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:role');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkHref = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:href');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkArcrole = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:arcrole');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xlinkActuate = A2(_canadaduane$typed_svg$TypedSvg_Core$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:actuate');
+var _canadaduane$typed_svg$TypedSvg_Attributes$xChannelSelector = _canadaduane$typed_svg$TypedSvg_Core$attribute('xChannelSelector');
+var _canadaduane$typed_svg$TypedSvg_Attributes$x2 = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'x2',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$x1 = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'x1',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$xHeight = _canadaduane$typed_svg$TypedSvg_Core$attribute('x-height');
+var _canadaduane$typed_svg$TypedSvg_Attributes$x = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'x',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$writingMode = _canadaduane$typed_svg$TypedSvg_Core$attribute('writing-mode');
+var _canadaduane$typed_svg$TypedSvg_Attributes$wordSpacing = _canadaduane$typed_svg$TypedSvg_Core$attribute('word-spacing');
+var _canadaduane$typed_svg$TypedSvg_Attributes$widths = _canadaduane$typed_svg$TypedSvg_Core$attribute('widths');
+var _canadaduane$typed_svg$TypedSvg_Attributes$width = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'width',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$visibility = _canadaduane$typed_svg$TypedSvg_Core$attribute('visibility');
+var _canadaduane$typed_svg$TypedSvg_Attributes$viewTarget = _canadaduane$typed_svg$TypedSvg_Core$attribute('viewTarget');
+var _canadaduane$typed_svg$TypedSvg_Attributes$viewBox = F4(
+	function (minX, minY, width, height) {
+		return A2(
+			_canadaduane$typed_svg$TypedSvg_Core$attribute,
+			'viewBox',
+			A2(
+				_elm_lang$core$String$join,
+				' ',
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Basics$toString,
+					{
+						ctor: '::',
+						_0: minX,
+						_1: {
+							ctor: '::',
+							_0: minY,
+							_1: {
+								ctor: '::',
+								_0: width,
+								_1: {
+									ctor: '::',
+									_0: height,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					})));
+	});
+var _canadaduane$typed_svg$TypedSvg_Attributes$vertOriginY = _canadaduane$typed_svg$TypedSvg_Core$attribute('vert-origin-y');
+var _canadaduane$typed_svg$TypedSvg_Attributes$vertOriginX = _canadaduane$typed_svg$TypedSvg_Core$attribute('vert-origin-x');
+var _canadaduane$typed_svg$TypedSvg_Attributes$vertAdvY = _canadaduane$typed_svg$TypedSvg_Core$attribute('vert-adv-y');
+var _canadaduane$typed_svg$TypedSvg_Attributes$version = function (number) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'version',
+		_elm_lang$core$Basics$toString(number));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$vMathematical = _canadaduane$typed_svg$TypedSvg_Core$attribute('v-mathematical');
+var _canadaduane$typed_svg$TypedSvg_Attributes$vIdeographic = _canadaduane$typed_svg$TypedSvg_Core$attribute('v-ideographic');
+var _canadaduane$typed_svg$TypedSvg_Attributes$vHanging = _canadaduane$typed_svg$TypedSvg_Core$attribute('v-hanging');
+var _canadaduane$typed_svg$TypedSvg_Attributes$vAlphabetic = _canadaduane$typed_svg$TypedSvg_Core$attribute('v-alphabetic');
+var _canadaduane$typed_svg$TypedSvg_Attributes$unitsPerEm = _canadaduane$typed_svg$TypedSvg_Core$attribute('units-per-em');
+var _canadaduane$typed_svg$TypedSvg_Attributes$unicodeRange = _canadaduane$typed_svg$TypedSvg_Core$attribute('unicode-range');
+var _canadaduane$typed_svg$TypedSvg_Attributes$unicodeBidi = _canadaduane$typed_svg$TypedSvg_Core$attribute('unicode-bidi');
+var _canadaduane$typed_svg$TypedSvg_Attributes$unicode = _canadaduane$typed_svg$TypedSvg_Core$attribute('unicode');
+var _canadaduane$typed_svg$TypedSvg_Attributes$underlineThickness = function (thickness) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'underline-thickness',
+		_elm_lang$core$Basics$toString(thickness));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$underlinePosition = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'underline-position',
+		_elm_lang$core$Basics$toString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$u2 = _canadaduane$typed_svg$TypedSvg_Core$attribute('u2');
+var _canadaduane$typed_svg$TypedSvg_Attributes$u1 = _canadaduane$typed_svg$TypedSvg_Core$attribute('u1');
+var _canadaduane$typed_svg$TypedSvg_Attributes$transform = function (transforms) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'transform',
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$transformToString, transforms)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$to = function (value) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'to',
+		_elm_lang$core$Basics$toString(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$title = _canadaduane$typed_svg$TypedSvg_Core$attribute('title');
+var _canadaduane$typed_svg$TypedSvg_Attributes$textRendering = _canadaduane$typed_svg$TypedSvg_Core$attribute('text-rendering');
+var _canadaduane$typed_svg$TypedSvg_Attributes$textLength = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'textLength',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$textDecoration = _canadaduane$typed_svg$TypedSvg_Core$attribute('text-decoration');
+var _canadaduane$typed_svg$TypedSvg_Attributes$textAnchor = function (anchorAlignment) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'textAnchor',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$anchorAlignmentToString(anchorAlignment));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$target = _canadaduane$typed_svg$TypedSvg_Core$attribute('target');
+var _canadaduane$typed_svg$TypedSvg_Attributes$tableValues = _canadaduane$typed_svg$TypedSvg_Core$attribute('tableValues');
+var _canadaduane$typed_svg$TypedSvg_Attributes$systemLanguage = _canadaduane$typed_svg$TypedSvg_Core$attribute('systemLanguage');
+var _canadaduane$typed_svg$TypedSvg_Attributes$style = function (value) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'style', value);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeWidth = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'strokeWidth',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeOpacity = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-opacity');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeMiterlimit = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-miterlimit');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeLinejoin = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-linejoin');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeLinecap = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-linecap');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeDashoffset = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-dashoffset');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strokeDasharray = _canadaduane$typed_svg$TypedSvg_Core$attribute('stroke-dasharray');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stroke = function (color) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'stroke',
+		_eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba(color));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$string = _canadaduane$typed_svg$TypedSvg_Core$attribute('string');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strikethroughThickness = _canadaduane$typed_svg$TypedSvg_Core$attribute('strikethrough-thickness');
+var _canadaduane$typed_svg$TypedSvg_Attributes$strikethroughPosition = _canadaduane$typed_svg$TypedSvg_Core$attribute('strikethrough-position');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stopOpacity = _canadaduane$typed_svg$TypedSvg_Core$attribute('stop-opacity');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stopColor = _canadaduane$typed_svg$TypedSvg_Core$attribute('stop-color');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stitchTiles = _canadaduane$typed_svg$TypedSvg_Core$attribute('stitchTiles');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stemv = _canadaduane$typed_svg$TypedSvg_Core$attribute('stemv');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stemh = _canadaduane$typed_svg$TypedSvg_Core$attribute('stemh');
+var _canadaduane$typed_svg$TypedSvg_Attributes$stdDeviation = _canadaduane$typed_svg$TypedSvg_Core$attribute('stdDeviation');
+var _canadaduane$typed_svg$TypedSvg_Attributes$startOffset = _canadaduane$typed_svg$TypedSvg_Core$attribute('startOffset');
+var _canadaduane$typed_svg$TypedSvg_Attributes$spreadMethod = _canadaduane$typed_svg$TypedSvg_Core$attribute('spreadMethod');
+var _canadaduane$typed_svg$TypedSvg_Attributes$speed = _canadaduane$typed_svg$TypedSvg_Core$attribute('speed');
+var _canadaduane$typed_svg$TypedSvg_Attributes$specularExponent = _canadaduane$typed_svg$TypedSvg_Core$attribute('specularExponent');
+var _canadaduane$typed_svg$TypedSvg_Attributes$specularConstant = _canadaduane$typed_svg$TypedSvg_Core$attribute('specularConstant');
+var _canadaduane$typed_svg$TypedSvg_Attributes$spacing = _canadaduane$typed_svg$TypedSvg_Core$attribute('spacing');
+var _canadaduane$typed_svg$TypedSvg_Attributes$slope = _canadaduane$typed_svg$TypedSvg_Core$attribute('slope');
+var _canadaduane$typed_svg$TypedSvg_Attributes$shapeRendering = function (shapeRendering) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'shapeRendering',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$shapeRenderingToString(shapeRendering));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$ry = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'ry',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$rx = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'rx',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$rotate = _canadaduane$typed_svg$TypedSvg_Core$attribute('rotate');
+var _canadaduane$typed_svg$TypedSvg_Attributes$restart = function (restart) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'restart',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$restartToString(restart));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$requiredFeatures = function (features) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'requiredFeatures',
+		A2(_elm_lang$core$String$join, ' ', features));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$requiredExtensions = _canadaduane$typed_svg$TypedSvg_Core$attribute('requiredExtensions');
+var _canadaduane$typed_svg$TypedSvg_Attributes$repeatDur = function (duration) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'repeatDur',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$durationToString(duration));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$repeatCount = function (repeatCount) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'repeatCount',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$repeatCountToString(repeatCount));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$renderingIntent = _canadaduane$typed_svg$TypedSvg_Core$attribute('rendering-intent');
+var _canadaduane$typed_svg$TypedSvg_Attributes$refY = _canadaduane$typed_svg$TypedSvg_Core$attribute('refY');
+var _canadaduane$typed_svg$TypedSvg_Attributes$refX = _canadaduane$typed_svg$TypedSvg_Core$attribute('refX');
+var _canadaduane$typed_svg$TypedSvg_Attributes$r = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'r',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$primitiveUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'primitiveUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$preserveAspectRatio = F2(
+	function (align, meetOrSlice) {
+		return A2(
+			_canadaduane$typed_svg$TypedSvg_Core$attribute,
+			'preserveAspectRatio',
+			A2(
+				_elm_lang$core$String$join,
+				' ',
+				{
+					ctor: '::',
+					_0: _canadaduane$typed_svg$TypedSvg_TypesToStrings$alignToString(align),
+					_1: {
+						ctor: '::',
+						_0: _canadaduane$typed_svg$TypedSvg_TypesToStrings$meetOrSliceToString(meetOrSlice),
+						_1: {ctor: '[]'}
+					}
+				}));
+	});
+var _canadaduane$typed_svg$TypedSvg_Attributes$points = function (pts) {
+	var pointToString = function (_p0) {
+		var _p1 = _p0;
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(_p1._0),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				', ',
+				_elm_lang$core$Basics$toString(_p1._1)));
+	};
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'points',
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$List$map, pointToString, pts)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$pointOrder = _canadaduane$typed_svg$TypedSvg_Core$attribute('point-order');
+var _canadaduane$typed_svg$TypedSvg_Attributes$pointerEvents = _canadaduane$typed_svg$TypedSvg_Core$attribute('pointer-events');
+var _canadaduane$typed_svg$TypedSvg_Attributes$patternUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'patternUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$patternTransform = function (transforms) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'patternTransform',
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$transformToString, transforms)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$patternContentUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'patternContentUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$pathLength = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'pathLength',
+		_elm_lang$core$Basics$toString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$path = _canadaduane$typed_svg$TypedSvg_Core$attribute('path');
+var _canadaduane$typed_svg$TypedSvg_Attributes$panose1 = _canadaduane$typed_svg$TypedSvg_Core$attribute('panose-1');
+var _canadaduane$typed_svg$TypedSvg_Attributes$overlineThickness = function (thickness) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'overlineThickness',
+		_elm_lang$core$Basics$toString(thickness));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$overlinePosition = function (position) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'overlinePosition',
+		_elm_lang$core$Basics$toString(position));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$overflow = _canadaduane$typed_svg$TypedSvg_Core$attribute('overflow');
+var _canadaduane$typed_svg$TypedSvg_Attributes$origin = _canadaduane$typed_svg$TypedSvg_Core$attribute('origin');
+var _canadaduane$typed_svg$TypedSvg_Attributes$orientation = _canadaduane$typed_svg$TypedSvg_Core$attribute('orientation');
+var _canadaduane$typed_svg$TypedSvg_Attributes$orient = _canadaduane$typed_svg$TypedSvg_Core$attribute('orient');
+var _canadaduane$typed_svg$TypedSvg_Attributes$opacity = _canadaduane$typed_svg$TypedSvg_Core$attribute('opacity');
+var _canadaduane$typed_svg$TypedSvg_Attributes$offset = _canadaduane$typed_svg$TypedSvg_Core$attribute('offset');
+var _canadaduane$typed_svg$TypedSvg_Attributes$name = _canadaduane$typed_svg$TypedSvg_Core$attribute('name');
+var _canadaduane$typed_svg$TypedSvg_Attributes$min = function (clockValue) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'min', clockValue);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$method = _canadaduane$typed_svg$TypedSvg_Core$attribute('method');
+var _canadaduane$typed_svg$TypedSvg_Attributes$media = _canadaduane$typed_svg$TypedSvg_Core$attribute('media');
+var _canadaduane$typed_svg$TypedSvg_Attributes$max = function (clockValue) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'max', clockValue);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$maskUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'maskUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$maskContentUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'maskContentUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$mask = _canadaduane$typed_svg$TypedSvg_Core$attribute('mask');
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerWidth = function (width) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'markerWidth',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(width));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerUnits = function (markerCoordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'markerUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$markerCoordinateSystemToString(markerCoordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerStart = _canadaduane$typed_svg$TypedSvg_Core$attribute('marker-start');
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerMid = _canadaduane$typed_svg$TypedSvg_Core$attribute('marker-mid');
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerHeight = function (height) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'markerHeight',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(height));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$markerEnd = _canadaduane$typed_svg$TypedSvg_Core$attribute('marker-end');
+var _canadaduane$typed_svg$TypedSvg_Attributes$local = _canadaduane$typed_svg$TypedSvg_Core$attribute('local');
+var _canadaduane$typed_svg$TypedSvg_Attributes$lightingColor = _canadaduane$typed_svg$TypedSvg_Core$attribute('lighting-color');
+var _canadaduane$typed_svg$TypedSvg_Attributes$letterSpacing = _canadaduane$typed_svg$TypedSvg_Core$attribute('letter-spacing');
+var _canadaduane$typed_svg$TypedSvg_Attributes$lengthAdjust = function (option) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'lengthAdjust',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthAdjustToString(option));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$lang = _canadaduane$typed_svg$TypedSvg_Core$attribute('lang');
+var _canadaduane$typed_svg$TypedSvg_Attributes$keyTimes = function (floatList) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'keyTimes',
+		A2(
+			_elm_lang$core$String$join,
+			';',
+			A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, floatList)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$keySplines = function (bezierAnchorPointList) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'keySplines',
+		A2(
+			_elm_lang$core$String$join,
+			';',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$bezierAnchorPointToString, bezierAnchorPointList)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$kerning = function (k) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'kerning',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$kerningToString(k));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$k = _canadaduane$typed_svg$TypedSvg_Core$attribute('k');
+var _canadaduane$typed_svg$TypedSvg_Attributes$intercept = _canadaduane$typed_svg$TypedSvg_Core$attribute('intercept');
+var _canadaduane$typed_svg$TypedSvg_Attributes$imageRendering = function (rendering) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'image-rendering',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$renderingToString(rendering));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$ideographic = _canadaduane$typed_svg$TypedSvg_Core$attribute('ideographic');
+var _canadaduane$typed_svg$TypedSvg_Attributes$horizOriginY = _canadaduane$typed_svg$TypedSvg_Core$attribute('horiz-origin-y');
+var _canadaduane$typed_svg$TypedSvg_Attributes$horizOriginX = _canadaduane$typed_svg$TypedSvg_Core$attribute('horiz-origin-x');
+var _canadaduane$typed_svg$TypedSvg_Attributes$horizAdvX = _canadaduane$typed_svg$TypedSvg_Core$attribute('horiz-adv-x');
+var _canadaduane$typed_svg$TypedSvg_Attributes$height = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'height',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$hanging = _canadaduane$typed_svg$TypedSvg_Core$attribute('hanging');
+var _canadaduane$typed_svg$TypedSvg_Attributes$gradientUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'gradientUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$gradientTransform = function (transforms) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'gradientTransform',
+		A2(
+			_elm_lang$core$String$join,
+			' ',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$transformToString, transforms)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$glyphRef = _canadaduane$typed_svg$TypedSvg_Core$attribute('glyphRef');
+var _canadaduane$typed_svg$TypedSvg_Attributes$glyphOrientationVertical = _canadaduane$typed_svg$TypedSvg_Core$attribute('glyph-orientation-vertical');
+var _canadaduane$typed_svg$TypedSvg_Attributes$glyphOrientationHorizontal = _canadaduane$typed_svg$TypedSvg_Core$attribute('glyph-orientation-horizontal');
+var _canadaduane$typed_svg$TypedSvg_Attributes$glyphName = _canadaduane$typed_svg$TypedSvg_Core$attribute('glyph-name');
+var _canadaduane$typed_svg$TypedSvg_Attributes$g2 = _canadaduane$typed_svg$TypedSvg_Core$attribute('g2');
+var _canadaduane$typed_svg$TypedSvg_Attributes$g1 = _canadaduane$typed_svg$TypedSvg_Core$attribute('g1');
+var _canadaduane$typed_svg$TypedSvg_Attributes$fy = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fy',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fx = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fx',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$from = function (value) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'from',
+		_elm_lang$core$Basics$toString(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$format = _canadaduane$typed_svg$TypedSvg_Core$attribute('format');
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontWeight = function (fontWeight) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontWeight',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fontWeightToString(fontWeight));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontVariant = function (fontVariant) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontVariant',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fontVariantToString(fontVariant));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontStyle = function (fontStyle) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontStyle',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fontStyleToString(fontStyle));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontStretch = function (fontStretch) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontStretch',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fontStretchToString(fontStretch));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontSizeAdjust = function (fontSizeAdjust) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontSizeAdjust',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fontSizeAdjustToString(fontSizeAdjust));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontSize = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fontSize',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fontFamily = function (families) {
+	var _p2 = families;
+	if (_p2.ctor === '[]') {
+		return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'fontFamily', 'inherit');
+	} else {
+		return A2(
+			_canadaduane$typed_svg$TypedSvg_Core$attribute,
+			'fontFamily',
+			A2(_elm_lang$core$String$join, ', ', families));
+	}
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$filter = function (f) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'filter',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$filterToString(f));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fillRule = function (fillRule) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fill-rule',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$fillRuleToString(fillRule));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fillOpacity = function (opacity) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fill-opacity',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$opacityToString(opacity));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$fill = function (color) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'fill',
+		_eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba(color));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$noFill = _canadaduane$typed_svg$TypedSvg_Attributes$fill(
+	A4(_elm_lang$core$Color$rgba, 0, 0, 0, 0.0));
+var _canadaduane$typed_svg$TypedSvg_Attributes$externalResourcesRequired = function (bool) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'externalResourcesRequired',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$boolToString(bool));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$exponent = _canadaduane$typed_svg$TypedSvg_Core$attribute('exponent');
+var _canadaduane$typed_svg$TypedSvg_Attributes$end = function (timingValues) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'end',
+		A2(
+			_elm_lang$core$String$join,
+			';',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$timingValueAsString, timingValues)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$enableBackground = _canadaduane$typed_svg$TypedSvg_Core$attribute('enable-background');
+var _canadaduane$typed_svg$TypedSvg_Attributes$dy = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'dy',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$dx = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'dx',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$dur = function (duration) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'dur',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$durationToString(duration));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$dominantBaseline = function (dominantBaseline) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'dominant-baseline',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$dominantBaselineToString(dominantBaseline));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$display = function (display) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'display',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$displayToString(display));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$direction = function (direction) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'direction',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$directionToString(direction));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$descent = _canadaduane$typed_svg$TypedSvg_Core$attribute('descent');
+var _canadaduane$typed_svg$TypedSvg_Attributes$decelerate = _canadaduane$typed_svg$TypedSvg_Core$attribute('decelerate');
+var _canadaduane$typed_svg$TypedSvg_Attributes$d = _canadaduane$typed_svg$TypedSvg_Core$attribute('d');
+var _canadaduane$typed_svg$TypedSvg_Attributes$cy = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'cy',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$cx = function (length) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'cx',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$lengthToString(length));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$cursor = function (cursor) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'cursor',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$cursorToString(cursor));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$contentType = function (t) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'type_', t);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$contentStyleType = function (styleSheetLanguage) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'contentStyleType', styleSheetLanguage);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$contentScriptType = function (mimeType) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'contentScriptType', mimeType);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$color = function (c) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'color',
+		_eskimoblood$elm_color_extra$Color_Convert$colorToCssRgba(c));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$colorRendering = function (rendering) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'color-rendering',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$renderingToString(rendering));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$colorProfile = function (colorProfile) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'color-profile',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$colorProfileToString(colorProfile));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$colorInterpolation = function (colorInterpolation) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'colorInterpolation',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$colorInterpolationToString(colorInterpolation));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$clipRule = function (clipRule) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'clip-rule',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$clipRuleToString(clipRule));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$clipPathUnits = function (coordinateSystem) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'clipPathUnits',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$coordinateSystemToString(coordinateSystem));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$clipPath = function (clipPath) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'clip-path',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$clipPathToString(clipPath));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$clip = function (clip) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'clip',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$clipToString(clip));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$class = function (names) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'class',
+		A2(_elm_lang$core$String$join, ' ', names));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$capHeight = _canadaduane$typed_svg$TypedSvg_Core$attribute('cap-height');
+var _canadaduane$typed_svg$TypedSvg_Attributes$calcMode = function (calcMode) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'calcMode',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$calcModeToString(calcMode));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$by = _canadaduane$typed_svg$TypedSvg_Core$attribute('by');
+var _canadaduane$typed_svg$TypedSvg_Attributes$begin = function (timingValues) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'begin',
+		A2(
+			_elm_lang$core$String$join,
+			';',
+			A2(_elm_lang$core$List$map, _canadaduane$typed_svg$TypedSvg_TypesToStrings$timingValueAsString, timingValues)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$bbox = _canadaduane$typed_svg$TypedSvg_Core$attribute('bbox');
+var _canadaduane$typed_svg$TypedSvg_Attributes$baseProfile = _canadaduane$typed_svg$TypedSvg_Core$attribute('baseProfile');
+var _canadaduane$typed_svg$TypedSvg_Attributes$baselineShift = function (baselineShift) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'baseline-shift',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$baselineShiftToString(baselineShift));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$autoReverse = _canadaduane$typed_svg$TypedSvg_Core$attribute('autoReverse');
+var _canadaduane$typed_svg$TypedSvg_Attributes$attributeType = function (attributeType) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'attributeType',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$attributeTypeToString(attributeType));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$attributeName = function (name) {
+	return A2(_canadaduane$typed_svg$TypedSvg_Core$attribute, 'attributeName', name);
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$ascent = function (maxDepth) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'ascent',
+		_elm_lang$core$Basics$toString(maxDepth));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$arabicForm = _canadaduane$typed_svg$TypedSvg_Core$attribute('arabic-form');
+var _canadaduane$typed_svg$TypedSvg_Attributes$animationValues = function (values) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'values',
+		A2(
+			_elm_lang$core$String$join,
+			';',
+			A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, values)));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$animateTransformType = function (animateTransformType) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'type_',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$animateTransformTypeToString(animateTransformType));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$amplitude = _canadaduane$typed_svg$TypedSvg_Core$attribute('amplitude');
+var _canadaduane$typed_svg$TypedSvg_Attributes$allowReorder = function (allowReorder) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'allowReorder',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$yesNoToString(allowReorder));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$alignmentBaseline = function (alignmentBaseline) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'alignment-baseline',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$alignmentBaselineToString(alignmentBaseline));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$alphabetic = _canadaduane$typed_svg$TypedSvg_Core$attribute('alphabetic');
+var _canadaduane$typed_svg$TypedSvg_Attributes$additive = function (option) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'additive',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$additiveToString(option));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$accumulate = function (option) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'accumulate',
+		_canadaduane$typed_svg$TypedSvg_TypesToStrings$accumulateToString(option));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$accelerate = function (rate) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'accelerate',
+		_elm_lang$core$Basics$toString(rate));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes$accentHeight = function (height) {
+	return A2(
+		_canadaduane$typed_svg$TypedSvg_Core$attribute,
+		'accent-height',
+		_elm_lang$core$Basics$toString(height));
+};
+
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y2 = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$y2(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y1 = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$y1(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$y(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x2 = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$x2(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x1 = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$x1(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$x(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$width = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$width(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$strokeWidth = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$strokeWidth(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$textLength = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$textLength(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$ry = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$ry(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$rx = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$rx(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$r = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$r(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$markerWidth = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$markerWidth(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$markerHeight = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$markerHeight(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$height = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$height(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$fy = function (yAxisCoord) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$fx(
+		_canadaduane$typed_svg$TypedSvg_Types$px(yAxisCoord));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$fx = function (xAxisCoord) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$fx(
+		_canadaduane$typed_svg$TypedSvg_Types$px(xAxisCoord));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$fontSize = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$fontSize(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$dy = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$dy(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$dx = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$dx(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$cy = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$cy(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+var _canadaduane$typed_svg$TypedSvg_Attributes_InPx$cx = function (value) {
+	return _canadaduane$typed_svg$TypedSvg_Attributes$cx(
+		_canadaduane$typed_svg$TypedSvg_Types$px(value));
+};
+
+var _canadaduane$typed_svg$TypedSvg_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _canadaduane$typed_svg$TypedSvg_Events$simpleOn = F2(
+	function (name, msg) {
+		return A2(
+			_canadaduane$typed_svg$TypedSvg_Events$on,
+			name,
+			_elm_lang$core$Json_Decode$succeed(msg));
+	});
+var _canadaduane$typed_svg$TypedSvg_Events$onBegin = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('begin');
+var _canadaduane$typed_svg$TypedSvg_Events$onEnd = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('end');
+var _canadaduane$typed_svg$TypedSvg_Events$onRepeat = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('repeat');
+var _canadaduane$typed_svg$TypedSvg_Events$onAbort = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('abort');
+var _canadaduane$typed_svg$TypedSvg_Events$onError = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('error');
+var _canadaduane$typed_svg$TypedSvg_Events$onResize = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('resize');
+var _canadaduane$typed_svg$TypedSvg_Events$onScroll = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('scroll');
+var _canadaduane$typed_svg$TypedSvg_Events$onLoad = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('load');
+var _canadaduane$typed_svg$TypedSvg_Events$onUnload = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('unload');
+var _canadaduane$typed_svg$TypedSvg_Events$onZoom = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('zoom');
+var _canadaduane$typed_svg$TypedSvg_Events$onActivate = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('activate');
+var _canadaduane$typed_svg$TypedSvg_Events$onClick = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('click');
+var _canadaduane$typed_svg$TypedSvg_Events$onFocusIn = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('focusin');
+var _canadaduane$typed_svg$TypedSvg_Events$onFocusOut = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('focusout');
+var _canadaduane$typed_svg$TypedSvg_Events$onMouseDown = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('mousedown');
+var _canadaduane$typed_svg$TypedSvg_Events$onMouseMove = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('mousemove');
+var _canadaduane$typed_svg$TypedSvg_Events$onMouseOut = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('mouseout');
+var _canadaduane$typed_svg$TypedSvg_Events$onMouseOver = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('mouseover');
+var _canadaduane$typed_svg$TypedSvg_Events$onMouseUp = _canadaduane$typed_svg$TypedSvg_Events$simpleOn('mouseup');
 
 var _elm_lang$html$Html_Attributes$map = _elm_lang$virtual_dom$VirtualDom$mapProperty;
 var _elm_lang$html$Html_Attributes$attribute = _elm_lang$virtual_dom$VirtualDom$attribute;
@@ -8260,347 +11242,6 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _elm_lang$svg$Svg$map = _elm_lang$virtual_dom$VirtualDom$map;
-var _elm_lang$svg$Svg$text = _elm_lang$virtual_dom$VirtualDom$text;
-var _elm_lang$svg$Svg$svgNamespace = A2(
-	_elm_lang$virtual_dom$VirtualDom$property,
-	'namespace',
-	_elm_lang$core$Json_Encode$string('http://www.w3.org/2000/svg'));
-var _elm_lang$svg$Svg$node = F3(
-	function (name, attributes, children) {
-		return A3(
-			_elm_lang$virtual_dom$VirtualDom$node,
-			name,
-			{ctor: '::', _0: _elm_lang$svg$Svg$svgNamespace, _1: attributes},
-			children);
-	});
-var _elm_lang$svg$Svg$svg = _elm_lang$svg$Svg$node('svg');
-var _elm_lang$svg$Svg$foreignObject = _elm_lang$svg$Svg$node('foreignObject');
-var _elm_lang$svg$Svg$animate = _elm_lang$svg$Svg$node('animate');
-var _elm_lang$svg$Svg$animateColor = _elm_lang$svg$Svg$node('animateColor');
-var _elm_lang$svg$Svg$animateMotion = _elm_lang$svg$Svg$node('animateMotion');
-var _elm_lang$svg$Svg$animateTransform = _elm_lang$svg$Svg$node('animateTransform');
-var _elm_lang$svg$Svg$mpath = _elm_lang$svg$Svg$node('mpath');
-var _elm_lang$svg$Svg$set = _elm_lang$svg$Svg$node('set');
-var _elm_lang$svg$Svg$a = _elm_lang$svg$Svg$node('a');
-var _elm_lang$svg$Svg$defs = _elm_lang$svg$Svg$node('defs');
-var _elm_lang$svg$Svg$g = _elm_lang$svg$Svg$node('g');
-var _elm_lang$svg$Svg$marker = _elm_lang$svg$Svg$node('marker');
-var _elm_lang$svg$Svg$mask = _elm_lang$svg$Svg$node('mask');
-var _elm_lang$svg$Svg$pattern = _elm_lang$svg$Svg$node('pattern');
-var _elm_lang$svg$Svg$switch = _elm_lang$svg$Svg$node('switch');
-var _elm_lang$svg$Svg$symbol = _elm_lang$svg$Svg$node('symbol');
-var _elm_lang$svg$Svg$desc = _elm_lang$svg$Svg$node('desc');
-var _elm_lang$svg$Svg$metadata = _elm_lang$svg$Svg$node('metadata');
-var _elm_lang$svg$Svg$title = _elm_lang$svg$Svg$node('title');
-var _elm_lang$svg$Svg$feBlend = _elm_lang$svg$Svg$node('feBlend');
-var _elm_lang$svg$Svg$feColorMatrix = _elm_lang$svg$Svg$node('feColorMatrix');
-var _elm_lang$svg$Svg$feComponentTransfer = _elm_lang$svg$Svg$node('feComponentTransfer');
-var _elm_lang$svg$Svg$feComposite = _elm_lang$svg$Svg$node('feComposite');
-var _elm_lang$svg$Svg$feConvolveMatrix = _elm_lang$svg$Svg$node('feConvolveMatrix');
-var _elm_lang$svg$Svg$feDiffuseLighting = _elm_lang$svg$Svg$node('feDiffuseLighting');
-var _elm_lang$svg$Svg$feDisplacementMap = _elm_lang$svg$Svg$node('feDisplacementMap');
-var _elm_lang$svg$Svg$feFlood = _elm_lang$svg$Svg$node('feFlood');
-var _elm_lang$svg$Svg$feFuncA = _elm_lang$svg$Svg$node('feFuncA');
-var _elm_lang$svg$Svg$feFuncB = _elm_lang$svg$Svg$node('feFuncB');
-var _elm_lang$svg$Svg$feFuncG = _elm_lang$svg$Svg$node('feFuncG');
-var _elm_lang$svg$Svg$feFuncR = _elm_lang$svg$Svg$node('feFuncR');
-var _elm_lang$svg$Svg$feGaussianBlur = _elm_lang$svg$Svg$node('feGaussianBlur');
-var _elm_lang$svg$Svg$feImage = _elm_lang$svg$Svg$node('feImage');
-var _elm_lang$svg$Svg$feMerge = _elm_lang$svg$Svg$node('feMerge');
-var _elm_lang$svg$Svg$feMergeNode = _elm_lang$svg$Svg$node('feMergeNode');
-var _elm_lang$svg$Svg$feMorphology = _elm_lang$svg$Svg$node('feMorphology');
-var _elm_lang$svg$Svg$feOffset = _elm_lang$svg$Svg$node('feOffset');
-var _elm_lang$svg$Svg$feSpecularLighting = _elm_lang$svg$Svg$node('feSpecularLighting');
-var _elm_lang$svg$Svg$feTile = _elm_lang$svg$Svg$node('feTile');
-var _elm_lang$svg$Svg$feTurbulence = _elm_lang$svg$Svg$node('feTurbulence');
-var _elm_lang$svg$Svg$font = _elm_lang$svg$Svg$node('font');
-var _elm_lang$svg$Svg$linearGradient = _elm_lang$svg$Svg$node('linearGradient');
-var _elm_lang$svg$Svg$radialGradient = _elm_lang$svg$Svg$node('radialGradient');
-var _elm_lang$svg$Svg$stop = _elm_lang$svg$Svg$node('stop');
-var _elm_lang$svg$Svg$circle = _elm_lang$svg$Svg$node('circle');
-var _elm_lang$svg$Svg$ellipse = _elm_lang$svg$Svg$node('ellipse');
-var _elm_lang$svg$Svg$image = _elm_lang$svg$Svg$node('image');
-var _elm_lang$svg$Svg$line = _elm_lang$svg$Svg$node('line');
-var _elm_lang$svg$Svg$path = _elm_lang$svg$Svg$node('path');
-var _elm_lang$svg$Svg$polygon = _elm_lang$svg$Svg$node('polygon');
-var _elm_lang$svg$Svg$polyline = _elm_lang$svg$Svg$node('polyline');
-var _elm_lang$svg$Svg$rect = _elm_lang$svg$Svg$node('rect');
-var _elm_lang$svg$Svg$use = _elm_lang$svg$Svg$node('use');
-var _elm_lang$svg$Svg$feDistantLight = _elm_lang$svg$Svg$node('feDistantLight');
-var _elm_lang$svg$Svg$fePointLight = _elm_lang$svg$Svg$node('fePointLight');
-var _elm_lang$svg$Svg$feSpotLight = _elm_lang$svg$Svg$node('feSpotLight');
-var _elm_lang$svg$Svg$altGlyph = _elm_lang$svg$Svg$node('altGlyph');
-var _elm_lang$svg$Svg$altGlyphDef = _elm_lang$svg$Svg$node('altGlyphDef');
-var _elm_lang$svg$Svg$altGlyphItem = _elm_lang$svg$Svg$node('altGlyphItem');
-var _elm_lang$svg$Svg$glyph = _elm_lang$svg$Svg$node('glyph');
-var _elm_lang$svg$Svg$glyphRef = _elm_lang$svg$Svg$node('glyphRef');
-var _elm_lang$svg$Svg$textPath = _elm_lang$svg$Svg$node('textPath');
-var _elm_lang$svg$Svg$text_ = _elm_lang$svg$Svg$node('text');
-var _elm_lang$svg$Svg$tref = _elm_lang$svg$Svg$node('tref');
-var _elm_lang$svg$Svg$tspan = _elm_lang$svg$Svg$node('tspan');
-var _elm_lang$svg$Svg$clipPath = _elm_lang$svg$Svg$node('clipPath');
-var _elm_lang$svg$Svg$colorProfile = _elm_lang$svg$Svg$node('colorProfile');
-var _elm_lang$svg$Svg$cursor = _elm_lang$svg$Svg$node('cursor');
-var _elm_lang$svg$Svg$filter = _elm_lang$svg$Svg$node('filter');
-var _elm_lang$svg$Svg$script = _elm_lang$svg$Svg$node('script');
-var _elm_lang$svg$Svg$style = _elm_lang$svg$Svg$node('style');
-var _elm_lang$svg$Svg$view = _elm_lang$svg$Svg$node('view');
-
-var _elm_lang$svg$Svg_Attributes$writingMode = _elm_lang$virtual_dom$VirtualDom$attribute('writing-mode');
-var _elm_lang$svg$Svg_Attributes$wordSpacing = _elm_lang$virtual_dom$VirtualDom$attribute('word-spacing');
-var _elm_lang$svg$Svg_Attributes$visibility = _elm_lang$virtual_dom$VirtualDom$attribute('visibility');
-var _elm_lang$svg$Svg_Attributes$unicodeBidi = _elm_lang$virtual_dom$VirtualDom$attribute('unicode-bidi');
-var _elm_lang$svg$Svg_Attributes$textRendering = _elm_lang$virtual_dom$VirtualDom$attribute('text-rendering');
-var _elm_lang$svg$Svg_Attributes$textDecoration = _elm_lang$virtual_dom$VirtualDom$attribute('text-decoration');
-var _elm_lang$svg$Svg_Attributes$textAnchor = _elm_lang$virtual_dom$VirtualDom$attribute('text-anchor');
-var _elm_lang$svg$Svg_Attributes$stroke = _elm_lang$virtual_dom$VirtualDom$attribute('stroke');
-var _elm_lang$svg$Svg_Attributes$strokeWidth = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-width');
-var _elm_lang$svg$Svg_Attributes$strokeOpacity = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-opacity');
-var _elm_lang$svg$Svg_Attributes$strokeMiterlimit = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-miterlimit');
-var _elm_lang$svg$Svg_Attributes$strokeLinejoin = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-linejoin');
-var _elm_lang$svg$Svg_Attributes$strokeLinecap = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-linecap');
-var _elm_lang$svg$Svg_Attributes$strokeDashoffset = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-dashoffset');
-var _elm_lang$svg$Svg_Attributes$strokeDasharray = _elm_lang$virtual_dom$VirtualDom$attribute('stroke-dasharray');
-var _elm_lang$svg$Svg_Attributes$stopOpacity = _elm_lang$virtual_dom$VirtualDom$attribute('stop-opacity');
-var _elm_lang$svg$Svg_Attributes$stopColor = _elm_lang$virtual_dom$VirtualDom$attribute('stop-color');
-var _elm_lang$svg$Svg_Attributes$shapeRendering = _elm_lang$virtual_dom$VirtualDom$attribute('shape-rendering');
-var _elm_lang$svg$Svg_Attributes$pointerEvents = _elm_lang$virtual_dom$VirtualDom$attribute('pointer-events');
-var _elm_lang$svg$Svg_Attributes$overflow = _elm_lang$virtual_dom$VirtualDom$attribute('overflow');
-var _elm_lang$svg$Svg_Attributes$opacity = _elm_lang$virtual_dom$VirtualDom$attribute('opacity');
-var _elm_lang$svg$Svg_Attributes$mask = _elm_lang$virtual_dom$VirtualDom$attribute('mask');
-var _elm_lang$svg$Svg_Attributes$markerStart = _elm_lang$virtual_dom$VirtualDom$attribute('marker-start');
-var _elm_lang$svg$Svg_Attributes$markerMid = _elm_lang$virtual_dom$VirtualDom$attribute('marker-mid');
-var _elm_lang$svg$Svg_Attributes$markerEnd = _elm_lang$virtual_dom$VirtualDom$attribute('marker-end');
-var _elm_lang$svg$Svg_Attributes$lightingColor = _elm_lang$virtual_dom$VirtualDom$attribute('lighting-color');
-var _elm_lang$svg$Svg_Attributes$letterSpacing = _elm_lang$virtual_dom$VirtualDom$attribute('letter-spacing');
-var _elm_lang$svg$Svg_Attributes$kerning = _elm_lang$virtual_dom$VirtualDom$attribute('kerning');
-var _elm_lang$svg$Svg_Attributes$imageRendering = _elm_lang$virtual_dom$VirtualDom$attribute('image-rendering');
-var _elm_lang$svg$Svg_Attributes$glyphOrientationVertical = _elm_lang$virtual_dom$VirtualDom$attribute('glyph-orientation-vertical');
-var _elm_lang$svg$Svg_Attributes$glyphOrientationHorizontal = _elm_lang$virtual_dom$VirtualDom$attribute('glyph-orientation-horizontal');
-var _elm_lang$svg$Svg_Attributes$fontWeight = _elm_lang$virtual_dom$VirtualDom$attribute('font-weight');
-var _elm_lang$svg$Svg_Attributes$fontVariant = _elm_lang$virtual_dom$VirtualDom$attribute('font-variant');
-var _elm_lang$svg$Svg_Attributes$fontStyle = _elm_lang$virtual_dom$VirtualDom$attribute('font-style');
-var _elm_lang$svg$Svg_Attributes$fontStretch = _elm_lang$virtual_dom$VirtualDom$attribute('font-stretch');
-var _elm_lang$svg$Svg_Attributes$fontSize = _elm_lang$virtual_dom$VirtualDom$attribute('font-size');
-var _elm_lang$svg$Svg_Attributes$fontSizeAdjust = _elm_lang$virtual_dom$VirtualDom$attribute('font-size-adjust');
-var _elm_lang$svg$Svg_Attributes$fontFamily = _elm_lang$virtual_dom$VirtualDom$attribute('font-family');
-var _elm_lang$svg$Svg_Attributes$floodOpacity = _elm_lang$virtual_dom$VirtualDom$attribute('flood-opacity');
-var _elm_lang$svg$Svg_Attributes$floodColor = _elm_lang$virtual_dom$VirtualDom$attribute('flood-color');
-var _elm_lang$svg$Svg_Attributes$filter = _elm_lang$virtual_dom$VirtualDom$attribute('filter');
-var _elm_lang$svg$Svg_Attributes$fill = _elm_lang$virtual_dom$VirtualDom$attribute('fill');
-var _elm_lang$svg$Svg_Attributes$fillRule = _elm_lang$virtual_dom$VirtualDom$attribute('fill-rule');
-var _elm_lang$svg$Svg_Attributes$fillOpacity = _elm_lang$virtual_dom$VirtualDom$attribute('fill-opacity');
-var _elm_lang$svg$Svg_Attributes$enableBackground = _elm_lang$virtual_dom$VirtualDom$attribute('enable-background');
-var _elm_lang$svg$Svg_Attributes$dominantBaseline = _elm_lang$virtual_dom$VirtualDom$attribute('dominant-baseline');
-var _elm_lang$svg$Svg_Attributes$display = _elm_lang$virtual_dom$VirtualDom$attribute('display');
-var _elm_lang$svg$Svg_Attributes$direction = _elm_lang$virtual_dom$VirtualDom$attribute('direction');
-var _elm_lang$svg$Svg_Attributes$cursor = _elm_lang$virtual_dom$VirtualDom$attribute('cursor');
-var _elm_lang$svg$Svg_Attributes$color = _elm_lang$virtual_dom$VirtualDom$attribute('color');
-var _elm_lang$svg$Svg_Attributes$colorRendering = _elm_lang$virtual_dom$VirtualDom$attribute('color-rendering');
-var _elm_lang$svg$Svg_Attributes$colorProfile = _elm_lang$virtual_dom$VirtualDom$attribute('color-profile');
-var _elm_lang$svg$Svg_Attributes$colorInterpolation = _elm_lang$virtual_dom$VirtualDom$attribute('color-interpolation');
-var _elm_lang$svg$Svg_Attributes$colorInterpolationFilters = _elm_lang$virtual_dom$VirtualDom$attribute('color-interpolation-filters');
-var _elm_lang$svg$Svg_Attributes$clip = _elm_lang$virtual_dom$VirtualDom$attribute('clip');
-var _elm_lang$svg$Svg_Attributes$clipRule = _elm_lang$virtual_dom$VirtualDom$attribute('clip-rule');
-var _elm_lang$svg$Svg_Attributes$clipPath = _elm_lang$virtual_dom$VirtualDom$attribute('clip-path');
-var _elm_lang$svg$Svg_Attributes$baselineShift = _elm_lang$virtual_dom$VirtualDom$attribute('baseline-shift');
-var _elm_lang$svg$Svg_Attributes$alignmentBaseline = _elm_lang$virtual_dom$VirtualDom$attribute('alignment-baseline');
-var _elm_lang$svg$Svg_Attributes$zoomAndPan = _elm_lang$virtual_dom$VirtualDom$attribute('zoomAndPan');
-var _elm_lang$svg$Svg_Attributes$z = _elm_lang$virtual_dom$VirtualDom$attribute('z');
-var _elm_lang$svg$Svg_Attributes$yChannelSelector = _elm_lang$virtual_dom$VirtualDom$attribute('yChannelSelector');
-var _elm_lang$svg$Svg_Attributes$y2 = _elm_lang$virtual_dom$VirtualDom$attribute('y2');
-var _elm_lang$svg$Svg_Attributes$y1 = _elm_lang$virtual_dom$VirtualDom$attribute('y1');
-var _elm_lang$svg$Svg_Attributes$y = _elm_lang$virtual_dom$VirtualDom$attribute('y');
-var _elm_lang$svg$Svg_Attributes$xmlSpace = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:space');
-var _elm_lang$svg$Svg_Attributes$xmlLang = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:lang');
-var _elm_lang$svg$Svg_Attributes$xmlBase = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/XML/1998/namespace', 'xml:base');
-var _elm_lang$svg$Svg_Attributes$xlinkType = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:type');
-var _elm_lang$svg$Svg_Attributes$xlinkTitle = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:title');
-var _elm_lang$svg$Svg_Attributes$xlinkShow = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:show');
-var _elm_lang$svg$Svg_Attributes$xlinkRole = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:role');
-var _elm_lang$svg$Svg_Attributes$xlinkHref = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:href');
-var _elm_lang$svg$Svg_Attributes$xlinkArcrole = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:arcrole');
-var _elm_lang$svg$Svg_Attributes$xlinkActuate = A2(_elm_lang$virtual_dom$VirtualDom$attributeNS, 'http://www.w3.org/1999/xlink', 'xlink:actuate');
-var _elm_lang$svg$Svg_Attributes$xChannelSelector = _elm_lang$virtual_dom$VirtualDom$attribute('xChannelSelector');
-var _elm_lang$svg$Svg_Attributes$x2 = _elm_lang$virtual_dom$VirtualDom$attribute('x2');
-var _elm_lang$svg$Svg_Attributes$x1 = _elm_lang$virtual_dom$VirtualDom$attribute('x1');
-var _elm_lang$svg$Svg_Attributes$xHeight = _elm_lang$virtual_dom$VirtualDom$attribute('x-height');
-var _elm_lang$svg$Svg_Attributes$x = _elm_lang$virtual_dom$VirtualDom$attribute('x');
-var _elm_lang$svg$Svg_Attributes$widths = _elm_lang$virtual_dom$VirtualDom$attribute('widths');
-var _elm_lang$svg$Svg_Attributes$width = _elm_lang$virtual_dom$VirtualDom$attribute('width');
-var _elm_lang$svg$Svg_Attributes$viewTarget = _elm_lang$virtual_dom$VirtualDom$attribute('viewTarget');
-var _elm_lang$svg$Svg_Attributes$viewBox = _elm_lang$virtual_dom$VirtualDom$attribute('viewBox');
-var _elm_lang$svg$Svg_Attributes$vertOriginY = _elm_lang$virtual_dom$VirtualDom$attribute('vert-origin-y');
-var _elm_lang$svg$Svg_Attributes$vertOriginX = _elm_lang$virtual_dom$VirtualDom$attribute('vert-origin-x');
-var _elm_lang$svg$Svg_Attributes$vertAdvY = _elm_lang$virtual_dom$VirtualDom$attribute('vert-adv-y');
-var _elm_lang$svg$Svg_Attributes$version = _elm_lang$virtual_dom$VirtualDom$attribute('version');
-var _elm_lang$svg$Svg_Attributes$values = _elm_lang$virtual_dom$VirtualDom$attribute('values');
-var _elm_lang$svg$Svg_Attributes$vMathematical = _elm_lang$virtual_dom$VirtualDom$attribute('v-mathematical');
-var _elm_lang$svg$Svg_Attributes$vIdeographic = _elm_lang$virtual_dom$VirtualDom$attribute('v-ideographic');
-var _elm_lang$svg$Svg_Attributes$vHanging = _elm_lang$virtual_dom$VirtualDom$attribute('v-hanging');
-var _elm_lang$svg$Svg_Attributes$vAlphabetic = _elm_lang$virtual_dom$VirtualDom$attribute('v-alphabetic');
-var _elm_lang$svg$Svg_Attributes$unitsPerEm = _elm_lang$virtual_dom$VirtualDom$attribute('units-per-em');
-var _elm_lang$svg$Svg_Attributes$unicodeRange = _elm_lang$virtual_dom$VirtualDom$attribute('unicode-range');
-var _elm_lang$svg$Svg_Attributes$unicode = _elm_lang$virtual_dom$VirtualDom$attribute('unicode');
-var _elm_lang$svg$Svg_Attributes$underlineThickness = _elm_lang$virtual_dom$VirtualDom$attribute('underline-thickness');
-var _elm_lang$svg$Svg_Attributes$underlinePosition = _elm_lang$virtual_dom$VirtualDom$attribute('underline-position');
-var _elm_lang$svg$Svg_Attributes$u2 = _elm_lang$virtual_dom$VirtualDom$attribute('u2');
-var _elm_lang$svg$Svg_Attributes$u1 = _elm_lang$virtual_dom$VirtualDom$attribute('u1');
-var _elm_lang$svg$Svg_Attributes$type_ = _elm_lang$virtual_dom$VirtualDom$attribute('type');
-var _elm_lang$svg$Svg_Attributes$transform = _elm_lang$virtual_dom$VirtualDom$attribute('transform');
-var _elm_lang$svg$Svg_Attributes$to = _elm_lang$virtual_dom$VirtualDom$attribute('to');
-var _elm_lang$svg$Svg_Attributes$title = _elm_lang$virtual_dom$VirtualDom$attribute('title');
-var _elm_lang$svg$Svg_Attributes$textLength = _elm_lang$virtual_dom$VirtualDom$attribute('textLength');
-var _elm_lang$svg$Svg_Attributes$targetY = _elm_lang$virtual_dom$VirtualDom$attribute('targetY');
-var _elm_lang$svg$Svg_Attributes$targetX = _elm_lang$virtual_dom$VirtualDom$attribute('targetX');
-var _elm_lang$svg$Svg_Attributes$target = _elm_lang$virtual_dom$VirtualDom$attribute('target');
-var _elm_lang$svg$Svg_Attributes$tableValues = _elm_lang$virtual_dom$VirtualDom$attribute('tableValues');
-var _elm_lang$svg$Svg_Attributes$systemLanguage = _elm_lang$virtual_dom$VirtualDom$attribute('systemLanguage');
-var _elm_lang$svg$Svg_Attributes$surfaceScale = _elm_lang$virtual_dom$VirtualDom$attribute('surfaceScale');
-var _elm_lang$svg$Svg_Attributes$style = _elm_lang$virtual_dom$VirtualDom$attribute('style');
-var _elm_lang$svg$Svg_Attributes$string = _elm_lang$virtual_dom$VirtualDom$attribute('string');
-var _elm_lang$svg$Svg_Attributes$strikethroughThickness = _elm_lang$virtual_dom$VirtualDom$attribute('strikethrough-thickness');
-var _elm_lang$svg$Svg_Attributes$strikethroughPosition = _elm_lang$virtual_dom$VirtualDom$attribute('strikethrough-position');
-var _elm_lang$svg$Svg_Attributes$stitchTiles = _elm_lang$virtual_dom$VirtualDom$attribute('stitchTiles');
-var _elm_lang$svg$Svg_Attributes$stemv = _elm_lang$virtual_dom$VirtualDom$attribute('stemv');
-var _elm_lang$svg$Svg_Attributes$stemh = _elm_lang$virtual_dom$VirtualDom$attribute('stemh');
-var _elm_lang$svg$Svg_Attributes$stdDeviation = _elm_lang$virtual_dom$VirtualDom$attribute('stdDeviation');
-var _elm_lang$svg$Svg_Attributes$startOffset = _elm_lang$virtual_dom$VirtualDom$attribute('startOffset');
-var _elm_lang$svg$Svg_Attributes$spreadMethod = _elm_lang$virtual_dom$VirtualDom$attribute('spreadMethod');
-var _elm_lang$svg$Svg_Attributes$speed = _elm_lang$virtual_dom$VirtualDom$attribute('speed');
-var _elm_lang$svg$Svg_Attributes$specularExponent = _elm_lang$virtual_dom$VirtualDom$attribute('specularExponent');
-var _elm_lang$svg$Svg_Attributes$specularConstant = _elm_lang$virtual_dom$VirtualDom$attribute('specularConstant');
-var _elm_lang$svg$Svg_Attributes$spacing = _elm_lang$virtual_dom$VirtualDom$attribute('spacing');
-var _elm_lang$svg$Svg_Attributes$slope = _elm_lang$virtual_dom$VirtualDom$attribute('slope');
-var _elm_lang$svg$Svg_Attributes$seed = _elm_lang$virtual_dom$VirtualDom$attribute('seed');
-var _elm_lang$svg$Svg_Attributes$scale = _elm_lang$virtual_dom$VirtualDom$attribute('scale');
-var _elm_lang$svg$Svg_Attributes$ry = _elm_lang$virtual_dom$VirtualDom$attribute('ry');
-var _elm_lang$svg$Svg_Attributes$rx = _elm_lang$virtual_dom$VirtualDom$attribute('rx');
-var _elm_lang$svg$Svg_Attributes$rotate = _elm_lang$virtual_dom$VirtualDom$attribute('rotate');
-var _elm_lang$svg$Svg_Attributes$result = _elm_lang$virtual_dom$VirtualDom$attribute('result');
-var _elm_lang$svg$Svg_Attributes$restart = _elm_lang$virtual_dom$VirtualDom$attribute('restart');
-var _elm_lang$svg$Svg_Attributes$requiredFeatures = _elm_lang$virtual_dom$VirtualDom$attribute('requiredFeatures');
-var _elm_lang$svg$Svg_Attributes$requiredExtensions = _elm_lang$virtual_dom$VirtualDom$attribute('requiredExtensions');
-var _elm_lang$svg$Svg_Attributes$repeatDur = _elm_lang$virtual_dom$VirtualDom$attribute('repeatDur');
-var _elm_lang$svg$Svg_Attributes$repeatCount = _elm_lang$virtual_dom$VirtualDom$attribute('repeatCount');
-var _elm_lang$svg$Svg_Attributes$renderingIntent = _elm_lang$virtual_dom$VirtualDom$attribute('rendering-intent');
-var _elm_lang$svg$Svg_Attributes$refY = _elm_lang$virtual_dom$VirtualDom$attribute('refY');
-var _elm_lang$svg$Svg_Attributes$refX = _elm_lang$virtual_dom$VirtualDom$attribute('refX');
-var _elm_lang$svg$Svg_Attributes$radius = _elm_lang$virtual_dom$VirtualDom$attribute('radius');
-var _elm_lang$svg$Svg_Attributes$r = _elm_lang$virtual_dom$VirtualDom$attribute('r');
-var _elm_lang$svg$Svg_Attributes$primitiveUnits = _elm_lang$virtual_dom$VirtualDom$attribute('primitiveUnits');
-var _elm_lang$svg$Svg_Attributes$preserveAspectRatio = _elm_lang$virtual_dom$VirtualDom$attribute('preserveAspectRatio');
-var _elm_lang$svg$Svg_Attributes$preserveAlpha = _elm_lang$virtual_dom$VirtualDom$attribute('preserveAlpha');
-var _elm_lang$svg$Svg_Attributes$pointsAtZ = _elm_lang$virtual_dom$VirtualDom$attribute('pointsAtZ');
-var _elm_lang$svg$Svg_Attributes$pointsAtY = _elm_lang$virtual_dom$VirtualDom$attribute('pointsAtY');
-var _elm_lang$svg$Svg_Attributes$pointsAtX = _elm_lang$virtual_dom$VirtualDom$attribute('pointsAtX');
-var _elm_lang$svg$Svg_Attributes$points = _elm_lang$virtual_dom$VirtualDom$attribute('points');
-var _elm_lang$svg$Svg_Attributes$pointOrder = _elm_lang$virtual_dom$VirtualDom$attribute('point-order');
-var _elm_lang$svg$Svg_Attributes$patternUnits = _elm_lang$virtual_dom$VirtualDom$attribute('patternUnits');
-var _elm_lang$svg$Svg_Attributes$patternTransform = _elm_lang$virtual_dom$VirtualDom$attribute('patternTransform');
-var _elm_lang$svg$Svg_Attributes$patternContentUnits = _elm_lang$virtual_dom$VirtualDom$attribute('patternContentUnits');
-var _elm_lang$svg$Svg_Attributes$pathLength = _elm_lang$virtual_dom$VirtualDom$attribute('pathLength');
-var _elm_lang$svg$Svg_Attributes$path = _elm_lang$virtual_dom$VirtualDom$attribute('path');
-var _elm_lang$svg$Svg_Attributes$panose1 = _elm_lang$virtual_dom$VirtualDom$attribute('panose-1');
-var _elm_lang$svg$Svg_Attributes$overlineThickness = _elm_lang$virtual_dom$VirtualDom$attribute('overline-thickness');
-var _elm_lang$svg$Svg_Attributes$overlinePosition = _elm_lang$virtual_dom$VirtualDom$attribute('overline-position');
-var _elm_lang$svg$Svg_Attributes$origin = _elm_lang$virtual_dom$VirtualDom$attribute('origin');
-var _elm_lang$svg$Svg_Attributes$orientation = _elm_lang$virtual_dom$VirtualDom$attribute('orientation');
-var _elm_lang$svg$Svg_Attributes$orient = _elm_lang$virtual_dom$VirtualDom$attribute('orient');
-var _elm_lang$svg$Svg_Attributes$order = _elm_lang$virtual_dom$VirtualDom$attribute('order');
-var _elm_lang$svg$Svg_Attributes$operator = _elm_lang$virtual_dom$VirtualDom$attribute('operator');
-var _elm_lang$svg$Svg_Attributes$offset = _elm_lang$virtual_dom$VirtualDom$attribute('offset');
-var _elm_lang$svg$Svg_Attributes$numOctaves = _elm_lang$virtual_dom$VirtualDom$attribute('numOctaves');
-var _elm_lang$svg$Svg_Attributes$name = _elm_lang$virtual_dom$VirtualDom$attribute('name');
-var _elm_lang$svg$Svg_Attributes$mode = _elm_lang$virtual_dom$VirtualDom$attribute('mode');
-var _elm_lang$svg$Svg_Attributes$min = _elm_lang$virtual_dom$VirtualDom$attribute('min');
-var _elm_lang$svg$Svg_Attributes$method = _elm_lang$virtual_dom$VirtualDom$attribute('method');
-var _elm_lang$svg$Svg_Attributes$media = _elm_lang$virtual_dom$VirtualDom$attribute('media');
-var _elm_lang$svg$Svg_Attributes$max = _elm_lang$virtual_dom$VirtualDom$attribute('max');
-var _elm_lang$svg$Svg_Attributes$mathematical = _elm_lang$virtual_dom$VirtualDom$attribute('mathematical');
-var _elm_lang$svg$Svg_Attributes$maskUnits = _elm_lang$virtual_dom$VirtualDom$attribute('maskUnits');
-var _elm_lang$svg$Svg_Attributes$maskContentUnits = _elm_lang$virtual_dom$VirtualDom$attribute('maskContentUnits');
-var _elm_lang$svg$Svg_Attributes$markerWidth = _elm_lang$virtual_dom$VirtualDom$attribute('markerWidth');
-var _elm_lang$svg$Svg_Attributes$markerUnits = _elm_lang$virtual_dom$VirtualDom$attribute('markerUnits');
-var _elm_lang$svg$Svg_Attributes$markerHeight = _elm_lang$virtual_dom$VirtualDom$attribute('markerHeight');
-var _elm_lang$svg$Svg_Attributes$local = _elm_lang$virtual_dom$VirtualDom$attribute('local');
-var _elm_lang$svg$Svg_Attributes$limitingConeAngle = _elm_lang$virtual_dom$VirtualDom$attribute('limitingConeAngle');
-var _elm_lang$svg$Svg_Attributes$lengthAdjust = _elm_lang$virtual_dom$VirtualDom$attribute('lengthAdjust');
-var _elm_lang$svg$Svg_Attributes$lang = _elm_lang$virtual_dom$VirtualDom$attribute('lang');
-var _elm_lang$svg$Svg_Attributes$keyTimes = _elm_lang$virtual_dom$VirtualDom$attribute('keyTimes');
-var _elm_lang$svg$Svg_Attributes$keySplines = _elm_lang$virtual_dom$VirtualDom$attribute('keySplines');
-var _elm_lang$svg$Svg_Attributes$keyPoints = _elm_lang$virtual_dom$VirtualDom$attribute('keyPoints');
-var _elm_lang$svg$Svg_Attributes$kernelUnitLength = _elm_lang$virtual_dom$VirtualDom$attribute('kernelUnitLength');
-var _elm_lang$svg$Svg_Attributes$kernelMatrix = _elm_lang$virtual_dom$VirtualDom$attribute('kernelMatrix');
-var _elm_lang$svg$Svg_Attributes$k4 = _elm_lang$virtual_dom$VirtualDom$attribute('k4');
-var _elm_lang$svg$Svg_Attributes$k3 = _elm_lang$virtual_dom$VirtualDom$attribute('k3');
-var _elm_lang$svg$Svg_Attributes$k2 = _elm_lang$virtual_dom$VirtualDom$attribute('k2');
-var _elm_lang$svg$Svg_Attributes$k1 = _elm_lang$virtual_dom$VirtualDom$attribute('k1');
-var _elm_lang$svg$Svg_Attributes$k = _elm_lang$virtual_dom$VirtualDom$attribute('k');
-var _elm_lang$svg$Svg_Attributes$intercept = _elm_lang$virtual_dom$VirtualDom$attribute('intercept');
-var _elm_lang$svg$Svg_Attributes$in2 = _elm_lang$virtual_dom$VirtualDom$attribute('in2');
-var _elm_lang$svg$Svg_Attributes$in_ = _elm_lang$virtual_dom$VirtualDom$attribute('in');
-var _elm_lang$svg$Svg_Attributes$ideographic = _elm_lang$virtual_dom$VirtualDom$attribute('ideographic');
-var _elm_lang$svg$Svg_Attributes$id = _elm_lang$virtual_dom$VirtualDom$attribute('id');
-var _elm_lang$svg$Svg_Attributes$horizOriginY = _elm_lang$virtual_dom$VirtualDom$attribute('horiz-origin-y');
-var _elm_lang$svg$Svg_Attributes$horizOriginX = _elm_lang$virtual_dom$VirtualDom$attribute('horiz-origin-x');
-var _elm_lang$svg$Svg_Attributes$horizAdvX = _elm_lang$virtual_dom$VirtualDom$attribute('horiz-adv-x');
-var _elm_lang$svg$Svg_Attributes$height = _elm_lang$virtual_dom$VirtualDom$attribute('height');
-var _elm_lang$svg$Svg_Attributes$hanging = _elm_lang$virtual_dom$VirtualDom$attribute('hanging');
-var _elm_lang$svg$Svg_Attributes$gradientUnits = _elm_lang$virtual_dom$VirtualDom$attribute('gradientUnits');
-var _elm_lang$svg$Svg_Attributes$gradientTransform = _elm_lang$virtual_dom$VirtualDom$attribute('gradientTransform');
-var _elm_lang$svg$Svg_Attributes$glyphRef = _elm_lang$virtual_dom$VirtualDom$attribute('glyphRef');
-var _elm_lang$svg$Svg_Attributes$glyphName = _elm_lang$virtual_dom$VirtualDom$attribute('glyph-name');
-var _elm_lang$svg$Svg_Attributes$g2 = _elm_lang$virtual_dom$VirtualDom$attribute('g2');
-var _elm_lang$svg$Svg_Attributes$g1 = _elm_lang$virtual_dom$VirtualDom$attribute('g1');
-var _elm_lang$svg$Svg_Attributes$fy = _elm_lang$virtual_dom$VirtualDom$attribute('fy');
-var _elm_lang$svg$Svg_Attributes$fx = _elm_lang$virtual_dom$VirtualDom$attribute('fx');
-var _elm_lang$svg$Svg_Attributes$from = _elm_lang$virtual_dom$VirtualDom$attribute('from');
-var _elm_lang$svg$Svg_Attributes$format = _elm_lang$virtual_dom$VirtualDom$attribute('format');
-var _elm_lang$svg$Svg_Attributes$filterUnits = _elm_lang$virtual_dom$VirtualDom$attribute('filterUnits');
-var _elm_lang$svg$Svg_Attributes$filterRes = _elm_lang$virtual_dom$VirtualDom$attribute('filterRes');
-var _elm_lang$svg$Svg_Attributes$externalResourcesRequired = _elm_lang$virtual_dom$VirtualDom$attribute('externalResourcesRequired');
-var _elm_lang$svg$Svg_Attributes$exponent = _elm_lang$virtual_dom$VirtualDom$attribute('exponent');
-var _elm_lang$svg$Svg_Attributes$end = _elm_lang$virtual_dom$VirtualDom$attribute('end');
-var _elm_lang$svg$Svg_Attributes$elevation = _elm_lang$virtual_dom$VirtualDom$attribute('elevation');
-var _elm_lang$svg$Svg_Attributes$edgeMode = _elm_lang$virtual_dom$VirtualDom$attribute('edgeMode');
-var _elm_lang$svg$Svg_Attributes$dy = _elm_lang$virtual_dom$VirtualDom$attribute('dy');
-var _elm_lang$svg$Svg_Attributes$dx = _elm_lang$virtual_dom$VirtualDom$attribute('dx');
-var _elm_lang$svg$Svg_Attributes$dur = _elm_lang$virtual_dom$VirtualDom$attribute('dur');
-var _elm_lang$svg$Svg_Attributes$divisor = _elm_lang$virtual_dom$VirtualDom$attribute('divisor');
-var _elm_lang$svg$Svg_Attributes$diffuseConstant = _elm_lang$virtual_dom$VirtualDom$attribute('diffuseConstant');
-var _elm_lang$svg$Svg_Attributes$descent = _elm_lang$virtual_dom$VirtualDom$attribute('descent');
-var _elm_lang$svg$Svg_Attributes$decelerate = _elm_lang$virtual_dom$VirtualDom$attribute('decelerate');
-var _elm_lang$svg$Svg_Attributes$d = _elm_lang$virtual_dom$VirtualDom$attribute('d');
-var _elm_lang$svg$Svg_Attributes$cy = _elm_lang$virtual_dom$VirtualDom$attribute('cy');
-var _elm_lang$svg$Svg_Attributes$cx = _elm_lang$virtual_dom$VirtualDom$attribute('cx');
-var _elm_lang$svg$Svg_Attributes$contentStyleType = _elm_lang$virtual_dom$VirtualDom$attribute('contentStyleType');
-var _elm_lang$svg$Svg_Attributes$contentScriptType = _elm_lang$virtual_dom$VirtualDom$attribute('contentScriptType');
-var _elm_lang$svg$Svg_Attributes$clipPathUnits = _elm_lang$virtual_dom$VirtualDom$attribute('clipPathUnits');
-var _elm_lang$svg$Svg_Attributes$class = _elm_lang$virtual_dom$VirtualDom$attribute('class');
-var _elm_lang$svg$Svg_Attributes$capHeight = _elm_lang$virtual_dom$VirtualDom$attribute('cap-height');
-var _elm_lang$svg$Svg_Attributes$calcMode = _elm_lang$virtual_dom$VirtualDom$attribute('calcMode');
-var _elm_lang$svg$Svg_Attributes$by = _elm_lang$virtual_dom$VirtualDom$attribute('by');
-var _elm_lang$svg$Svg_Attributes$bias = _elm_lang$virtual_dom$VirtualDom$attribute('bias');
-var _elm_lang$svg$Svg_Attributes$begin = _elm_lang$virtual_dom$VirtualDom$attribute('begin');
-var _elm_lang$svg$Svg_Attributes$bbox = _elm_lang$virtual_dom$VirtualDom$attribute('bbox');
-var _elm_lang$svg$Svg_Attributes$baseProfile = _elm_lang$virtual_dom$VirtualDom$attribute('baseProfile');
-var _elm_lang$svg$Svg_Attributes$baseFrequency = _elm_lang$virtual_dom$VirtualDom$attribute('baseFrequency');
-var _elm_lang$svg$Svg_Attributes$azimuth = _elm_lang$virtual_dom$VirtualDom$attribute('azimuth');
-var _elm_lang$svg$Svg_Attributes$autoReverse = _elm_lang$virtual_dom$VirtualDom$attribute('autoReverse');
-var _elm_lang$svg$Svg_Attributes$attributeType = _elm_lang$virtual_dom$VirtualDom$attribute('attributeType');
-var _elm_lang$svg$Svg_Attributes$attributeName = _elm_lang$virtual_dom$VirtualDom$attribute('attributeName');
-var _elm_lang$svg$Svg_Attributes$ascent = _elm_lang$virtual_dom$VirtualDom$attribute('ascent');
-var _elm_lang$svg$Svg_Attributes$arabicForm = _elm_lang$virtual_dom$VirtualDom$attribute('arabic-form');
-var _elm_lang$svg$Svg_Attributes$amplitude = _elm_lang$virtual_dom$VirtualDom$attribute('amplitude');
-var _elm_lang$svg$Svg_Attributes$allowReorder = _elm_lang$virtual_dom$VirtualDom$attribute('allowReorder');
-var _elm_lang$svg$Svg_Attributes$alphabetic = _elm_lang$virtual_dom$VirtualDom$attribute('alphabetic');
-var _elm_lang$svg$Svg_Attributes$additive = _elm_lang$virtual_dom$VirtualDom$attribute('additive');
-var _elm_lang$svg$Svg_Attributes$accumulate = _elm_lang$virtual_dom$VirtualDom$attribute('accumulate');
-var _elm_lang$svg$Svg_Attributes$accelerate = _elm_lang$virtual_dom$VirtualDom$attribute('accelerate');
-var _elm_lang$svg$Svg_Attributes$accentHeight = _elm_lang$virtual_dom$VirtualDom$attribute('accent-height');
-
 var _evancz$elm_markdown$Native_Markdown = function() {
 
 
@@ -8914,10 +11555,10 @@ var _user$project$SelectionList$fromList = F2(
 	});
 
 var _user$project$InnoCheckModel$postUrl = 'https://doon-irc.firebaseio.com/irc-quickscan/';
-var _user$project$InnoCheckModel$answerColorEmpty = '#CCCCCC';
-var _user$project$InnoCheckModel$answerColorRed = '#C40233';
-var _user$project$InnoCheckModel$answerColorOrange = 'orange';
-var _user$project$InnoCheckModel$answerColorGreen = '#009F6B';
+var _user$project$InnoCheckModel$answerColorEmpty = A4(_elm_lang$core$Color$rgba, 204, 204, 204, 1);
+var _user$project$InnoCheckModel$answerColorRed = A4(_elm_lang$core$Color$rgba, 196, 2, 33, 1);
+var _user$project$InnoCheckModel$answerColorOrange = _elm_lang$core$Color$orange;
+var _user$project$InnoCheckModel$answerColorGreen = A4(_elm_lang$core$Color$rgba, 0, 159, 107, 1);
 var _user$project$InnoCheckModel$answerColorList = _elm_lang$core$Dict$fromList(
 	{
 		ctor: '::',
@@ -9647,25 +12288,24 @@ var _user$project$InnoCheckViewUtil$clickable = _elm_lang$html$Html_Attributes$s
 var _user$project$InnoCheckViewSvg$showIcon = F3(
 	function (model, aspect, _p0) {
 		var _p1 = _p0;
+		var _p2 = _p1._2;
 		return A2(
-			_elm_lang$svg$Svg$image,
+			_canadaduane$typed_svg$TypedSvg$image,
 			{
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$x(
-					_elm_lang$core$Basics$toString(_p1._0)),
+				_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x(_p1._0),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$y(
-						_elm_lang$core$Basics$toString(_p1._1)),
+					_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y(_p1._1),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width('80px'),
+						_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$width(_p2),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height('80px'),
+							_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$height(_p2),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$xlinkHref(
+								_0: _canadaduane$typed_svg$TypedSvg_Attributes$xlinkHref(
 									A2(
 										_user$project$InnoCheckViewUtil$imgUrl,
 										model.flags.baseUrl,
@@ -9679,9 +12319,9 @@ var _user$project$InnoCheckViewSvg$showIcon = F3(
 			{ctor: '[]'});
 	});
 var _user$project$InnoCheckViewSvg$showColorBlock = F4(
-	function (model, aspect, _p3, _p2) {
-		var _p4 = _p3;
-		var _p5 = _p2;
+	function (model, aspect, _p4, _p3) {
+		var _p5 = _p4;
+		var _p6 = _p3;
 		var aqa = A2(
 			_user$project$InnoCheckUtil$allQuestionsAnswered,
 			A2(_user$project$InnoCheckUtil$aspectQuestions, model.questions, aspect),
@@ -9693,13 +12333,13 @@ var _user$project$InnoCheckViewSvg$showColorBlock = F4(
 		var meanOfAnswers = _user$project$InnoCheckUtil$meanScore(answerScores);
 		var aspectScoreColor = A2(_user$project$InnoCheckUtil$meanScoreColor, aqa, meanOfAnswers);
 		return A2(
-			_elm_lang$svg$Svg$svg,
+			_canadaduane$typed_svg$TypedSvg$svg,
 			{
 				ctor: '::',
 				_0: _user$project$InnoCheckViewUtil$clickable,
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Events$onClick(
+					_0: _canadaduane$typed_svg$TypedSvg_Events$onClick(
 						_user$project$InnoCheckUpdate$SelectAspect(aspect)),
 					_1: {ctor: '[]'}
 				}
@@ -9707,26 +12347,22 @@ var _user$project$InnoCheckViewSvg$showColorBlock = F4(
 			{
 				ctor: '::',
 				_0: A2(
-					_elm_lang$svg$Svg$rect,
+					_canadaduane$typed_svg$TypedSvg$rect,
 					{
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fill(aspectScoreColor),
+						_0: _canadaduane$typed_svg$TypedSvg_Attributes$fill(aspectScoreColor),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$x(
-								_elm_lang$core$Basics$toString(_p4._0)),
+							_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x(_p5._0),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$y(
-									_elm_lang$core$Basics$toString(_p4._1)),
+								_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y(_p5._1),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$width(
-										_elm_lang$core$Basics$toString(_p4._2)),
+									_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$width(_p5._2),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$height(
-											_elm_lang$core$Basics$toString(_p4._3)),
+										_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$height(_p5._3),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -9740,61 +12376,55 @@ var _user$project$InnoCheckViewSvg$showColorBlock = F4(
 						_user$project$InnoCheckViewSvg$showIcon,
 						model,
 						aspect,
-						{ctor: '_Tuple2', _0: _p5._0, _1: _p5._1}),
+						{ctor: '_Tuple3', _0: _p6._0, _1: _p6._1, _2: _p6._2}),
 					_1: {ctor: '[]'}
 				}
 			});
 	});
 var _user$project$InnoCheckViewSvg$showCanvas = function (model) {
+	var yIcon = F3(
+		function (yCanvas, canvasHeight, iconSize) {
+			return yCanvas + ((canvasHeight - iconSize) / 2);
+		});
+	var xIcon = F3(
+		function (xCanvas, canvasWidth, iconSize) {
+			return xCanvas + ((canvasWidth - iconSize) / 2);
+		});
+	var margin = 5;
 	var canvasScalingFactor = 1;
-	var cWidth = _elm_lang$core$Basics$toString(canvasScalingFactor * 400);
-	var cHeight = _elm_lang$core$Basics$toString(canvasScalingFactor * 282);
+	var canvasWidth = canvasScalingFactor * 400;
+	var blockNarrowWidth = (canvasWidth - (4 * margin)) / 4;
+	var blockWideWidth = 2 * blockNarrowWidth;
+	var iconSize = blockNarrowWidth * 0.8;
+	var canvasHeight = canvasScalingFactor * 282;
+	var blockHeight = (canvasHeight - (3 * margin)) / 2;
 	return A2(
-		_elm_lang$svg$Svg$svg,
+		_canadaduane$typed_svg$TypedSvg$svg,
 		{
 			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$version('1.1'),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$x('0'),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$y('0'),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width(cWidth),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(cHeight),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 400 282'),
-								_1: {ctor: '[]'}
-							}
-						}
-					}
-				}
-			}
+			_0: A4(_canadaduane$typed_svg$TypedSvg_Attributes$viewBox, 0, 0, canvasWidth, canvasHeight),
+			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$svg$Svg$rect,
+				_canadaduane$typed_svg$TypedSvg$rect,
 				{
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$fill('#DDDDDD'),
+					_0: _canadaduane$typed_svg$TypedSvg_Attributes$fill(
+						A4(_elm_lang$core$Color$rgba, 221, 221, 221, 1)),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$x('0'),
+						_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$x(0),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$y('0'),
+							_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$y(0),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$width('400'),
+								_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$width(canvasWidth),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$height('282'),
+									_0: _canadaduane$typed_svg$TypedSvg_Attributes_InPx$height(canvasHeight),
 									_1: {ctor: '[]'}
 								}
 							}
@@ -9808,48 +12438,78 @@ var _user$project$InnoCheckViewSvg$showCanvas = function (model) {
 					_user$project$InnoCheckViewSvg$showColorBlock,
 					model,
 					_user$project$InnoCheckModel$Leadership,
-					{ctor: '_Tuple4', _0: 10, _1: 10, _2: 90, _3: 126},
-					{ctor: '_Tuple2', _0: 15, _1: 30}),
+					{ctor: '_Tuple4', _0: margin, _1: margin, _2: blockNarrowWidth, _3: blockHeight},
+					{
+						ctor: '_Tuple3',
+						_0: A3(xIcon, margin, blockNarrowWidth, iconSize),
+						_1: A3(yIcon, margin, blockHeight, iconSize),
+						_2: iconSize
+					}),
 				_1: {
 					ctor: '::',
 					_0: A4(
 						_user$project$InnoCheckViewSvg$showColorBlock,
 						model,
 						_user$project$InnoCheckModel$Processes,
-						{ctor: '_Tuple4', _0: 110, _1: 10, _2: 180, _3: 126},
-						{ctor: '_Tuple2', _0: 160, _1: 30}),
+						{ctor: '_Tuple4', _0: blockNarrowWidth + (2 * margin), _1: margin, _2: blockWideWidth, _3: blockHeight},
+						{
+							ctor: '_Tuple3',
+							_0: A3(xIcon, blockNarrowWidth + (2 * margin), blockWideWidth, iconSize),
+							_1: A3(yIcon, margin, blockHeight, iconSize),
+							_2: iconSize
+						}),
 					_1: {
 						ctor: '::',
 						_0: A4(
 							_user$project$InnoCheckViewSvg$showColorBlock,
 							model,
 							_user$project$InnoCheckModel$MeasureAndMonitor,
-							{ctor: '_Tuple4', _0: 300, _1: 10, _2: 90, _3: 126},
-							{ctor: '_Tuple2', _0: 305, _1: 30}),
+							{ctor: '_Tuple4', _0: (blockNarrowWidth + blockWideWidth) + (3 * margin), _1: margin, _2: blockNarrowWidth, _3: blockHeight},
+							{
+								ctor: '_Tuple3',
+								_0: A3(xIcon, (blockNarrowWidth + blockWideWidth) + (3 * margin), blockNarrowWidth, iconSize),
+								_1: A3(yIcon, margin, blockHeight, iconSize),
+								_2: iconSize
+							}),
 						_1: {
 							ctor: '::',
 							_0: A4(
 								_user$project$InnoCheckViewSvg$showColorBlock,
 								model,
 								_user$project$InnoCheckModel$Culture,
-								{ctor: '_Tuple4', _0: 10, _1: 146, _2: 90, _3: 126},
-								{ctor: '_Tuple2', _0: 15, _1: 166}),
+								{ctor: '_Tuple4', _0: margin, _1: blockHeight + (2 * margin), _2: blockNarrowWidth, _3: blockHeight},
+								{
+									ctor: '_Tuple3',
+									_0: A3(xIcon, margin, blockNarrowWidth, iconSize),
+									_1: A3(yIcon, blockHeight + (2 * margin), blockHeight, iconSize),
+									_2: iconSize
+								}),
 							_1: {
 								ctor: '::',
 								_0: A4(
 									_user$project$InnoCheckViewSvg$showColorBlock,
 									model,
 									_user$project$InnoCheckModel$Resources,
-									{ctor: '_Tuple4', _0: 110, _1: 146, _2: 180, _3: 126},
-									{ctor: '_Tuple2', _0: 160, _1: 166}),
+									{ctor: '_Tuple4', _0: blockNarrowWidth + (2 * margin), _1: blockHeight + (2 * margin), _2: blockWideWidth, _3: blockHeight},
+									{
+										ctor: '_Tuple3',
+										_0: A3(xIcon, blockNarrowWidth + (2 * margin), blockWideWidth, iconSize),
+										_1: A3(yIcon, blockHeight + (2 * margin), blockHeight, iconSize),
+										_2: iconSize
+									}),
 								_1: {
 									ctor: '::',
 									_0: A4(
 										_user$project$InnoCheckViewSvg$showColorBlock,
 										model,
 										_user$project$InnoCheckModel$Improve,
-										{ctor: '_Tuple4', _0: 300, _1: 146, _2: 90, _3: 126},
-										{ctor: '_Tuple2', _0: 305, _1: 166}),
+										{ctor: '_Tuple4', _0: (blockNarrowWidth + blockWideWidth) + (3 * margin), _1: blockHeight + (2 * margin), _2: blockNarrowWidth, _3: blockHeight},
+										{
+											ctor: '_Tuple3',
+											_0: A3(xIcon, (blockNarrowWidth + blockWideWidth) + (3 * margin), blockNarrowWidth, iconSize),
+											_1: A3(yIcon, blockHeight + (2 * margin), blockHeight, iconSize),
+											_2: iconSize
+										}),
 									_1: {ctor: '[]'}
 								}
 							}
