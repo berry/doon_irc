@@ -20207,7 +20207,7 @@ var _user$project$InnoCheckView$showGroupScanForm = function (model) {
 										_elm_lang$html$Html$div,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('group-button'),
+											_0: _elm_lang$html$Html_Attributes$class('group-button button-block sqs-block-button'),
 											_1: {ctor: '[]'}
 										},
 										{
