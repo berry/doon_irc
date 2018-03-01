@@ -18325,6 +18325,7 @@ var _user$project$SelectionList$fromList = F2(
 var _user$project$InnoCheckModel$storageAuthentication = A2(_Kinto$elm_kinto$Kinto$Basic, 'doon', 'ircquickscan');
 var _user$project$InnoCheckModel$storageUrl = 'https://doon-kinto.herokuapp.com/v1/';
 var _user$project$InnoCheckModel$answerColorEmpty = A4(_elm_lang$core$Color$rgba, 204, 204, 204, 1);
+var _user$project$InnoCheckModel$colorNeutral = A4(_elm_lang$core$Color$rgba, 51, 102, 204, 1);
 var _user$project$InnoCheckModel$answerColorRed = A4(_elm_lang$core$Color$rgba, 196, 2, 33, 1);
 var _user$project$InnoCheckModel$answerColorOrange = _elm_lang$core$Color$orange;
 var _user$project$InnoCheckModel$answerColorGreen = A4(_elm_lang$core$Color$rgba, 0, 159, 107, 1);
@@ -18477,7 +18478,7 @@ var _user$project$InnoCheckModel$aspectList = {
 				_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$Resources, _1: 'Middelen'},
 				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$MeasureAndMonitor, _1: 'Meten en monitoren'},
+					_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$MeasureAndMonitor, _1: 'Monitoren'},
 					_1: {
 						ctor: '::',
 						_0: {ctor: '_Tuple2', _0: _user$project$InnoCheckModel$Improve, _1: 'Verbeteren'},
@@ -20769,7 +20770,7 @@ var _user$project$MainGroupView$histogramColored = function (toGroups) {
 			ctor: '::',
 			_0: {
 				ctor: '::',
-				_0: _canadaduane$typed_svg$TypedSvg_Attributes$fill(_user$project$InnoCheckModel$answerColorOrange),
+				_0: _canadaduane$typed_svg$TypedSvg_Attributes$fill(_user$project$InnoCheckModel$colorNeutral),
 				_1: {
 					ctor: '::',
 					_0: _canadaduane$typed_svg$TypedSvg_Attributes$stroke(_user$project$InnoCheckModel$answerColorEmpty),
