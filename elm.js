@@ -18325,10 +18325,10 @@ var _user$project$SelectionList$fromList = F2(
 var _user$project$InnoCheckModel$storageAuthentication = A2(_Kinto$elm_kinto$Kinto$Basic, 'doon', 'ircquickscan');
 var _user$project$InnoCheckModel$storageUrl = 'https://doon-kinto.herokuapp.com/v1/';
 var _user$project$InnoCheckModel$answerColorEmpty = A4(_elm_lang$core$Color$rgba, 204, 204, 204, 1);
-var _user$project$InnoCheckModel$colorNeutral = A4(_elm_lang$core$Color$rgba, 51, 102, 204, 1);
-var _user$project$InnoCheckModel$answerColorRed = A4(_elm_lang$core$Color$rgba, 196, 2, 33, 1);
-var _user$project$InnoCheckModel$answerColorOrange = _elm_lang$core$Color$orange;
-var _user$project$InnoCheckModel$answerColorGreen = A4(_elm_lang$core$Color$rgba, 0, 159, 107, 1);
+var _user$project$InnoCheckModel$colorNeutral = A4(_elm_lang$core$Color$rgba, 0, 131, 159, 1);
+var _user$project$InnoCheckModel$answerColorRed = A4(_elm_lang$core$Color$rgba, 242, 59, 28, 1);
+var _user$project$InnoCheckModel$answerColorOrange = A4(_elm_lang$core$Color$rgba, 255, 214, 77, 1);
+var _user$project$InnoCheckModel$answerColorGreen = A4(_elm_lang$core$Color$rgba, 18, 120, 38, 1);
 var _user$project$InnoCheckModel$answerColorList = _elm_lang$core$Dict$fromList(
 	{
 		ctor: '::',
@@ -18408,41 +18408,65 @@ var _user$project$InnoCheckModel$Culture = {ctor: 'Culture'};
 var _user$project$InnoCheckModel$Leadership = {ctor: 'Leadership'};
 var _user$project$InnoCheckModel$questions = {
 	ctor: '::',
-	_0: {key: 1, aspect: _user$project$InnoCheckModel$Leadership, text: 'Ondersteunt en is het management actief betrokken bij de activiteiten op het gebied van het organiseren en ontwikkelen van nieuwe producten en diensten (oftewel innovatie)?'},
+	_0: {key: 1, aspect: _user$project$InnoCheckModel$Leadership, text: 'Er zijn innovatiedoelen geformuleerd, gedocumenteerd en gecommuniceerd en opgenomen in budgetten en planning en vertaald en aanwezig op afdelings/teamniveau.'},
 	_1: {
 		ctor: '::',
-		_0: {key: 2, aspect: _user$project$InnoCheckModel$Leadership, text: 'Heeft het management meetbare (innovatie)doelen voor het ontwikkelen van nieuwe producten of diensten en communiceert zij deze ook?'},
+		_0: {key: 2, aspect: _user$project$InnoCheckModel$Leadership, text: 'De innovatiedoelen zijn SMART opgesteld en dus specifiek, meetbaar, acceptabel, realistisch en tijdsgebonden.'},
 		_1: {
 			ctor: '::',
-			_0: {key: 3, aspect: _user$project$InnoCheckModel$Culture, text: 'Heeft de organisatie een visie geformuleerd en gecommuniceerd? Handelen medewerkers volgens deze visie?'},
+			_0: {key: 3, aspect: _user$project$InnoCheckModel$Leadership, text: 'Innovatie wordt structureel gecommuniceerd en betrokken stakeholders worden geïnformeerd over innovatie.'},
 			_1: {
 				ctor: '::',
-				_0: {key: 4, aspect: _user$project$InnoCheckModel$Culture, text: 'Moedigt de organisatie medewerkers aan tot het behalen van resultaten m.b.t. het bedenken, ontwikkelen en invoeren van nieuwe producten en diensten?'},
+				_0: {key: 4, aspect: _user$project$InnoCheckModel$Culture, text: 'Visie, missie en beleid t.a.v. innovatiedoelen worden duidelijk uitgedragen en zijn zichtbaar op de werkplek, bijeenkomsten, verzamelplaatsen, marketinguitingen en website.'},
 				_1: {
 					ctor: '::',
-					_0: {key: 5, aspect: _user$project$InnoCheckModel$Processes, text: 'Zijn de activiteiten, instructies en procedures beschreven m.b.t. hoe ideeën uit te werken tot nieuwe producten en diensten? M.a.w. is er een werkend innovatieproces ingevoerd?'},
+					_0: {key: 5, aspect: _user$project$InnoCheckModel$Culture, text: 'Wensen/eisen van stakeholders zijn in kaart gebracht en worden in een proces geïdentificeerd en gemonitord.'},
 					_1: {
 						ctor: '::',
-						_0: {key: 6, aspect: _user$project$InnoCheckModel$Processes, text: 'Zijn er processen aanwezig om nieuwe producten en diensten op te nemen in de bestaande organisatie?'},
+						_0: {key: 6, aspect: _user$project$InnoCheckModel$Culture, text: 'Er is een visie- en een missiestatement aanwezig, die in de organisatie wordt gecommuniceerd en waarnaar wordt gehandeld.'},
 						_1: {
 							ctor: '::',
-							_0: {key: 7, aspect: _user$project$InnoCheckModel$Resources, text: 'Zijn er voldoende middelen (mensen, geld, infrastructuur, informatie) gereserveerd en gemakkelijk beschikbaar om innovatieve activiteiten uit te voeren?'},
+							_0: {key: 7, aspect: _user$project$InnoCheckModel$Culture, text: 'Er is een cultuur waar innovatie in past en daar zijn voorbeelden en bewijzen van.'},
 							_1: {
 								ctor: '::',
-								_0: {key: 8, aspect: _user$project$InnoCheckModel$Resources, text: 'Kunnen medewerkers deelnemen in het bedenken en uitvoeren van nieuwe innovatieve activiteiten? Is innovatie opgenomen in hun persoonlijke doestellingen? Kunnen medewerkers een opleiding volgen?'},
+								_0: {key: 8, aspect: _user$project$InnoCheckModel$Processes, text: 'Er is een proces ingericht om ideeën te ontwikkelen, vast te leggen en te beoordelen.'},
 								_1: {
 									ctor: '::',
-									_0: {key: 9, aspect: _user$project$InnoCheckModel$MeasureAndMonitor, text: 'Worden er specifieke cijfers en data verzameld en gebruikt om de innovatie-activiteiten te meten en bewaken?'},
+									_0: {key: 9, aspect: _user$project$InnoCheckModel$Processes, text: 'Er is een proces om vanaf het idee te komen tot een in de markt gevalideerd product of dienst.'},
 									_1: {
 										ctor: '::',
-										_0: {key: 10, aspect: _user$project$InnoCheckModel$MeasureAndMonitor, text: 'Vindt er daadwerkelijk sturing plaats op basis van deze monitoring? Of is deze data transparant beschikbaar als basis voor zelfsturing?'},
+										_0: {key: 10, aspect: _user$project$InnoCheckModel$Processes, text: 'Er zijn processen aanwezig om nieuwe producten en diensten op te nemen in de lijnorganisatie.'},
 										_1: {
 											ctor: '::',
-											_0: {key: 11, aspect: _user$project$InnoCheckModel$Improve, text: 'Wordt het innovatieproces zelf stelselmatig geanalyseerd en beoordeeld op de goede werking?'},
+											_0: {key: 11, aspect: _user$project$InnoCheckModel$Resources, text: 'Er is een proces ingericht om budgetten toe te wijzen voor het besturen en uitvoeren van innovatieactiviteiten? (innovation board, metrics/kengetallen, financiële instrumenten)'},
 											_1: {
 												ctor: '::',
-												_0: {key: 12, aspect: _user$project$InnoCheckModel$Improve, text: 'Is er een proces/procedure ingericht om het innovatieproces te verbeteren op basis van deze bevindingen?'},
-												_1: {ctor: '[]'}
+												_0: {key: 12, aspect: _user$project$InnoCheckModel$Resources, text: 'Er is een eindverantwoordelijk manager met verantwoordelijkheid en mandaat voor het ontwikkelen en besturen van innovatieactiviteiten.'},
+												_1: {
+													ctor: '::',
+													_0: {key: 13, aspect: _user$project$InnoCheckModel$Resources, text: 'Medewerkers kunnen meedoen aan innovatieactiviteiten. Hun taken en verantwoordelijkheden zijn duidelijk en in hun functiebeschrijving opgenomen. Er zijn innovatieopleidingen.'},
+													_1: {
+														ctor: '::',
+														_0: {key: 14, aspect: _user$project$InnoCheckModel$Resources, text: 'Er is een proces en er zijn  middelen aanwezig om te kunnen zien wat er in de buitenwereld gebeurt. (data-analyse, kennisopslag en kennisdeling)'},
+														_1: {
+															ctor: '::',
+															_0: {key: 15, aspect: _user$project$InnoCheckModel$MeasureAndMonitor, text: 'Het innovatieproces wordt gemeten en gemonitord.'},
+															_1: {
+																ctor: '::',
+																_0: {key: 16, aspect: _user$project$InnoCheckModel$MeasureAndMonitor, text: 'Het resultaat van het innovatieproces wordt gemeten en gemonitord.'},
+																_1: {
+																	ctor: '::',
+																	_0: {key: 17, aspect: _user$project$InnoCheckModel$Improve, text: 'De organisatie beoordeelt, meet en bewaakt de verbeteringen in het innovatieproces.'},
+																	_1: {
+																		ctor: '::',
+																		_0: {key: 18, aspect: _user$project$InnoCheckModel$Improve, text: 'Er is een corrigerend proces om maatregelen te nemen als verbeteringen van het innovatieproces falen.'},
+																		_1: {ctor: '[]'}
+																	}
+																}
+															}
+														}
+													}
+												}
 											}
 										}
 									}
@@ -18489,48 +18513,48 @@ var _user$project$InnoCheckModel$aspectList = {
 		}
 	}
 };
-var _user$project$InnoCheckModel$aspectTips = _elm_lang$core$Dict$fromList(
+var _user$project$InnoCheckModel$aspectRecommendations = _elm_lang$core$Dict$fromList(
 	{
 		ctor: '::',
 		_0: {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$Leadership),
-			_1: '\n#### Tips voor het aspect leiderschap\n\nActief leiderschap is een belangrijke voorwaarde voor innovatie. Om ondernemend\nen innovatief gedrag in je organisatie aan te wakkeren, dient het management\nmedewerkers te faciliteren in hun ambitie om oplossingen\nte zoeken voor problemen en uitdagingen.\n\n**Onze tips**\n\n* Maak innovatie in jouw organisatie onderdeel van de business planning\n* Verzeker je ervan dat het management innovatie activiteiten erkent, ondersteunt en promoot\n* Stel innovatiedoelstellingen op en maak duidelijk hoe ze de strategie van de organisatie ondersteunen\n* Gebruik feedback van jouw stakeholders bij het vaststellen van jouw innovatiedoelen\n* Maak jouw innovatiedoelen meetbaar met doelen, mijlpalen, tijdlijnen en een strategie om de doelen te halen\n* Communiceer de innovatiedoelen binnen alle lagen van jouw organisatie\n* Houd stakeholders op de hoogte van de voortgang van jouw innovatieactiviteiten\n* Maak managers persoonlijk verantwoordelijk en toerekenbaar, voor de voortgang van het\ninnovatieproces, -tools en -methoden (gezamenlijk het innovatiemanagementsysteem genoemd).\n       '
+			_1: '\n#### Aanbevelingen voor het aspect leiderschap\n\nActief leiderschap is een belangrijke voorwaarde voor innovatie. Om ondernemend\nen innovatief gedrag in je organisatie aan te wakkeren, dient het management\nmedewerkers te faciliteren in hun ambitie om oplossingen\nte zoeken voor problemen en uitdagingen.\n\n**Onze aanbevelingen**\n\n* Maak innovatie in jouw organisatie onderdeel van de business planning\n* Verzeker je ervan dat het management innovatie activiteiten erkent, ondersteunt en promoot\n* Stel innovatiedoelstellingen op en maak duidelijk hoe ze de strategie van de organisatie ondersteunen\n* Gebruik feedback van jouw stakeholders bij het vaststellen van jouw innovatiedoelen\n* Maak jouw innovatiedoelen meetbaar met doelen, mijlpalen, tijdlijnen en een strategie om de doelen te halen\n* Communiceer de innovatiedoelen binnen alle lagen van jouw organisatie\n* Houd stakeholders op de hoogte van de voortgang van jouw innovatieactiviteiten\n* Maak managers persoonlijk verantwoordelijk en toerekenbaar, voor de voortgang van het\ninnovatieproces, -tools en -methoden (gezamenlijk het innovatiemanagementsysteem genoemd).\n       '
 		},
 		_1: {
 			ctor: '::',
 			_0: {
 				ctor: '_Tuple2',
 				_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$Culture),
-				_1: '\n#### Tips voor het aspect cultuur\n\nOndernemend en innovatief gedrag heeft een goede voedingsbodem nodig. Een cultuur waarin innoveren\nis toegestaan en wordt aangemoedigd.\n\n**Onze tips**\n\n* Stel een innovatiemanager aan, iemand die verantwoordelijk is voor de innovatieactiveiten in de organisatie\n* Stel een innovatieteam samen om de innovatieactiviteiten te organiseren\n* Weet wie je stakeholders zijn en leer hun (veranderende) behoefte en verwachtingen kennen\n* Stel een visie- en een missiestatement op voor de organisatie\n    '
+				_1: '\n#### Aanbevelingen voor het aspect cultuur\n\nOndernemend en innovatief gedrag heeft een goede voedingsbodem nodig. Een cultuur waarin innoveren\nis toegestaan en wordt aangemoedigd.\n\n**Onze aanbevelingen**\n\n* Stel een innovatiemanager aan, iemand die verantwoordelijk is voor de innovatieactiveiten in de organisatie\n* Stel een innovatieteam samen om de innovatieactiviteiten te organiseren\n* Weet wie je stakeholders zijn en leer hun (veranderende) behoefte en verwachtingen kennen\n* Stel een visie- en een missiestatement op voor de organisatie\n    '
 			},
 			_1: {
 				ctor: '::',
 				_0: {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$Processes),
-					_1: '\n#### Tips voor het aspect processen\n\nEen innovatieproces is tevens een creatief proces. En een creatief proces kent geen vaste\nstappen die met zekerheid leiden naar succes. Een creatief proces is een ontdekkingstocht.\nMaar, de ontwikkeling van een product of dienst, het innovatieproces, kent wel degelijk\nterugkerende ingrediënten en een fasering. Het innovatieproces heeft een aanpak nodig.\nEen innovatiemanagementsysteem.\n\n**Onze tips**\n\n* Documenteer het innovatieproces voldoende en voor zover nodig en zorg voor een *audit trail* om de effectiviteit van het innovatieproces te kunnen meten\n* Organiseer een proces om innovatieprojecten te initiëren, te plannen, te selecteren en te beheersen terwijl deze door de ontdekkings-, ontwikkelings- en uitrolfase heen gaan\n* Verzorg de planning van ieder innovatieproject en biedt een innovatiemethode aan\n* Onderken de risico\'s verbonden aan innovatie en gebruik een methode om deze risico’s te spreiden cq. te minimaliseren\n    '
+					_1: '\n#### Aanbevelingen voor het aspect processen\n\nEen innovatieproces is tevens een creatief proces. En een creatief proces kent geen vaste\nstappen die met zekerheid leiden naar succes. Een creatief proces is een ontdekkingstocht.\nMaar, de ontwikkeling van een product of dienst, het innovatieproces, kent wel degelijk\nterugkerende ingrediënten en een fasering. Het innovatieproces heeft een aanpak nodig.\nEen innovatiemanagementsysteem.\n\n**Onze aanbevelingen**\n\n* Documenteer het innovatieproces voldoende en voor zover nodig en zorg voor een *audit trail* om de effectiviteit van het innovatieproces te kunnen meten\n* Organiseer een proces om innovatieprojecten te initiëren, te plannen, te selecteren en te beheersen terwijl deze door de ontdekkings-, ontwikkelings- en uitrolfase heen gaan\n* Verzorg de planning van ieder innovatieproject en biedt een innovatiemethode aan\n* Onderken de risico\'s verbonden aan innovatie en gebruik een methode om deze risico’s te spreiden cq. te minimaliseren\n    '
 				},
 				_1: {
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$Resources),
-						_1: '\n#### Tips voor het aspect middelen\n\nEen innovatieproces heeft voeding nodig in de vorm van mensen en middelen. Je wilt op\neen gecontroleerde wijze het proces op het juiste moment de juiste voeding geven.\n\n**Onze tips**\n\n* Als je het nog niet hebt, zet een budgetteringsproces op waarin je regelmatig bepaalt\nwat de benodigde financiële resources zijn om de innovatieprocessen te ondersteunen.\n* Bewaak het innovatieproces en de projectuitgaven regelmatig\n* Stel een innovatiemanager aan die het centrum is van alle innovatieactiviteiten en die\nhet mandaat heeft om een innovatiemanagemensysteem te implementeren.\n* Organiseer een proces waarin medewerkers participeren in de innovatieactiviteiten. Het\nmedewerkerparticipatieprogramma groeit later uit tot een continue leerproces voor medewerkers.\n* Zorg voor een goede informatieverzameling ten behoeve van de ondersteuning van de innovatieactiviteiten\n\n    '
+						_1: '\n#### Aanbevelingen voor het aspect middelen\n\nEen innovatieproces heeft voeding nodig in de vorm van mensen en middelen. Je wilt op\neen gecontroleerde wijze het proces op het juiste moment de juiste voeding geven.\n\n**Onze aanbevelingen**\n\n* Als je het nog niet hebt, zet een budgetteringsproces op waarin je regelmatig bepaalt\nwat de benodigde financiële resources zijn om de innovatieprocessen te ondersteunen.\n* Bewaak het innovatieproces en de projectuitgaven regelmatig\n* Stel een innovatiemanager aan die het centrum is van alle innovatieactiviteiten en die\nhet mandaat heeft om een innovatiemanagemensysteem te implementeren.\n* Organiseer een proces waarin medewerkers participeren in de innovatieactiviteiten. Het\nmedewerkerparticipatieprogramma groeit later uit tot een continue leerproces voor medewerkers.\n* Zorg voor een goede informatieverzameling ten behoeve van de ondersteuning van de innovatieactiviteiten\n\n    '
 					},
 					_1: {
 						ctor: '::',
 						_0: {
 							ctor: '_Tuple2',
 							_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$MeasureAndMonitor),
-							_1: '\n#### Tips voor het aspect meten en monitoren\n\nMeten is weten. Dat geldt ook voor innovatieprocessen. Meten hoe je innovatieprojecten er\nvoor staan, stelt je in staat om op het juiste moment de juiste ondersteuning te bieden.\n\n**Onze tips**\n\n* Zet een proces in werking om regelmatig de innovatieactiviteiten in je organisatie\nte monitoren en meten gedurende de gehele levenscyclus van het innovatieproces.\n* Meet en bewaak individuele projecten én het gehele innovatie systeem\n* Meet zoveel als nodig is om in de gaten te houden of de innovatieactiviteiten de innovatiedoelstellingen halen\n* Communiceer en review de informatie die je meet\n* Review regelmatig de innovatieactiviteiten\n    '
+							_1: '\n#### Aanbevelingen voor het aspect meten en monitoren\n\nMeten is weten. Dat geldt ook voor innovatieprocessen. Meten hoe je innovatieprojecten er\nvoor staan, stelt je in staat om op het juiste moment de juiste ondersteuning te bieden.\n\n**Onze aanbevelingen**\n\n* Zet een proces in werking om regelmatig de innovatieactiviteiten in je organisatie\nte monitoren en meten gedurende de gehele levenscyclus van het innovatieproces.\n* Meet en bewaak individuele projecten én het gehele innovatie systeem\n* Meet zoveel als nodig is om in de gaten te houden of de innovatieactiviteiten de innovatiedoelstellingen halen\n* Communiceer en review de informatie die je meet\n* Review regelmatig de innovatieactiviteiten\n    '
 						},
 						_1: {
 							ctor: '::',
 							_0: {
 								ctor: '_Tuple2',
 								_0: _elm_lang$core$Basics$toString(_user$project$InnoCheckModel$Improve),
-								_1: '\n#### Tips voor het aspect verbeteren\n\nContinu leren en verbeteren is een belangrijk kenmerk van innoveren en dat geldt ook voor het\ninnovatieproces zelf. Blijf open staan voor vernieuwing en verbetering in het besef dat er nog\nveel te leren en te ontwikkelen valt.\n\n**Onze tips**\n\n* Zorg na een managementreview dat verbeteracties worden opgestart en implementeer, indien nodig, preventieve acties\n* Zorg dat verbeteringen bijdragen aan de organisatiecultuur, de innovatieactiviteiten en processen\n* Analyseer en gebruik de informatieverzameling om continue verbeteringen door te voeren\n* Documenteer en maak inzichtelijk waarom een innovatiemanagementsysteem, -tools en -methoden nodig zijn\nop alle niveau\'s in de organisatie.\n    '
+								_1: '\n#### Aanbevelingen voor het aspect verbeteren\n\nContinu leren en verbeteren is een belangrijk kenmerk van innoveren en dat geldt ook voor het\ninnovatieproces zelf. Blijf open staan voor vernieuwing en verbetering in het besef dat er nog\nveel te leren en te ontwikkelen valt.\n\n**Onze aanbevelingen**\n\n* Zorg na een managementreview dat verbeteracties worden opgestart en implementeer, indien nodig, preventieve acties\n* Zorg dat verbeteringen bijdragen aan de organisatiecultuur, de innovatieactiviteiten en processen\n* Analyseer en gebruik de informatieverzameling om continue verbeteringen door te voeren\n* Documenteer en maak inzichtelijk waarom een innovatiemanagementsysteem, -tools en -methoden nodig zijn\nop alle niveau\'s in de organisatie.\n    '
 							},
 							_1: {ctor: '[]'}
 						}
@@ -18622,7 +18646,35 @@ var _user$project$InnoCheckModel$questionAnswers0 = _elm_lang$core$Dict$fromList
 											_1: {
 												ctor: '::',
 												_0: {ctor: '_Tuple2', _0: 11, _1: _user$project$InnoCheckModel$Partly},
-												_1: {ctor: '[]'}
+												_1: {
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 12, _1: _user$project$InnoCheckModel$No},
+													_1: {
+														ctor: '::',
+														_0: {ctor: '_Tuple2', _0: 13, _1: _user$project$InnoCheckModel$Yes},
+														_1: {
+															ctor: '::',
+															_0: {ctor: '_Tuple2', _0: 14, _1: _user$project$InnoCheckModel$Partly},
+															_1: {
+																ctor: '::',
+																_0: {ctor: '_Tuple2', _0: 15, _1: _user$project$InnoCheckModel$No},
+																_1: {
+																	ctor: '::',
+																	_0: {ctor: '_Tuple2', _0: 16, _1: _user$project$InnoCheckModel$Partly},
+																	_1: {
+																		ctor: '::',
+																		_0: {ctor: '_Tuple2', _0: 17, _1: _user$project$InnoCheckModel$Yes},
+																		_1: {
+																			ctor: '::',
+																			_0: {ctor: '_Tuple2', _0: 18, _1: _user$project$InnoCheckModel$Partly},
+																			_1: {ctor: '[]'}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
 											}
 										}
 									}
@@ -18661,6 +18713,20 @@ var _user$project$InnoCheckModel$answerScoreList = {
 	}
 };
 
+var _user$project$InnoCheckUtil$getQuestionKeys = F2(
+	function (aspect, questions) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (_) {
+				return _.key;
+			},
+			A2(
+				_elm_lang$core$List$filter,
+				function (r) {
+					return _elm_lang$core$Native_Utils.eq(r.aspect, aspect);
+				},
+				questions));
+	});
 var _user$project$InnoCheckUtil$getValue = F2(
 	function (dict, key) {
 		return A2(
@@ -18722,7 +18788,7 @@ var _user$project$InnoCheckUtil$allQuestionsAnswered = F2(
 	});
 var _user$project$InnoCheckUtil$meanScoreColor = F2(
 	function (aqa, score) {
-		return (((_elm_lang$core$Native_Utils.cmp(score, 0) > -1) && (_elm_lang$core$Native_Utils.cmp(score, 30) < 1)) && aqa) ? _user$project$InnoCheckModel$answerColorRed : ((((_elm_lang$core$Native_Utils.cmp(score, 30) > 0) && (_elm_lang$core$Native_Utils.cmp(score, 60) < 0)) && aqa) ? _user$project$InnoCheckModel$answerColorOrange : ((((_elm_lang$core$Native_Utils.cmp(score, 60) > -1) && (_elm_lang$core$Native_Utils.cmp(score, 100) < 1)) && aqa) ? _user$project$InnoCheckModel$answerColorGreen : _user$project$InnoCheckModel$answerColorEmpty));
+		return aqa ? (((_elm_lang$core$Native_Utils.cmp(score, 0) > -1) && (_elm_lang$core$Native_Utils.cmp(score, 30) < 1)) ? _user$project$InnoCheckModel$answerColorRed : (((_elm_lang$core$Native_Utils.cmp(score, 30) > 0) && (_elm_lang$core$Native_Utils.cmp(score, 60) < 0)) ? _user$project$InnoCheckModel$answerColorOrange : (((_elm_lang$core$Native_Utils.cmp(score, 60) > -1) && (_elm_lang$core$Native_Utils.cmp(score, 100) < 1)) ? _user$project$InnoCheckModel$answerColorGreen : _user$project$InnoCheckModel$answerColorEmpty))) : _user$project$InnoCheckModel$answerColorEmpty;
 	});
 var _user$project$InnoCheckUtil$sumOfScores = function (kscores) {
 	return _elm_lang$core$List$sum(
@@ -19588,7 +19654,7 @@ var _user$project$InnoCheckView$showAspectAdviced = F2(
 			A2(
 				_elm_lang$core$Dict$get,
 				_elm_lang$core$Basics$toString(aspect),
-				_user$project$InnoCheckModel$aspectTips));
+				_user$project$InnoCheckModel$aspectRecommendations));
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -20634,7 +20700,7 @@ var _user$project$InnoCheckView$showQuestionBlock = function (model) {
 var _user$project$InnoCheckView$splashParagraph = A2(
 	_evancz$elm_markdown$Markdown$toHtml,
 	{ctor: '[]'},
-	'\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe\nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op\n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven\nwij je praktische tips over hoe je als organisatie je innovatievermogen kunt\nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de\nuitgebreide internationaal geaccrediteerde Innovation Management Standard.\nDe resultaten geven een eerste indruk van de innovatiecapaciteit\nvan de organisatie.\n');
+	'\n# Innovation Readiness Quickscan\n\nDeze scan geeft inzicht in de cruciale randvoorwaarden om succesvol nieuwe\nproducten en diensten te kunnen ontwerpen en lanceren. De randvoorwaarden worden gescoord op\n6 aspecten:\n* leiderschap\n* cultuur\n* processen\n* middelen\n* meten\n* verbeteren\n\nDe score bepaalt waar jouw organisatie kan verbeteren. Op basis hiervan geven\nwij je praktische aanbevelingen over hoe je als organisatie je innovatievermogen kunt\nverbeteren.\n\nDe scan is ontwikkeld door DOON i.s.m. PDMA/TIM Foundation en is gebaseerd op de\nuitgebreide internationaal geaccrediteerde Innovation Management Standard.\nDe resultaten geven een eerste indruk van de innovatiecapaciteit\nvan de organisatie.\n');
 var _user$project$InnoCheckView$showSplashScreen = function (model) {
 	return _elm_lang$core$Native_Utils.eq(model.splashScreenRead, false) ? {
 		ctor: '::',
@@ -20802,12 +20868,12 @@ var _user$project$MainGroupView$compareAnswer = F2(
 			getNum(a),
 			getNum(b));
 	});
-var _user$project$MainGroupView$countAnswersPerAspect = F2(
-	function (aspect, data) {
+var _user$project$MainGroupView$countAnswersPerAspect = F3(
+	function (aspect, data, questions) {
 		var checkList = function (list) {
 			checkList:
 			while (true) {
-				var getAnswers = _elm_lang$core$List$map(
+				var answers = _elm_lang$core$List$map(
 					function (_p1) {
 						var _p2 = _p1;
 						return _p2._0;
@@ -20820,7 +20886,7 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 					if (A2(
 						_elm_community$list_extra$List_Extra$notMember,
 						'Nee',
-						getAnswers(list))) {
+						answers(list))) {
 						var _v2 = {
 							ctor: '::',
 							_0: {ctor: '_Tuple2', _0: 'Nee', _1: 0},
@@ -20832,7 +20898,7 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 						if (A2(
 							_elm_community$list_extra$List_Extra$notMember,
 							'Ja',
-							getAnswers(list))) {
+							answers(list))) {
 							var _v3 = {
 								ctor: '::',
 								_0: {ctor: '_Tuple2', _0: 'Ja', _1: 0},
@@ -20844,7 +20910,7 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 							if (A2(
 								_elm_community$list_extra$List_Extra$notMember,
 								'Deels',
-								getAnswers(list))) {
+								answers(list))) {
 								var _v4 = {
 									ctor: '::',
 									_0: {ctor: '_Tuple2', _0: 'Deels', _1: 0},
@@ -20860,82 +20926,8 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 				}
 			}
 		};
-		var getSecondQuestion = function (x) {
-			return A2(
-				_elm_lang$core$Maybe$withDefault,
-				{ctor: '_Tuple2', _0: 0, _1: ''},
-				_elm_community$list_extra$List_Extra$last(x));
-		};
-		var getFirstQuestion = function (x) {
-			return A2(
-				_elm_lang$core$Maybe$withDefault,
-				{ctor: '_Tuple2', _0: 0, _1: ''},
-				_elm_lang$core$List$head(x));
-		};
-		var aspectKeys = function (a) {
-			var _p3 = a;
-			switch (_p3.ctor) {
-				case 'Leadership':
-					return {
-						ctor: '::',
-						_0: 1,
-						_1: {
-							ctor: '::',
-							_0: 2,
-							_1: {ctor: '[]'}
-						}
-					};
-				case 'Culture':
-					return {
-						ctor: '::',
-						_0: 3,
-						_1: {
-							ctor: '::',
-							_0: 4,
-							_1: {ctor: '[]'}
-						}
-					};
-				case 'Processes':
-					return {
-						ctor: '::',
-						_0: 5,
-						_1: {
-							ctor: '::',
-							_0: 6,
-							_1: {ctor: '[]'}
-						}
-					};
-				case 'Resources':
-					return {
-						ctor: '::',
-						_0: 7,
-						_1: {
-							ctor: '::',
-							_0: 8,
-							_1: {ctor: '[]'}
-						}
-					};
-				case 'MeasureAndMonitor':
-					return {
-						ctor: '::',
-						_0: 9,
-						_1: {
-							ctor: '::',
-							_0: 10,
-							_1: {ctor: '[]'}
-						}
-					};
-				default:
-					return {
-						ctor: '::',
-						_0: 11,
-						_1: {
-							ctor: '::',
-							_0: 12,
-							_1: {ctor: '[]'}
-						}
-					};
-			}
+		var aspectKeys = function (aspect) {
+			return A2(_user$project$InnoCheckUtil$getQuestionKeys, aspect, questions);
 		};
 		var answersForAspect = function (aspect) {
 			return A2(
@@ -20946,32 +20938,32 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 						_elm_lang$core$Tuple$first,
 						A2(
 							_elm_lang$core$List$filter,
-							function (_p4) {
-								var _p5 = _p4;
+							function (_p3) {
+								var _p4 = _p3;
 								return A2(
 									_elm_lang$core$List$member,
-									_p5._0,
+									_p4._0,
 									aspectKeys(aspect));
 							},
 							A2(
 								_elm_lang$core$List$map,
-								function (_p6) {
-									var _p7 = _p6;
+								function (_p5) {
+									var _p6 = _p5;
 									return {
 										ctor: '_Tuple2',
 										_0: A2(
 											_elm_lang$core$Result$withDefault,
 											0,
-											_elm_lang$core$String$toInt(_p7._0)),
-										_1: _p7._1
+											_elm_lang$core$String$toInt(_p6._0)),
+										_1: _p6._1
 									};
 								},
 								x.questionAnswers)));
 				},
 				data);
 		};
-		var answerCountForQuestion = F2(
-			function (aspect, questionFunction) {
+		var countAnswers = F2(
+			function (aspect, a) {
 				return A2(
 					_elm_lang$core$List$sortWith,
 					_user$project$MainGroupView$compareAnswer,
@@ -20981,11 +20973,13 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 							function (l) {
 								return {
 									ctor: '_Tuple2',
-									_0: _elm_lang$core$Tuple$second(
-										A2(
-											_elm_lang$core$Maybe$withDefault,
-											{ctor: '_Tuple2', _0: 0, _1: ''},
-											_elm_lang$core$List$head(l))),
+									_0: function (_p7) {
+										return _elm_lang$core$Tuple$second(
+											A2(
+												_elm_lang$core$Maybe$withDefault,
+												{ctor: '_Tuple2', _0: 0, _1: ''},
+												_elm_lang$core$List$head(_p7)));
+									}(l),
 									_1: _elm_lang$core$Basics$toFloat(
 										_elm_lang$core$List$length(l))
 								};
@@ -20994,18 +20988,21 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 								_elm_lang$core$List$sort(
 									A2(
 										_elm_lang$core$List$map,
-										questionFunction,
+										function (_p8) {
+											return A2(
+												_elm_lang$core$Maybe$withDefault,
+												{ctor: '_Tuple2', _0: 0, _1: ''},
+												_elm_lang$core$List$head(
+													A2(
+														_elm_lang$core$List$filter,
+														function (_p9) {
+															var _p10 = _p9;
+															return _elm_lang$core$Native_Utils.eq(_p10._0, a);
+														},
+														_p8)));
+										},
 										answersForAspect(aspect)))))));
 			});
-		var heights = {
-			ctor: '::',
-			_0: A2(answerCountForQuestion, aspect, getFirstQuestion),
-			_1: {
-				ctor: '::',
-				_0: A2(answerCountForQuestion, aspect, getSecondQuestion),
-				_1: {ctor: '[]'}
-			}
-		};
 		var labels = A2(
 			_elm_lang$core$List$map,
 			function (a) {
@@ -21015,6 +21012,12 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 					_elm_lang$core$Basics$toString(a));
 			},
 			aspectKeys(aspect));
+		var heights = function (aspect) {
+			return A2(
+				_elm_lang$core$List$map,
+				countAnswers(aspect),
+				aspectKeys(aspect));
+		};
 		return A3(
 			_elm_lang$core$List$map2,
 			F2(
@@ -21022,7 +21025,7 @@ var _user$project$MainGroupView$countAnswersPerAspect = F2(
 					return {ctor: '_Tuple2', _0: v0, _1: v1};
 				}),
 			labels,
-			heights);
+			heights(aspect));
 	});
 var _user$project$MainGroupView$translateAspect = F2(
 	function (aspectList, string) {
@@ -21032,12 +21035,12 @@ var _user$project$MainGroupView$translateAspect = F2(
 				_0: {ctor: '_Tuple2', _0: 'Leadership (all green)', _1: 'Leiderschap (alles groen)'},
 				_1: A2(
 					_elm_lang$core$List$map,
-					function (_p8) {
-						var _p9 = _p8;
+					function (_p11) {
+						var _p12 = _p11;
 						return {
 							ctor: '_Tuple2',
-							_0: _elm_lang$core$Basics$toString(_p9._0),
-							_1: _p9._1
+							_0: _elm_lang$core$Basics$toString(_p12._0),
+							_1: _p12._1
 						};
 					},
 					aspectList)
@@ -21134,20 +21137,20 @@ var _user$project$MainGroupView$viewAnswersPerAspect = function (model) {
 							_terezka$elm_plot$Plot$viewBars,
 							_user$project$MainGroupView$groupsColored(
 								_elm_lang$core$List$map(
-									function (_p10) {
-										var _p11 = _p10;
+									function (_p13) {
+										var _p14 = _p13;
 										return A2(
 											_terezka$elm_plot$Plot$group,
-											_p11._0,
+											_p14._0,
 											A2(
 												_elm_lang$core$List$map,
-												function (_p12) {
-													var _p13 = _p12;
-													return _p13._1;
+												function (_p15) {
+													var _p16 = _p15;
+													return _p16._1;
 												},
-												_p11._1));
+												_p14._1));
 									})),
-							A2(_user$project$MainGroupView$countAnswersPerAspect, aspect, model.dbAnswersStored)),
+							A3(_user$project$MainGroupView$countAnswersPerAspect, aspect, model.dbAnswersStored, model.questions)),
 						_1: {ctor: '[]'}
 					}
 				}
@@ -21190,20 +21193,58 @@ var _user$project$MainGroupView$viewAnswersPerAspect = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Gegeven antwoorden per vraag'),
+						_0: _elm_lang$html$Html$text('Verklaring kleuren van de antwoorden:'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$p,
-						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('\'Ja\' = groen, \'Deels\' = oranje en \'Nee\' = rood'),
+							_0: _elm_lang$html$Html_Attributes$style(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'color', _1: ''},
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Groen = Ja, mee eens.'),
 							_1: {ctor: '[]'}
 						}),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$p,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Oranje/geel = Deels ingevuld, kan beter.'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$p,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Rood = Nee, niet mee eens.'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$br,
+									{ctor: '[]'},
+									{ctor: '[]'}),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
 				}
 			},
 			A2(_elm_lang$core$List$map, view, aspects)));
@@ -21238,14 +21279,14 @@ var _user$project$MainGroupView$viewAdvicedApects = function (model) {
 						_terezka$elm_plot$Plot$viewBars,
 						_user$project$MainGroupView$histogramColored(
 							_elm_lang$core$List$map(
-								function (_p14) {
-									var _p15 = _p14;
+								function (_p17) {
+									var _p18 = _p17;
 									return A2(
 										_terezka$elm_plot$Plot$group,
-										_p15._0,
+										_p18._0,
 										{
 											ctor: '::',
-											_0: _elm_lang$core$Basics$toFloat(_p15._1),
+											_0: _elm_lang$core$Basics$toFloat(_p18._1),
 											_1: {ctor: '[]'}
 										});
 								})),
@@ -21274,12 +21315,19 @@ var _user$project$MainGroupView$viewNumberOfScans = function (model) {
 								_elm_lang$core$List$length(model.dbAnswersStored)))),
 					_1: {ctor: '[]'}
 				}),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$br,
+					{ctor: '[]'},
+					{ctor: '[]'}),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$MainGroupView$viewReport = function (model) {
-	var _p16 = model.dbAnswersStored;
-	if (_p16.ctor === '[]') {
+	var _p19 = model.dbAnswersStored;
+	if (_p19.ctor === '[]') {
 		return A2(
 			_elm_lang$html$Html$p,
 			{ctor: '[]'},
@@ -21295,7 +21343,7 @@ var _user$project$MainGroupView$viewReport = function (model) {
 			{
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$h1,
+					_elm_lang$html$Html$h4,
 					{ctor: '[]'},
 					{
 						ctor: '::',
@@ -21441,8 +21489,8 @@ var _user$project$MainGroupView$getAnswersForGroupCode = function (groupcode) {
 };
 var _user$project$MainGroupView$update = F2(
 	function (action, model) {
-		var _p17 = action;
-		switch (_p17.ctor) {
+		var _p20 = action;
+		switch (_p20.ctor) {
 			case 'Noop':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -21453,7 +21501,7 @@ var _user$project$MainGroupView$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{dbGroupCode: _p17._0, dbMessage: ''}),
+						{dbGroupCode: _p20._0, dbMessage: ''}),
 					{ctor: '[]'});
 			case 'ButtonGetData':
 				return A2(
@@ -21467,12 +21515,12 @@ var _user$project$MainGroupView$update = F2(
 						_1: {ctor: '[]'}
 					});
 			default:
-				if (_p17._0.ctor === 'Ok') {
+				if (_p20._0.ctor === 'Ok') {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							model,
-							{dbAnswersStored: _p17._0._0, dbMessage: 'Data opgehaald.'}),
+							{dbAnswersStored: _p20._0._0, dbMessage: 'Data opgehaald.'}),
 						{ctor: '[]'});
 				} else {
 					return A2(
@@ -21484,7 +21532,7 @@ var _user$project$MainGroupView$update = F2(
 								dbMessage: A2(
 									_elm_lang$core$Basics_ops['++'],
 									'Error: ',
-									_elm_lang$core$Basics$toString(_p17._0._0))
+									_elm_lang$core$Basics$toString(_p20._0._0))
 							}),
 						{ctor: '[]'});
 				}
@@ -21495,7 +21543,7 @@ var _user$project$MainGroupView$main = _elm_lang$html$Html$programWithFlags(
 		init: _user$project$InnoCheckModel$initialModel0,
 		view: _user$project$MainGroupView$view,
 		update: _user$project$MainGroupView$update,
-		subscriptions: function (_p18) {
+		subscriptions: function (_p21) {
 			return _elm_lang$core$Platform_Sub$none;
 		}
 	})(
