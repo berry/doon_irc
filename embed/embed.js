@@ -11332,7 +11332,7 @@ var $author$project$MainEmbed$fetchContent = F2(
 	function (card, tab) {
 		var url = A3(
 			$elm$url$Url$Builder$crossOrigin,
-			'https://online.doon.nu',
+			'https://cors.io/?https://online.doon.nu',
 			A2(
 				$elm$core$List$append,
 				$author$project$Model$urlContentBase,
