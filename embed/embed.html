@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DOON Online Embedded Test Page</title>
+</head>
+
+<body>
+    <!-- For TEST purposes only -->
+    <h1>Testing - deze titel zit buiten Elm.</h1>
+    <div id="doononline"></div>
+    <script>
+        /* create the link element */
+        var linkElement = document.createElement('link');
+
+        /* add attributes */
+        linkElement.setAttribute('rel', 'stylesheet');
+        linkElement.setAttribute('href', 'https://fonts.googleapis.com/css?family=Raleway:400,400i,700&display=swap');
+
+        /* attach to the document head */
+        document.getElementsByTagName('head')[0].appendChild(linkElement);
+    </script>
+    <script type="text/javascript" src="embed.js"></script>
+    <script>
+        var app = Elm.MainEmbed.init({
+            node: document.getElementById('doononline'),
+            flags: { windowSize: { width: window.innerWidth, height: window.innerHeight }, customerCode: "DOON" }
+        });
+    </script>
+</body>
+
+</html>
